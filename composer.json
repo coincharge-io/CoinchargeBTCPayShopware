@@ -1,0 +1,31 @@
+{
+    "name": "coincharge/shopware6-btcpay",
+    "description": "Description for the plugin Shopware BTCPay Plugin",
+    "version": "1.0.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Coincharge"
+        }
+    ],
+    "require": {
+        "shopware/core": "6.4.*"
+    },
+    "extra": {
+        "shopware-plugin-class": "Coincharge\\ShopwareBTCPay\\CoinchargeShopwareBTCPay",
+        "label": {
+            "de-DE": "Der angezeigte lesbare Name für das Plugin",
+            "en-GB": "The displayed readable name for the plugin"
+        },
+        "description": {
+            "de-DE": "Beschreibung in der Administration für das Plugin",
+            "en-GB": "Description in the administration for this plugin"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Coincharge\\ShopwareBTCPay\\": "src/"
+        }
+    }
+}
