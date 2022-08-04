@@ -1,0 +1,11 @@
+{% block sw_settings_content_card_slot_plugins %}
+    {% parent %}
+
+    <sw-settings-item :label="$tc('btcpay-payment-settings.module.title')"
+                      :to="{ name: 'btc.payment.configuration.settings' }"
+                      :backgroundEnabled="false">
+        <template #icon>
+            <img class="btcpay-payment-icon" :src="">
+        </template>
+    </sw-settings-item>
+{% endblock %}

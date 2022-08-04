@@ -4,6 +4,7 @@ namespace Coincharge\ShopwareBTCPay;
 
 use Shopware\Core\Framework\Plugin;
 
-class  CoinchargeShopwareBTCPay extends Plugin
+class  ShopwareBTCPay extends Plugin
 {
+	
 }
