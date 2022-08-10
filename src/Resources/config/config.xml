@@ -5,7 +5,6 @@
 
     <card>
         <title>BTCPay Server</title>
-
         <input-field>
             <name>btcpayServerUrl</name>
             <label>BTCPay Server URL</label>
