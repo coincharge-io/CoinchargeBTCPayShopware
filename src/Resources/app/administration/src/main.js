@@ -1,2 +1,2 @@
-import './module/btcpay-configuration';
+import './module/';
 
