@@ -1,0 +1,85 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% if collector.count > 0 %}
+        {% set icon %}
+            {{ include('@Enqueue/Icon/icon.svg') }}
+            <span class="sf-toolbar-value">
+                {{ collector.count }}</span>
+        {% endset %}
+
+        {% set text %}
+            <div class="sf-toolbar-info-piece">
+                <b>Sent messages</b>
+                <span class="sf-toolbar-status">{{ collector.count }}</span>
+            </div>
+        {% endset %}
+
+        {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
+    {% endif %}
+{% endblock %}
+
+{% block menu %}
+    <span class="label {{ not collector.count ? 'disabled' }}">
+        <span class="icon">{{ include('@Enqueue/Icon/icon.svg') }}</span>
+        <strong>Message Queue</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    {% if collector.count > 0 %}
+    <h2>Sent messages</h2>
+        {% for clientName, sentMessages in collector.sentMessages %}
+            {% if sentMessages|length > 0 %}
+                <h3>Client: {{ clientName }}</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Topic</th>
+                        <th>Command</th>
+                        <th>Message</th>
+                        <th>Priority</th>
+                        <th>Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for sentMessage in sentMessages %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ sentMessage.topic|default(null) }}</td>
+                            <td>{{ sentMessage.command|default(null) }}</td>
+                            <td style="width: 70%" class="metadata">
+                                <span>
+                                    {% set body = collector.ensureString(sentMessage.body) %}
+                                    {{ body|length > 40 ? body|slice(0, 40) ~ '...' : body  }}
+                                </span>
+                                {% if body|length > 40 %}
+                                    <a class="btn btn-link text-small sf-toggle"
+                                       data-toggle-selector="#message-body-{{ loop.index }}"
+                                       data-toggle-alt-content="Hide body"
+                                    >Show body</a>
+                                    <div id="message-body-{{ loop.index }}"
+                                         class="context sf-toggle-content sf-toggle-hidden">
+                                        <pre>{{ body }}</pre>
+                                    </div>
+                                {% endif %}
+                            <td>
+                                <span title="{{ sentMessage.priority }}">{{ collector.prettyPrintPriority(sentMessage.priority) }}</span>
+                            </td>
+                            <td style="white-space:nowrap;">
+                                {{ sentMessage.sentAt|date('i:s.v') }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="empty">
+            <p>No messages were sent.</p>
+        </div>
+    {% endif %}
+{% endblock %}

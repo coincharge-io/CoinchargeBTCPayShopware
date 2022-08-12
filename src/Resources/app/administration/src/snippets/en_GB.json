@@ -1,0 +1,10 @@
+{
+    "coincharge-btcpay-generate-key": {
+        "button": "Generate API key"
+    },
+    "coincharge-btcpay-test-connection": {
+        "success": "Connection was successfully established",
+        "error": "Connection could not be established. Please check your API credentials",
+        "button": "Test connection"
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "name": "sroze/messenger-enqueue-transport",
+    "type": "symfony-bundle",
+    "description": "Enqueue adapter for Symfony Messenger component",
+    "keywords": ["symfony", "messenger", "enqueue"],
+    "homepage": "http://symfony.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Samuel Roze",
+            "email": "samuel.roze@gmail.com"
+        },
+        {
+            "name": "Symfony Community",
+            "homepage": "http://symfony.com/contributors"
+        }
+    ],
+    "require": {
+        "enqueue/enqueue-bundle": "^0.10",
+        "symfony/messenger": "^4.3|^5",
+        "symfony/options-resolver": "^3.4|^4.2|^5",
+        "enqueue/amqp-tools": "^0.10"
+    },
+    "replace": {
+        "enqueue/messenger-adapter": ">0.2.2"
+    },
+    "autoload": {
+        "psr-4": { "Enqueue\\MessengerAdapter\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "require-dev": {
+        "phpspec/prophecy": "^1.8.0",
+        "phpunit/phpunit": "^7.1",
+        "symfony/yaml": "^3.4|^4.1|^5"
+    }
+}

@@ -1,0 +1,8 @@
+services:
+    enqueue.messenger_transport.factory:
+        class: 'Enqueue\MessengerAdapter\QueueInteropTransportFactory'
+        arguments:
+            - '@messenger.default_serializer'
+            - '@enqueue.locator'
+            - '%kernel.debug%'
+        tags: ['messenger.transport_factory']

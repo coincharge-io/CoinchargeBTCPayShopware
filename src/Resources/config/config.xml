@@ -11,23 +11,18 @@
             <helpText>BTCPay Server URL.</helpText>
             <helpText lang="de-DE">BTCPay Server URL.</helpText>
         </input-field>
-        <component name="btcpayserver-generate-api">
-            Generate API key
+        <component name="coincharge-btcpay-generate-key">
+            <name>generate</name>
         </component>
-
         <input-field>
             <name>btcpayApiKey</name>
             <label>BTCPay API Key</label>
             <helpText>BTCPay API Key.</helpText>
             <helpText lang="de-DE">BTCPay API Key.</helpText>
         </input-field>
-        <input-field>
-            <name>storeId</name>
-            <label>Store ID</label>
-            <helpText>Store ID.</helpText>
-            <helpText lang="de-DE">Store ID.</helpText>
-        </input-field>
-        </card>
+        <component name="coincharge-btcpay-test-connection">
+            <name>test</name>
+        </component>
 	<card>
         <input-field type="checkbox">
             <name>sendCustomerData</name>
@@ -35,6 +30,6 @@
             <label lang="de-DE">Send customer data to BTCPayServer</label>
             <helpText>Send customer data to BTCPayServer.</helpText>
             <helpText lang="de-DE">Send customer data to BTCPayServer.</helpText>
-			</input-field>
+		</input-field>
 	</card>
 </config>
