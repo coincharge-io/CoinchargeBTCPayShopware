@@ -7,15 +7,14 @@ export default class CoinchargeBtcpayApiService extends ApiService {
     generateApiKey() {
 
     }
-    verifyApiKey(globalPluginConfig, actualPluginConfig) {
+    verifyApiKey() {
         const apiRoute = `${this.getApiBasePath()}/verify-api-key`;
         const headers = this.getBasicHeaders()
 
         return this.httpClient.post(
             apiRoute,
             {
-                globalPluginConfig: globalPluginConfig,
-                actualPluginConfig: actualPluginConfig
+
             },
             {
                 headers

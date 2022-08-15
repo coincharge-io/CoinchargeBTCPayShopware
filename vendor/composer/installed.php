@@ -580,6 +580,18 @@
             'reference' => 'f627771eb854aa7f45f80add0f23c6c4d67ea0f2',
             'dev_requirement' => false,
         ),
+        'php-http/async-client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'php-http/client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
         'php-http/message-factory' => array(
             'pretty_version' => 'v1.0.2',
             'version' => '1.0.2.0',
@@ -1033,6 +1045,30 @@
             'aliases' => array(),
             'reference' => 'a0660b602357d5c2ceaac1c9f80c5820bbff803d',
             'dev_requirement' => false,
+        ),
+        'symfony/http-client' => array(
+            'pretty_version' => 'v5.4.11',
+            'version' => '5.4.11.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/http-client',
+            'aliases' => array(),
+            'reference' => '5c5c37eb2a276d8d7d669dd76688aa1606ee78fb',
+            'dev_requirement' => false,
+        ),
+        'symfony/http-client-contracts' => array(
+            'pretty_version' => 'v2.5.2',
+            'version' => '2.5.2.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/http-client-contracts',
+            'aliases' => array(),
+            'reference' => 'ba6a9f0e8f3edd190520ee3b9a958596b6ca2e70',
+            'dev_requirement' => false,
+        ),
+        'symfony/http-client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '2.4',
+            ),
         ),
         'symfony/http-foundation' => array(
             'pretty_version' => 'v5.4.11',
