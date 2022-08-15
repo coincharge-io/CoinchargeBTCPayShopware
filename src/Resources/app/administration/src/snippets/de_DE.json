@@ -1,6 +1,7 @@
 {
     "coincharge-btcpay-generate-key": {
-        "button": "Generate API key"
+        "button": "Generate API key",
+        "error": "Provided url isn't valid"
     },
     "coincharge-btcpay-test-connection": {
         "success": "Connection was successfully established",

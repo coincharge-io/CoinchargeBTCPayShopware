@@ -5,7 +5,7 @@ import template from './coincharge-btcpay-generate-key.html.twig';
 Component.register('coincharge-btcpay-generate-key', {
     template,
     inject: [
-        'multiSafepayApiService'
+        'coinchargeBtcpayApiService'
     ],
     mixins: [
         Mixin.getByName('notification')
@@ -16,50 +16,24 @@ Component.register('coincharge-btcpay-generate-key', {
         };
     },
     computed: {
-        globalPluginConfig() {
-            let config = this.$parent.$parent.$parent.actualConfigData;
-            if (config) {
-                return config.null;
-            } else if (this.$parent.$parent.$parent.$parent.actualConfigData) {
-                return this.$parent.$parent.$parent.$parent.actualConfigData.null;
-            } else if (this.$parent.$parent.$parent.$parent.$parent.actualConfigData) {
-                //Since 6.4.9.0
-                return this.$parent.$parent.$parent.$parent.$parent.actualConfigData.null
-            }
 
-        },
-        actualPluginConfig() {
-            if (this.$parent.$parent.$parent.currentSalesChannelId) {
-                let currentSalesChannelId = this.$parent.$parent.$parent.currentSalesChannelId;
-                return this.$parent.$parent.$parent.actualConfigData[currentSalesChannelId];
-            } else if (this.$parent.$parent.$parent.$parent.currentSalesChannelId) {
-                let currentSalesChannelId = this.$parent.$parent.$parent.$parent.currentSalesChannelId;
-                return this.$parent.$parent.$parent.$parent.actualConfigData[currentSalesChannelId];
-            } else if (this.$parent.$parent.$parent.$parent.$parent.currentSalesChannelId) {
-                //Since 6.4.9.0
-                let currentSalesChannelId = this.$parent.$parent.$parent.$parent.$parent.currentSalesChannelId;
-                return this.$parent.$parent.$parent.$parent.$parent.actualConfigData[currentSalesChannelId];
-            } else {
-                return null
-            }
-        }
     },
     methods: {
         check() {
             this.isLoading = true;
 
-            this.multiSafepayApiService.verifyApiKey(this.globalPluginConfig, this.actualPluginConfig).then((ApiResponse) => {
+            this.coinchargeBtcpayApiService.verifyApiKey().then((ApiResponse) => {
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({
-                        title: 'MultiSafepay',
-                        message: this.$tc('multisafepay-verify-api-key.error')
+                        title: 'BTCPay Server',
+                        message: this.$tc('coincharge-btcpay-generate-key.error')
                     })
                     this.isLoading = false;
                     return;
                 }
                 this.createNotificationSuccess({
-                    title: 'MultiSafepay',
-                    message: this.$tc('multisafepay-verify-api-key.success')
+                    title: 'BTCPay Server',
+                    message: this.$tc('coincharge-btcpay-generate-key.success')
                 });
                 this.isLoading = false;
             });
