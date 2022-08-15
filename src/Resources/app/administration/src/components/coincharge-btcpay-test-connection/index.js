@@ -15,8 +15,6 @@ Component.register('coincharge-btcpay-test-connection', {
             isLoading: false,
         };
     },
-    computed: {
-    },
     methods: {
         check() {
             this.isLoading = true;

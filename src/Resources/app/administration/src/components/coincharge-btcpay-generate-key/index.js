@@ -15,14 +15,15 @@ Component.register('coincharge-btcpay-generate-key', {
             isLoading: false,
         };
     },
-    computed: {
-
-    },
     methods: {
-        check() {
+        generate_key() {
+
+            const btcpayServerUrl = document.querySelector("#ShopwareBTCPay.config.btcpayServerUrl").value
+
+            const currentUrl = window.location.href;
             this.isLoading = true;
 
-            this.coinchargeBtcpayApiService.verifyApiKey().then((ApiResponse) => {
+            this.coinchargeBtcpayApiService.generateApiKey(btcpayServerUrl, currentUrl).then((ApiResponse) => {
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({
                         title: 'BTCPay Server',
@@ -37,6 +38,6 @@ Component.register('coincharge-btcpay-generate-key', {
                 });
                 this.isLoading = false;
             });
-        },
+        }
     }
 });
