@@ -59,6 +59,9 @@ class  ShopwareBTCPay extends Plugin
             'name' => 'BTCPay Server',
             'description' => 'Example payment description',
             'pluginId' => $pluginId,
+            'customFields' => [
+                'payment_method_name' => 'btcpay_server'
+            ]
         ];
 
         /** @var EntityRepositoryInterface $paymentRepository */

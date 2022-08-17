@@ -16,28 +16,15 @@ Component.register('coincharge-btcpay-generate-key', {
         };
     },
     methods: {
-        generate_key() {
-
-            const btcpayServerUrl = document.querySelector("#ShopwareBTCPay.config.btcpayServerUrl").value
-
-            const currentUrl = window.location.href;
+        generate() {
+            const btcpayServerUrl = document.getElementById("ShopwareBTCPay.config.btcpayServerUrl").value
+            const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.isLoading = true;
+            return window.open(filteredUrl + '/api-keys/authorize/?applicationName=BTCPay%20Shopware%20plugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&selectiveStores=true', '_blank');
 
-            this.coinchargeBtcpayApiService.generateApiKey(btcpayServerUrl, currentUrl).then((ApiResponse) => {
-                if (ApiResponse.success === false) {
-                    this.createNotificationWarning({
-                        title: 'BTCPay Server',
-                        message: this.$tc('coincharge-btcpay-generate-key.error')
-                    })
-                    this.isLoading = false;
-                    return;
-                }
-                this.createNotificationSuccess({
-                    title: 'BTCPay Server',
-                    message: this.$tc('coincharge-btcpay-generate-key.success')
-                });
-                this.isLoading = false;
-            });
+        },
+        removeTrailingSlash(serverUrl) {
+            return serverUrl.replace(/\/$/, '')
         }
     }
 });

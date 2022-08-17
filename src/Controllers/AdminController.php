@@ -7,22 +7,27 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 
+
+/**
+ * @RouteScope(scopes={"api"})
+ */
 class AdminController extends AbstractController
 {
     /**
-    * @Route("/api/btcpay/coincharge-btcpay/generate-api-key", name="api.action.coincharge-btcpay.generate-api-key", methods={"GET"})
+    * @Route("/api/coincharge-btcpay/generate-api-key", name="api.action.coincharge-btcpay.generate-api-key", methods={"POST"})
     */
-    protected function generateApiKey(string $btcpayServerUrl, string $shopwareSettingsPageUrl): RedirectResponse
+    public function generateApiKey(Request $request)
     {
-        $client = HttpClient::create();
-        $response = $client->request('GET', $btcpayServerUrl+'/api-keys/authorize', [
+        /* $client = HttpClient::create();
+        $response = $client->request('GET', $request->request->get('btcpayServerUrl')+'/api-keys/authorize', [
             'json'=>[
                 'permissions' => ["btcpay.store.cancreateinvoice", "btcpay.store.canviewinvoice"],
                 'applicationName' => 'BTCPay Shopware plugin',
                 'strict'    => true,
                 'selectiveStores' => true,
-                'redirect' => $shopwareSettingsPageUrl
+                'redirect' => $request->request->get('shopwareSettingsPageUrl')
             ]
             ]);
         
@@ -30,14 +35,15 @@ class AdminController extends AbstractController
             return new JsonResponse(["success"=>false, "message"=>"Something went wrong. Double check server url."]);
         }
         return new JsonResponse(["success"=>true, "body"=>$response->getBody()]);
+ */
+    return new JsonResponse(["success"=>true, "body"=>$request]);
 
-        
     }
     /**
-     * @Route("/api/btcpay/coincharge-btcpay/verify-api-key", name="api.action.coincharge-btcpay.verify-api-key", methods={"GET"}) 
+     * @Route("/api/coincharge-btcpay/verify-api-key", name="api.action.coincharge-btcpay.verify-api-key", methods={"GET"}) 
      * */ 
 
-    protected function testConnection(): JsonResponse{
+    public function testConnection(): JsonResponse{
 
     }
 }
