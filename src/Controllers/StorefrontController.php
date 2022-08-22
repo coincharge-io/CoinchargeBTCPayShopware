@@ -27,7 +27,7 @@ class StorefrontController extends AbstractController
      * @Route("/store-api/btcpay/invoice", name="api.action.coincharge-btcpay.invoice",
      *     methods={"POST"})
      */
-    public function generateInvoice(Request $request, SalesChannelContext $context, CustomerEntity $customer)
+    public function generateInvoice(Request $request, SalesChannelContext $context)
     {
         //TODO Sanitize cookie
         $invoiceId=$_COOKIE['btcpayInvoiceId'];
@@ -35,7 +35,7 @@ class StorefrontController extends AbstractController
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'token 4c6acb3bd448081f500778067adda8cc72'
+                'Authorization' => 'token 6acb3bd448081f500778067adda8cc72'
             ]
         ]);
         $response = $client->request('POST', '/api/v1/stores/38Yo2tRcswNdqGiTeqRkyxUMuszQTzXqxXEYKyyn63w2/invoices', [
@@ -61,14 +61,15 @@ class StorefrontController extends AbstractController
      * @Route("/store-api/btcpay/invoice", name="api.action.coincharge-btcpay.paid.invoice",
      *     methods={"GET"})
      */
-    public function isPaidInvoice(Request $request, SalesChannelContext $context, CustomerEntity $customer)
+    public function isPaidInvoice(Request $request, SalesChannelContext $context)
     {
         //TODO Sanitize cookie
-        $invoiceId=$_COOKIE['btcpayInvoiceId'];
+        //$invoiceId=$_COOKIE['btcpayInvoiceId'];
+        $invoiceId='Tsr6FXWSRGXL5SfUmCsFdq';
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'token 4c6acb3bd448081f500778067adda8cc72'
+                'Authorization' => 'token 6acb3bd448081f500778067adda8cc72'
             ]
         ]);
         //https://btcpay.example.com/api/v1/api/v1/stores/{storeId}/invoices/{invoiceId}
@@ -78,5 +79,14 @@ class StorefrontController extends AbstractController
             return new JsonResponse(["success" => false, "message" => "Something went wrong. Double check server url."]);
         }
         return new JsonResponse(["success" => true, "message" =>  json_decode($response->getBody()->getContents())]);
+    }
+    /**
+     * @LoginRequired(allowGuest=true)
+     * @Route("/store-api/btcpay/authorized", name="api.action.coincharge-btcpay.authorized",
+     *     methods={"GET"})
+     */
+    public function authorizedApp(Request $request, SalesChannelContext $context)
+    {
+        var_dump($request);
     }
 }
