@@ -1,2 +1,7 @@
 {% sw_extends '@Storefront/storefront/page/checkout/finish/index.html.twig' %}
 
+{% block page_checkout_finish_details %}
+    {{ parent() }}
+    <template data-btcpay-modal></template>
+
+{% endblock %}

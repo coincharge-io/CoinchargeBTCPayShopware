@@ -11,7 +11,7 @@
     ],
     "require": {
         "shopware/core": "6.4.*",
-        "symfony/http-client": "^5.4"
+        "guzzlehttp/guzzle": "^7.4"
     },
     "extra": {
         "shopware-plugin-class": "Coincharge\\ShopwareBTCPay\\ShopwareBTCPay",

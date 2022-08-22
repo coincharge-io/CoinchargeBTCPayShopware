@@ -1,13 +1,18 @@
 <container xmlns="http://symfony.com/schema/dic/services"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="btcpay.payment_handler" class="Coincharge\ShopwareBTCPay\Service\BTCPayPayment">
+        <service id="Coincharge\ShopwareBTCPay\Service\BTCPayPayment">
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <tag name="shopware.payment.method.async" />
         </service>
         <service id="Coincharge\ShopwareBTCPay\Controllers\AdminController" public="true">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+        <service id="Coincharge\ShopwareBTCPay\Controllers\StorefrontController" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

@@ -1,0 +1,21 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/index.html.twig' %}
+
+{% block page_checkout_aside_actions %}
+	<div class="checkout-aside-action">
+		<div data-btcpay-modal>
+			<button id="btcpay-button" class="btn btn-primary btn-block btn-lg">Pay</button>
+		</div>
+		<form id="confirmOrderForm" action="{{ path('frontend.checkout.finish.order') }}" data-form-csrf-handler="true" data-form-preserver="true" data-form-submit-loader="true" data-form-add-history="true" data-form-add-history-options='{{ formAddHistoryOptions|json_encode }}' method="post">
+
+			{% block page_checkout_aside_actions_csrf %}
+				{{ sw_csrf('frontend.checkout.finish.order') }}
+			{% endblock %}
+
+			{% block page_checkout_confirm_form_submit %}
+				<button id="confirmFormSubmit" class="btn btn-primary btn-block btn-lg" form="confirmOrderForm" {% if page.cart.errors.blockOrder %} disabled {% endif %} type="submit">
+					{{ "checkout.confirmSubmit"|trans|sw_sanitize }}
+				</button>
+			{% endblock %}
+		</form>
+	</div>
+{% endblock %}
