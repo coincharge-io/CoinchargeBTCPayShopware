@@ -21,7 +21,7 @@ class SettingsService
 
     public function getSetting(string $setting, ?string $salesChannelId=null) : mixed
     {
-        return $this->systemConfigService->get("ShopwareBTCPay.config. ".$setting,$salesChannelId);
+        return $this->systemConfigService->get("ShopwareBTCPay.config.".$setting,$salesChannelId);
     }
     public function getShopName(string $salesChannelId) : string
     {

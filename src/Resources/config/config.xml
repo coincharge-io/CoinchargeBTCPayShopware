@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/master/src/Core/System/SystemConfig/Schema/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/master/src/Core/System/SystemConfig/Schema/config.xsd">
 
     <card>
         <title>BTCPay Server</title>
@@ -19,17 +18,23 @@
             <helpText>BTCPay API Key.</helpText>
             <helpText lang="de-DE">BTCPay API Key.</helpText>
         </input-field>
+        <input-field>
+            <name>btcpayServerStoreId</name>
+            <label>BTCPay Server Store Id</label>
+            <helpText>BTCPay Server Store Id.</helpText>
+            <helpText lang="de-DE">BTCPay Server Store Id.</helpText>
+        </input-field>
         <component name="coincharge-btcpay-test-connection">
             <name>test</name>
         </component>
     </card>
-	<card>
+    <card>
         <input-field type="checkbox">
             <name>sendCustomerData</name>
             <label>Send customer data to BTCPayServer</label>
             <label lang="de-DE">Send customer data to BTCPayServer</label>
             <helpText>Send customer data to BTCPayServer.</helpText>
             <helpText lang="de-DE">Send customer data to BTCPayServer.</helpText>
-		</input-field>
-	</card>
+        </input-field>
+    </card>
 </config>

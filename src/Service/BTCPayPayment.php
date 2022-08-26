@@ -5,20 +5,23 @@ namespace Coincharge\ShopwareBTCPay\Service;
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
-use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymentException;
+use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymenException;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Coincharge\ShopwareBTCPay\Service\SettingsService;
+use GuzzleHttp\Client;
 
 class BTCPayPayment implements AsynchronousPaymentHandlerInterface
 {
     private OrderTransactionStateHandler $transactionStateHandler;
 
-    public function __construct(OrderTransactionStateHandler $transactionStateHandler){
+    public function __construct(OrderTransactionStateHandler $transactionStateHandler, SettingsService $settingsService){
         $this->transactionStateHandler = $transactionStateHandler;
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -26,8 +29,9 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
      */
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
+        
         try{
-            $redirectUrl = $this->sendReturnUrlToBTCPay($transaction->getReturnUrl());
+            $redirectUrl = $this->sendReturnUrlToBTCPay($transaction, $salesChannelContext);
         }catch (\Exception $e){
             throw new AsyncPaymentProcessException(
                 $transaction->getOrderTransaction()->getId(),
@@ -42,28 +46,71 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext):void
     {
         $transactionId = $transaction->getOrderTransaction()->getId();
-
-        if($request->query->getBoolean('cancel')){
+        /* if($request->query->getBoolean('cancel')){
             throw new CustomerCanceledAsyncPaymenException(
                 $transactionId,
                 'Customer canceled the payment'
             );
-        }
-        $paymentState = $request->query->getAlpha('status');
+        } */
+        $paymentState = $request->request->getAlpha('status');
 
         $context = $salesChannelContext->getContext();
-        if($paymentState==='completed'){
+         /* if($paymentState==='Settled'){
             $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
         }else{
             $this->transactionStateHandler->reopen($transaction->getOrderTransaction()->getId(),$context);
-        }
+        }  */
+        /*BTCPay server doesn't send information about invoice on redirect
+         *There are two options
+         *We can trust BTCPay server and update state on every call from BTCPay
+         *Better option would be to set a webhook and listen to the events from BTCPay server
+         */
+        $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
+
     }
-    private function sendReturnUrlToBTCPay(string $getReturnUrl):string
+    private function sendReturnUrlToBTCPay( $transaction, $context):string
     {
         $paymentProviderUrl="";
-        // Do some API Call to your payment provider
-
         return $paymentProviderUrl;
+        // Do some API Call to your payment provider
+        $client = new Client([
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'token '.$this->settingsService->getSetting('btcpayApiKey')
+            ]
+        ]);
+        /* $response = $client->request('POST', '/api/v1/stores/iTeqRkyxUMuszQTzXqxXEYKyyn63w2/invoices', [
+            'body' => json_encode([
+                'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                'currency'=>$context->getCurrency()->getIsoCode(),
+                'metadata' =>
+                ['orderId' => $transaction->getOrderTransaction()->getId(),
+            ],
+            'checkout'=>[
+                'redirectURL'=>$transaction->getReturnUrl(),
+                'redirectAutomatically'=>true
+            ]
+            ])
+        ]); */
+        $response = $client->request('POST', $this->settingsService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->settingsService->getSetting('btcpayServerStoreId').'/invoices', [
+            'body' => json_encode([
+                'amount' => 5,
+                'currency'=>'SATS',
+                'metadata' =>
+                ['orderId' => $transaction->getOrderTransaction()->getId(),
+            ],
+            'checkout'=>[
+                'redirectURL'=>$transaction->getReturnUrl(),
+                'redirectAutomatically'=>true
+            ]
+            ])
+        ]);
+
+        /* if (200 !== $response->getStatusCode()) {
+            
+        } */
+        $body = json_decode($response->getBody()->getContents());
+        return $body->checkoutLink;
     }
 
 }
