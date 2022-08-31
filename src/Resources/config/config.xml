@@ -27,14 +27,13 @@
         <component name="coincharge-btcpay-test-connection">
             <name>test</name>
         </component>
-    </card>
-    <card>
-        <input-field type="checkbox">
-            <name>sendCustomerData</name>
-            <label>Send customer data to BTCPayServer</label>
-            <label lang="de-DE">Send customer data to BTCPayServer</label>
-            <helpText>Send customer data to BTCPayServer.</helpText>
-            <helpText lang="de-DE">Send customer data to BTCPayServer.</helpText>
+        <input-field type="password">
+            <name>btcpayWebhookSecret</name>
+            <label>Webhook secret</label>
+            <label lang="de-DE">Webhook secret</label>
         </input-field>
+        <component name="coincharge-btcpay-create-webhook">
+            <name>webhook</name>
+        </component>
     </card>
 </config>

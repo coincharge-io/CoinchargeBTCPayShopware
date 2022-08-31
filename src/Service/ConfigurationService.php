@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\ShopwareBTCPay\Service;
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
-class SettingsService
+class ConfigurationService
 {
     /**
      * @var SystemConfigService
@@ -19,13 +21,12 @@ class SettingsService
         $this->systemConfigService = $systemConfigService;
     }
 
-    public function getSetting(string $setting, ?string $salesChannelId=null) : mixed
+    public function getSetting(string $setting, ?string $salesChannelId = null): ?string
     {
-        return $this->systemConfigService->get("ShopwareBTCPay.config.".$setting,$salesChannelId);
+        return $this->systemConfigService->get("ShopwareBTCPay.config." . $setting, $salesChannelId);
     }
-    public function getShopName(string $salesChannelId) : string
+    public function getShopName(string $salesChannelId): string
     {
         return $this->systemConfigService->get("core.basicInformation.shopName");
     }
-
 }
