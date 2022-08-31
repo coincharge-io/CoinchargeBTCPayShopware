@@ -40,13 +40,16 @@ class AdminController extends AbstractController
 
         $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/webhooks', [
             'body' => json_encode([
-                'url'=>'http://localhost/payment/finalize-transaction'
+                'url'=>'http://localhost/payment/finalize-transaction' //TODO Define function for shop base url
             ])
         ]);
+        $body = json_decode($response->getBody()->getContents());
+
         if (200 !== $response->getStatusCode()) {
-            return new JsonResponse(['success' => false, 'response' => $response]);
+            return new JsonResponse(['success' => false, 'data' => $body]);
         }
-        return new JsonResponse(['success' => true, 'response' => $response]);
+        $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
+        return new JsonResponse(['success' => true, 'data' => $body]);
 
 
     }
@@ -64,6 +67,7 @@ class AdminController extends AbstractController
         ]);
 
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices');
+        
         if (200 !== $response->getStatusCode()) {
             return new JsonResponse(['success' => false]);
         }

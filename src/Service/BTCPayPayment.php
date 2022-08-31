@@ -43,6 +43,24 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
      */
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext):void
     {
+        $header = 'Btcpay-Sig';
+        $signature = $request->headers->get($header);
+        $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
+        if($signature!==$expectedHeader){
+            return false;
+        }
+        $body = $request->getContent();
+
+        if($body['type'] !=='InvoiceSettled'){
+            return false;
+        }
+        $client = new Client([
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'token '.$this->configurationService->getSetting('btcpayApiKey')
+            ]
+        ]);
+        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices/'.$body->invoiceId);
         $transactionId = $transaction->getOrderTransaction()->getId();
         /* if($request->query->getBoolean('cancel')){
             throw new CustomerCanceledAsyncPaymenException(
@@ -53,11 +71,17 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
         $paymentState = $request->request->getAlpha('status');
 
         $context = $salesChannelContext->getContext();
+        $body = json_decode($response->getBody()->getContents());
          /* if($paymentState==='Settled'){
             $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
         }else{
             $this->transactionStateHandler->reopen($transaction->getOrderTransaction()->getId(),$context);
         }  */
+          if($body->status==='Settled'){
+            $this->transactionStateHandler->paid($body['metadata']['orderId'],$context);
+        }else{
+            $this->transactionStateHandler->reopen($body['metadata']['orderId'],$context);
+        }  
         /*BTCPay server doesn't send information about invoice on redirect
          *There are two options
          *We can trust BTCPay server and update state on every call from BTCPay

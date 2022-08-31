@@ -20,6 +20,7 @@ Component.register('coincharge-btcpay-create-webhook', {
             this.isLoading = true;
 
             this.coinchargeBtcpayApiService.generateWebhook().then((ApiResponse) => {
+
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({
                         title: 'BTCPay Server',

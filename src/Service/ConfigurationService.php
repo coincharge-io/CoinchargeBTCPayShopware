@@ -25,6 +25,10 @@ class ConfigurationService
     {
         return $this->systemConfigService->get("ShopwareBTCPay.config." . $setting, $salesChannelId);
     }
+    public function setSetting(string $setting,string $value, ?string $salesChannelId = null)
+    {
+        return $this->systemConfigService->set("ShopwareBTCPay.config." . $setting, $value, $salesChannelId);
+    }
     public function getShopName(string $salesChannelId): string
     {
         return $this->systemConfigService->get("core.basicInformation.shopName");
