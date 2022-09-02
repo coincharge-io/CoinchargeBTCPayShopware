@@ -5,10 +5,13 @@
         <service id="Coincharge\ShopwareBTCPay\Service\BTCPayPayment">
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\ShopwareBTCPay\Service\ConfigurationService"/>
+            <argument type="service" id="Psr\Log\LoggerInterface"/>
             <tag name="shopware.payment.method.async" />
         </service>
         <service id="Coincharge\ShopwareBTCPay\Controllers\AdminController" public="true">
             <argument type="service" id="Coincharge\ShopwareBTCPay\Service\ConfigurationService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="Psr\Log\LoggerInterface"/>
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>

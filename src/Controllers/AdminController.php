@@ -11,7 +11,9 @@ use GuzzleHttp\Client;
 use Symfony\Component\HttpFoundation\Request;
 use Shopware\Core\Framework\Context;
 use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
-
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @RouteScope(scopes={"api"})
@@ -20,10 +22,14 @@ use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
 class AdminController extends AbstractController
 {
     private ConfigurationService  $configurationService;
-    
-    public function __construct(ConfigurationService $configurationService)
+    private OrderTransactionStateHandler $transactionStateHandler;
+    protected $logger;
+
+    public function __construct(ConfigurationService $configurationService,OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->configurationService = $configurationService;
+        $this->transactionStateHandler = $transactionStateHandler;
+        $this->logger = $logger;
 
     }
     /**
@@ -40,7 +46,7 @@ class AdminController extends AbstractController
 
         $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/webhooks', [
             'body' => json_encode([
-                'url'=>'http://localhost/payment/finalize-transaction' //TODO Define function for shop base url
+                'url'=>'http://localhost/api/_action/btcpay/webhook-endpoint' //TODO Define function for shop base url
             ])
         ]);
         $body = json_decode($response->getBody()->getContents());
@@ -72,8 +78,50 @@ class AdminController extends AbstractController
             return new JsonResponse(['success' => false]);
         }
         return new JsonResponse(['success' => true]);
-
-
     }
+    /**
+     * @Route("/api/_action/btcpay/webhook-endpoint", name="api.action.btcpay.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
+     */
+    public function webhookEndpoint(Request $request)
+    {
+        $this->logger->info('request '. $request);
+         $header = 'Btcpay-Sig';
+        $signature = $request->headers->get($header);
+        $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
+        if($signature!==$expectedHeader){
+            //return false;
+        }
+        $this->logger->info('$signature!==$expectedHeader '.$signature);
+        $this->logger->info('$signature!==$expectedHeader '.$expectedHeader);
+        $this->logger->info($signature!==$expectedHeader);
+        $body = $request->request->all();
+        if($body['type'] !=='InvoiceSettled'){
+           // return false;
+        }
+        $client = new Client([
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'token '.$this->configurationService->getSetting('btcpayApiKey')
+            ]
+        ]);
+        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices/'.$body['invoiceId']);
+        
+        $responseBody = json_decode($response->getBody()->getContents());
+        
+          if($body->status==='Settled'){
+            $this->transactionStateHandler->paid($responseBody['metadata']['orderId'],$context);
+        }else{
+            $this->transactionStateHandler->reopen($responseBody['metadata']['orderId'],$context);
+        }   
+        return new Response($responseBody);
+
+        /*BTCPay server doesn't send information about invoice on redirect
+         *There are two options
+         *We can trust BTCPay server and update state on every call from BTCPay
+         *Better option would be to set a webhook and listen to the events from BTCPay server
+         */
+        //$this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
+    }
+
     
 }

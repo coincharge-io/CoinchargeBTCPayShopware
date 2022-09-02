@@ -4,7 +4,7 @@ namespace Coincharge\ShopwareBTCPay\Service;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
-use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
+use Shopware\Core\Checkout\Payment\Exception\SyncPaymentProcessException;
 use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymenException;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
@@ -12,15 +12,19 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
+
 
 class BTCPayPayment implements AsynchronousPaymentHandlerInterface
 {
     private OrderTransactionStateHandler $transactionStateHandler;
     private ConfigurationService  $configurationService;
+    protected $logger;
     
-    public function __construct(OrderTransactionStateHandler $transactionStateHandler, ConfigurationService  $configurationService){
+    public function __construct(OrderTransactionStateHandler $transactionStateHandler, ConfigurationService  $configurationService, LoggerInterface $logger){
         $this->transactionStateHandler = $transactionStateHandler;
         $this->configurationService = $configurationService;
+        $this->logger = $logger;
     }
 
     /**
@@ -47,12 +51,12 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
         $signature = $request->headers->get($header);
         $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
         if($signature!==$expectedHeader){
-            return false;
+            //return false;
         }
         $body = $request->getContent();
 
         if($body['type'] !=='InvoiceSettled'){
-            return false;
+           // return false;
         }
         $client = new Client([
             'headers' => [
@@ -121,7 +125,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                 ['orderId' => $transaction->getOrderTransaction()->getId(),
             ],
             'checkout'=>[
-                'redirectURL'=>$transaction->getReturnUrl(),
+                'redirectURL'=>'http://localhost/account/order',
                 'redirectAutomatically'=>true
             ]
             ])
