@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\ShopwareBTCPay\Controllers;
 
@@ -25,12 +27,11 @@ class AdminController extends AbstractController
     private OrderTransactionStateHandler $transactionStateHandler;
     protected $logger;
 
-    public function __construct(ConfigurationService $configurationService,OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
+    public function __construct(ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
-
     }
     /**
      * @Route("/api/_action/btcpay/webhook", name="api.action.btcpay.webhook", methods={"POST"})
@@ -40,13 +41,13 @@ class AdminController extends AbstractController
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'token '.$this->configurationService->getSetting('btcpayApiKey')
+                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
             ]
         ]);
 
-        $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/webhooks', [
+        $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks', [
             'body' => json_encode([
-                'url'=>'http://localhost/api/_action/btcpay/webhook-endpoint' //TODO Define function for shop base url
+                'url' => 'http://localhost/api/_action/btcpay/webhook-endpoint' //TODO Define function for shop base url
             ])
         ]);
         $body = json_decode($response->getBody()->getContents());
@@ -56,8 +57,6 @@ class AdminController extends AbstractController
         }
         $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
         return new JsonResponse(['success' => true, 'data' => $body]);
-
-
     }
 
     /**
@@ -68,12 +67,12 @@ class AdminController extends AbstractController
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'token '.$this->configurationService->getSetting('btcpayApiKey')
+                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
             ]
         ]);
 
-        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices');
-        
+        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices');
+
         if (200 !== $response->getStatusCode()) {
             return new JsonResponse(['success' => false]);
         }
@@ -82,38 +81,43 @@ class AdminController extends AbstractController
     /**
      * @Route("/api/_action/btcpay/webhook-endpoint", name="api.action.btcpay.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
-    public function webhookEndpoint(Request $request)
+    public function webhookEndpoint(Request $request, Context $context)
     {
-        $this->logger->info('request '. $request);
-         $header = 'Btcpay-Sig';
+        //$context = Context::createDefaultContext();
+        $this->logger->info('context->' . print_r($context,true));
+
+        $this->logger->info('request ' . $request);
+        $header = 'Btcpay-Sig';
         $signature = $request->headers->get($header);
         $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
-        if($signature!==$expectedHeader){
+        if ($signature !== $expectedHeader) {
             //return false;
         }
-        $this->logger->info('$signature!==$expectedHeader '.$signature);
-        $this->logger->info('$signature!==$expectedHeader '.$expectedHeader);
-        $this->logger->info($signature!==$expectedHeader);
+        $this->logger->info('$signature!==$expectedHeader ' . $signature);
+        $this->logger->info('$signature!==$expectedHeader ' . $expectedHeader);
+        $this->logger->info($signature !== $expectedHeader);
+
         $body = $request->request->all();
-        if($body['type'] !=='InvoiceSettled'){
-           // return false;
+        if ($body['type'] !== 'InvoiceSettled') {
+            // return false;
         }
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'token '.$this->configurationService->getSetting('btcpayApiKey')
+                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
             ]
         ]);
-        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices/'.$body['invoiceId']);
-        
+        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId']);
+
         $responseBody = json_decode($response->getBody()->getContents());
-        
-          if($body->status==='Settled'){
-            $this->transactionStateHandler->paid($responseBody['metadata']['orderId'],$context);
-        }else{
-            $this->transactionStateHandler->reopen($responseBody['metadata']['orderId'],$context);
-        }   
-        return new Response($responseBody);
+        //$context = $salesChannelContext->getContext();
+
+        if ($responseBody->status === 'Settled') {
+            $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
+        } else {
+            $this->transactionStateHandler->reopen($responseBody->metadata->orderId, $context);
+        }
+        return new Response();
 
         /*BTCPay server doesn't send information about invoice on redirect
          *There are two options
@@ -122,6 +126,4 @@ class AdminController extends AbstractController
          */
         //$this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
     }
-
-    
 }

@@ -4,7 +4,7 @@ namespace Coincharge\ShopwareBTCPay\Service;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
-use Shopware\Core\Checkout\Payment\Exception\SyncPaymentProcessException;
+use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
 use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymenException;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
@@ -17,12 +17,10 @@ use Psr\Log\LoggerInterface;
 
 class BTCPayPayment implements AsynchronousPaymentHandlerInterface
 {
-    private OrderTransactionStateHandler $transactionStateHandler;
     private ConfigurationService  $configurationService;
-    protected $logger;
+    protected LoggerInterface $logger;
     
-    public function __construct(OrderTransactionStateHandler $transactionStateHandler, ConfigurationService  $configurationService, LoggerInterface $logger){
-        $this->transactionStateHandler = $transactionStateHandler;
+    public function __construct( ConfigurationService  $configurationService, LoggerInterface $logger){
         $this->configurationService = $configurationService;
         $this->logger = $logger;
     }
@@ -47,6 +45,9 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
      */
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext):void
     {
+    }
+   /*  public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext):void
+    {
         $header = 'Btcpay-Sig';
         $signature = $request->headers->get($header);
         $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
@@ -66,34 +67,21 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
         ]);
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices/'.$body->invoiceId);
         $transactionId = $transaction->getOrderTransaction()->getId();
-        /* if($request->query->getBoolean('cancel')){
-            throw new CustomerCanceledAsyncPaymenException(
-                $transactionId,
-                'Customer canceled the payment'
-            );
-        } */
+        
         $paymentState = $request->request->getAlpha('status');
 
         $context = $salesChannelContext->getContext();
         $body = json_decode($response->getBody()->getContents());
-         /* if($paymentState==='Settled'){
-            $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
-        }else{
-            $this->transactionStateHandler->reopen($transaction->getOrderTransaction()->getId(),$context);
-        }  */
+       
           if($body->status==='Settled'){
             $this->transactionStateHandler->paid($body['metadata']['orderId'],$context);
         }else{
             $this->transactionStateHandler->reopen($body['metadata']['orderId'],$context);
         }  
-        /*BTCPay server doesn't send information about invoice on redirect
-         *There are two options
-         *We can trust BTCPay server and update state on every call from BTCPay
-         *Better option would be to set a webhook and listen to the events from BTCPay server
-         */
+       
         $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
 
-    }
+    } */
     private function sendReturnUrlToBTCPay( $transaction, $context):string
     {
         $paymentProviderUrl="";
