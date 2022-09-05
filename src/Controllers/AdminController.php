@@ -44,10 +44,12 @@ class AdminController extends AbstractController
                 'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
             ]
         ]);
+        //TODO Test
+        $webhookUrl = $request->server->get('REQUEST_SCHEME').'://'.$request->server->get('HTTP_HOST') . '/api/_action/btcpay/webhook-endpoint';
 
         $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks', [
             'body' => json_encode([
-                'url' => 'http://localhost/api/_action/btcpay/webhook-endpoint' //TODO Define function for shop base url
+                'url' => $webhookUrl //TODO Define function for shop base url
             ])
         ]);
         $body = json_decode($response->getBody()->getContents());
