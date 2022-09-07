@@ -18,5 +18,11 @@
         <service id="Coincharge\ShopwareBTCPay\Service\ConfigurationService">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
+        <service id="Coincharge\ShopwareBTCPay\Entity\Payment\CoinchargePaymentEntityDefinition">
+            <tag name="shopware.entity.definition" entity="coincharge_payments"/>
+        </service>
+        <service id="Coincharge\ShopwareBTCPay\Entity\Order\CoinchargeOrderEntityDefinition">
+            <tag name="shopware.entity.definition" entity="coincharge_orders"/>
+        </service>
     </services>
 </container>
