@@ -10,7 +10,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\IdField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToManyAssociationField;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionDefinition\Checkout\Order\OrderDefinition;
+use Shopware\Core\Checkout\Order\OrderDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToOneAssociationField;
 use Coincharge\ShopwareBTCPay\Entity\Payment\CoinchargePaymentEntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
@@ -27,7 +27,7 @@ class CoinchargeOrderEntityDefinition extends EntityDefinition
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new Required(), new PrimaryKey()),
-			(new FkField('order_id', 'orderId', OrderDefinition::class))->addFlags(new Required()),
+			(new FkField('order_id', 'order_id', OrderDefinition::class))->addFlags(new Required()),
             (new StringField('orderNumber', 'orderNumber')),
             (new StringField('invoiceId', 'invoiceId')),
             (new StringField('paymentMethod', 'paymentMethod')),
@@ -40,16 +40,19 @@ class CoinchargeOrderEntityDefinition extends EntityDefinition
             (new StringField('due', 'due')),
             (new StringField('amount', 'amount')),
             (new StringField('networkFee', 'networkFee')),
-            (new StringField('providedComment', 'providedComment'))
-            (new StringField('consumedLightningAddress', 'consumedLightningAddress'))
-            (new OneToManyAssociationField('payments', CoinchargePaymentEntityDefinition::class, 'order_id'))
+            (new StringField('providedComment', 'providedComment')),
+            (new StringField('consumedLightningAddress', 'consumedLightningAddress')),
+            (new OneToManyAssociationField('payments', CoinchargePaymentEntityDefinition::class, 'order_id')),
             (new OneToOneAssociationField('order', 'order_id', 'id', OrderDefinition::class, true)),
-
            ]);
     }
     public function getCollectionClass(): string
     {
         return CoinchargeOrderEntityCollection::class;
     }
+    public function getEntityClass(): string
+	{
+		return CoinchargeOrderEntity::class;
+	}
 
 }

@@ -16,6 +16,7 @@ use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 /**
  * @RouteScope(scopes={"api"})
@@ -26,12 +27,15 @@ class AdminController extends AbstractController
     private ConfigurationService  $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     protected $logger;
+    private EntityRepository $orderRepository;
 
-    public function __construct(ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
+
+    public function __construct(ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
     {
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
         $this->logger->info = $logger;
+        $this->orderRepository = $orderRepository;
     }
     /**
      * @Route("/api/_action/btcpay/webhook", name="api.action.btcpay.webhook", methods={"POST"})
@@ -64,7 +68,7 @@ class AdminController extends AbstractController
     /**
      * @Route("/api/_action/btcpay/verify", name="api.action.btcpay.verify.webhook", methods={"GET"})
      */
-    public function verifyApiKey()
+    public function verifyApiKey(Context $context)
     {
         $client = new Client([
             'headers' => [
@@ -78,6 +82,14 @@ class AdminController extends AbstractController
         if (200 !== $response->getStatusCode()) {
             return new JsonResponse(['success' => false]);
         }
+        $this->orderRepository->create(
+            [['order_id' => '00B95524A4044FB08E1B309D220A5794',
+            'invoiceId' => '33',
+            'status' => '33',
+            'amount' => '33'
+            ]],
+            $context
+        );
         return new JsonResponse(['success' => true]);
     }
     /**
@@ -113,7 +125,7 @@ class AdminController extends AbstractController
         } else {
             $this->transactionStateHandler->reopen($responseBody->metadata->orderId, $context);
         } */
-        switch ($body['type']) {
+        /* switch ($body['type']) {
 			case 'InvoiceReceivedPayment':
 				if ($body['afterExpiration']) {
 					$this->transactionStateHandler->paid_partially($responseBody->metadata->orderId, $context);
@@ -193,7 +205,7 @@ class AdminController extends AbstractController
 				$this->updateOrderPayments($order);
 
 				break;
-		}
+		} */
         return new Response();
 
         /*BTCPay server doesn't send information about invoice on redirect

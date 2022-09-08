@@ -4,13 +4,14 @@
     <services>
         <service id="Coincharge\ShopwareBTCPay\Service\BTCPayPayment">
             <argument type="service" id="Coincharge\ShopwareBTCPay\Service\ConfigurationService"/>
-            <argument type="service" id="monolog.logger"/>
+            <argument type="service" id="coincharge_order.repository"/>
             <tag name="shopware.payment.method.async" />
         </service>
         <service id="Coincharge\ShopwareBTCPay\Controllers\AdminController" public="true">
             <argument type="service" id="Coincharge\ShopwareBTCPay\Service\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="monolog.logger"/>
+            <argument type="service" id="coincharge_order.repository"/>
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
@@ -19,10 +20,10 @@
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
         <service id="Coincharge\ShopwareBTCPay\Entity\Payment\CoinchargePaymentEntityDefinition">
-            <tag name="shopware.entity.definition" entity="coincharge_payments"/>
+            <tag name="shopware.entity.definition" entity="coincharge_payment"/>
         </service>
         <service id="Coincharge\ShopwareBTCPay\Entity\Order\CoinchargeOrderEntityDefinition">
-            <tag name="shopware.entity.definition" entity="coincharge_orders"/>
+            <tag name="shopware.entity.definition" entity="coincharge_order"/>
         </service>
     </services>
 </container>

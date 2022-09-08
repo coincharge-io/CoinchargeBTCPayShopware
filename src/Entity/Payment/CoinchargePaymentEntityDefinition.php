@@ -11,7 +11,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
-
+use Coincharge\ShopwareBTCPay\Entity\Order\CoinchargeOrderEntityDefinition;
 
 class CoinchargePaymentEntityDefinition extends EntityDefinition
 {
@@ -38,5 +38,9 @@ class CoinchargePaymentEntityDefinition extends EntityDefinition
     {
         return CoinchargePaymentEntityCollection::class;
     }
+    public function getEntityClass(): string
+	{
+		return CoinchargePaymentEntity::class;
+	}
 
 }
