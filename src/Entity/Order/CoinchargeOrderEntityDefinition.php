@@ -17,7 +17,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 
 class CoinchargeOrderEntityDefinition extends EntityDefinition
 {
-    public const ENTITY_NAME = 'coincharge_orders';
+    public const ENTITY_NAME = 'coincharge_order';
 
     public function getEntityName():string
     {
@@ -27,7 +27,7 @@ class CoinchargeOrderEntityDefinition extends EntityDefinition
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new Required(), new PrimaryKey()),
-			(new FkField('order_id', 'order_id', OrderDefinition::class))->addFlags(new Required()),
+			(new FkField('order_id', 'orderId', OrderDefinition::class))->addFlags(new Required()),
             (new StringField('orderNumber', 'orderNumber')),
             (new StringField('invoiceId', 'invoiceId')),
             (new StringField('paymentMethod', 'paymentMethod')),

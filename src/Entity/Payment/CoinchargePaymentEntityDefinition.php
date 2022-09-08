@@ -15,7 +15,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 
 class CoinchargePaymentEntityDefinition extends EntityDefinition
 {
-    public const ENTITY_NAME = 'coincharge_payments';
+    public const ENTITY_NAME = 'coincharge_payment';
 
     public function getEntityName():string
     {
