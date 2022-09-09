@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 /**
  * @RouteScope(scopes={"api"})
@@ -71,7 +72,9 @@ class AdminController extends AbstractController
      */
     public function verifyApiKey(Context $context)
     {
-        $client = new Client([
+        
+        
+            $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
@@ -94,7 +97,7 @@ class AdminController extends AbstractController
         /* $this->orderRepository->update([[
             'id' => '00B95524A4044FB08E1B309D220A5794',
                 'customFields' => [
-                    'btcpay_order_status' => 'partiallyPaidAfterExpiration'
+                    'btcpayOrderStatus' => 'partiallyPaidAfterExpiration'
                 ]
         ]], $context); */
         $header = 'Btcpay-Sig';
@@ -115,33 +118,39 @@ class AdminController extends AbstractController
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId']);
 
         $responseBody = json_decode($response->getBody()->getContents());
-        $criteria = (new Criteria([$responseBody->metadata->orderId]));
+        //$criteria = (new Criteria([$responseBody->metadata->orderNumber]));
         //$order = $this->orderRepository->search($criteria, $context)->get($responseBody->metadata->orderId);
+         $criteria = new Criteria();
+    $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody->metadata->orderNumber));
 
+    $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
+    
         switch ($body['type']) {
             case 'InvoiceReceivedPayment':
                 if ($body['afterExpiration']) {
                     $this->transactionStateHandler->payPartially($responseBody->metadata->orderId, $context);
                     $this->logger->info('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.');
 
-                    /* $this->orderRepository->upsert([
+                    $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'partiallyPaidAfterExpiration'
+                                    'btcpayOrderStatus' => 'partiallyPaid',
+                                    'paidAfterExpiration' => true,
+                                    'paymentMethod' => $body['paymentMethod']
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                 } else {
 
-                    /* $this->orderRepository->upsert([
+                     $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'waitingForSettlement'
+                                    'btcpayOrderStatus' => 'waitingForSettlement'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->logger->info('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.');
                 }
 
@@ -156,25 +165,27 @@ class AdminController extends AbstractController
                 ) {
                     // Check if also the invoice is now fully paid.
                     if ($this->invoiceIsFullyPaid($body['invoiceId'])) {
-                        /*  $this->orderRepository->upsert([
+                         $this->orderRepository->upsert([
                                 [
-                                    'id' => $responseBody->metadata->orderId,
+                                    'id'=>$orderId,
                                     'customFields' => [
-                                        'btcpay_order_status' => 'settledAfterInvoiceWasExpired'
+                                        'btcpayOrderStatus' => 'settled',
+                                        'paidAfterExpiration' => true,
+                                        'paymentMethod' => $body['paymentMethod']
                                     ],
                                 ],
-                            ], $context); */
+                            ], $context); 
                         $this->logger->debug('Invoice fully paid.');
                         $this->logger->info('Invoice fully settled after invoice was already expired. Needs manual checking.');
                     } else {
-                        /* $this->orderRepository->upsert([
+                         $this->orderRepository->upsert([
                                 [
-                                    'id' => $responseBody->metadata->orderId,
+                                    'id'=>$orderId,
                                     'customFields' => [
-                                        'btcpay_order_status' => 'notFullyPaid'
+                                        'btcpayOrderStatus' => 'notFullyPaid'
                                     ],
                                 ],
-                            ], $context); */
+                            ], $context); 
                         $this->logger->debug('Invoice NOT fully paid.');
                         $this->logger->info('(Partial) payment settled but invoice not settled yet (could be more transactions incoming). Needs manual checking.');
                     }
@@ -187,25 +198,27 @@ class AdminController extends AbstractController
             case 'InvoiceProcessing': // The invoice is paid in full.
                 $this->transactionStateHandler->process($responseBody->metadata->orderId, $context);
                 if ($body['overPaid']) {
-                    /* $this->orderRepository->upsert([
+                     $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'paidFullyWithOverpayment'
+                                    'btcpayOrderStatus' => 'paidFullyWithOverpayment',
+                                    'overpaid' => true
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->logger->info('Invoice payment received fully with overpayment, waiting for settlement.');
                 } else {
 
-                    /*  $this->orderRepository->upsert([
+                      $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'paidFully'
+                                    'btcpayOrderStatus' => 'paidFully',
+                                    'overpaid' => false
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->logger->info('Invoice payment received fully, waiting for settlement.');
                 }
                 break;
@@ -213,74 +226,74 @@ class AdminController extends AbstractController
                 $this->transactionStateHandler->cancel($responseBody->metadata->orderId, $context);
                 if ($body['manuallyMarked']) {
 
-                    /* $this->orderRepository->upsert([
+                     $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'manuallyMarked'
+                                    'btcpayOrderStatus' => 'manuallyMarked'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->logger->info('Invoice manually marked invalid.');
                 } else {
-                    /* $this->orderRepository->upsert([
+                     $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'invalid'
+                                    'btcpayOrderStatus' => 'invalid'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->logger->info('Invoice became invalid.');
                 }
                 break;
             case 'InvoiceExpired':
                 if ($body['partiallyPaid']) {
 
-                    /* $this->orderRepository->upsert([
+                     $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'invoiceExpiredPaidPartially'
+                                    'btcpayOrderStatus' => 'invoiceExpiredPaidPartially'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->transactionStateHandler->payPartially($responseBody->metadata->orderId, $context);
                     $this->logger->info('Invoice expired but was paid partially, please check.');
                 } else {
-                    /* $this->orderRepository->upsert([
+                     $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'invoiceExpired'
+                                    'btcpayOrderStatus' => 'invoiceExpired'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->transactionStateHandler->fail($responseBody->metadata->orderId, $context);
                     $this->logger->info('Invoice expired.');
                 }
                 break;
             case 'InvoiceSettled':
                 if ($body['overPaid']) {
-                    /* $this->orderRepository->upsert([
+                    $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'settledOverpaid'
+                                    'btcpayOrderStatus' => 'settledOverpaid'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
                     $this->logger->info('Invoice payment settled but was overpaid.');
                 } else {
-                    /* $this->orderRepository->upsert([
+                    $this->orderRepository->upsert([
                             [
-                                'id' => $responseBody->metadata->orderId,
+                                'id'=>$orderId,
                                 'customFields' => [
-                                    'btcpay_order_status' => 'paid'
+                                    'btcpayOrderStatus' => 'paid'
                                 ],
                             ],
-                        ], $context); */
+                        ], $context); 
                     $this->logger->info('Invoice payment settled.');
                     $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
                 }

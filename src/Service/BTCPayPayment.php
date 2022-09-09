@@ -26,15 +26,13 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     {
         $this->configurationService = $configurationService;
         $this->logger = $logger;
-
     }
-    
+
     /**
      * @throws AsyncPaymentProcessException
      */
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
-
         try {
             $redirectUrl = $this->sendReturnUrlToBTCPay($transaction, $salesChannelContext);
         } catch (\Exception $e) {
@@ -51,7 +49,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
-    
+
     private function sendReturnUrlToBTCPay($transaction, $context): string
     {
 
@@ -62,40 +60,42 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                     'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
                 ]
             ]);
-            $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME).'://'.parse_url($transaction->getReturnUrl(), PHP_URL_HOST).'/account/order';
+            $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
 
-            /* $response = $client->request('POST', '/api/v1/stores/iTeqRkyxUMuszQTzXqxXEYKyyn63w2/invoices', [
-            'body' => json_encode([
-                'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                'currency'=>$context->getCurrency()->getIsoCode(),
-                'metadata' =>
-                ['orderId' => $transaction->getOrderTransaction()->getId()],
-            'checkout'=>[
-                'redirectURL'=>$accountUrl,
-                'redirectAutomatically'=>true
-            ]
-            ])
-        ]); */
-            $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
-                'body' => json_encode([
-                    'amount' => 5,
-                    'currency' => 'SATS',
+            /*  $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
+                 'body' => json_encode([
+                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                    'currency' => $context->getCurrency()->getIsoCode(),
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getId(),
+                        'orderNumber' => $transaction->getOrder()->getOrderNumber()
                     ],
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true
                     ]
-                ])
-            ]);
+                ]) 
+            ]); */
+             $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
+                 'body' => json_encode([
+                    'amount' => 5,
+                    'currency' => 'SATS',
+                    'metadata' =>
+                    [
+                        'orderId' => $transaction->getOrderTransaction()->getId(),
+                        'orderNumber' => $transaction->getOrder()->getOrderNumber()
+                    ],
+                    'checkout' => [
+                        'redirectURL' => $accountUrl,
+                        'redirectAutomatically' => true
+                    ]
+                ]) 
+            ]); 
 
-            /* if (200 !== $response->getStatusCode()) {
             
-        } */
             $body = json_decode($response->getBody()->getContents());
-           
+
             return $body->checkoutLink;
         } catch (\Exception $e) {
             //$this->logger->error($e);

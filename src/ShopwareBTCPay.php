@@ -12,12 +12,76 @@ use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
+use Shopware\Core\System\CustomField\CustomFieldTypes;
 
 use Coincharge\ShopwareBTCPay\Service\BTCPayPayment;
 class  ShopwareBTCPay extends Plugin
 {
 	public function install(InstallContext $context): void
     {
+        $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+    
+            $customFieldSetRepository->upsert([
+                [
+                    'name' => 'btcpayServer',
+                    // 'global' => true,
+                    'config' => [
+                        'label' => [
+                            'de-DE' => 'BTCPayServer Information',
+                            'en-GB' => 'BTCPayServer Information'
+                        ]
+                    ],
+                    'customFields' => [
+                        [
+                            'name' => 'btcpayOrderStatus',
+                            'label' => 'Order Status',
+                            'type' => CustomFieldTypes::TEXT,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'btcpayOrderStatus',
+                                    'en-GB' => 'btcpayOrderStatus'
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'paymentMethod',
+                            'label' => 'Payment Method',
+                            'type' => CustomFieldTypes::TEXT,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'paymentMethod',
+                                    'en-GB' => 'paymentMethod'
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'paidAfterExpiration',
+                            'label' => 'Paid After Expiration',
+                            'type' => CustomFieldTypes::BOOL,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'paidAfterExpiration',
+                                    'en-GB' => 'paidAfterExpiration'
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'overpaid',
+                            'label' => 'Received more than expected',
+                            'type' => CustomFieldTypes::BOOL,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'overpaid',
+                                    'en-GB' => 'overpaid'
+                                ]
+                            ]
+                        ],
+                    ],
+                    'relations' => [[
+                        'entityName' => 'order'
+                    ]],
+                ]
+            ], $context->getContext()); 
         $this->addPaymentMethod($context->getContext());
     }
 
