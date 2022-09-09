@@ -35,9 +35,6 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
 
-        //$redirectUrl = $request->server->get('REQUEST_SCHEME').'://'.$request->server->get('HTTP_HOST')
-
-
         try {
             $redirectUrl = $this->sendReturnUrlToBTCPay($transaction, $salesChannelContext);
         } catch (\Exception $e) {
@@ -54,48 +51,10 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
-    /*  public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext):void
-    {
-        $header = 'Btcpay-Sig';
-        $signature = $request->headers->get($header);
-        $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
-        if($signature!==$expectedHeader){
-            //return false;
-        }
-        $body = $request->getContent();
-
-        if($body['type'] !=='InvoiceSettled'){
-           // return false;
-        }
-        $client = new Client([
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'token '.$this->configurationService->getSetting('btcpayApiKey')
-            ]
-        ]);
-        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl').'/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices/'.$body->invoiceId);
-        $transactionId = $transaction->getOrderTransaction()->getId();
-        
-        $paymentState = $request->request->getAlpha('status');
-
-        $context = $salesChannelContext->getContext();
-        $body = json_decode($response->getBody()->getContents());
-       
-          if($body->status==='Settled'){
-            $this->transactionStateHandler->paid($body['metadata']['orderId'],$context);
-        }else{
-            $this->transactionStateHandler->reopen($body['metadata']['orderId'],$context);
-        }  
-       
-        $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
-
-    } */
+    
     private function sendReturnUrlToBTCPay($transaction, $context): string
     {
-        //$orderRepository = $this->container->get('coincharge_order.repository');
 
-        $paymentProviderUrl = "";
-        // Do some API Call to your payment provider
         try {
             $client = new Client([
                 'headers' => [
@@ -103,6 +62,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                     'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
                 ]
             ]);
+            $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME).'://'.parse_url($transaction->getReturnUrl(), PHP_URL_HOST).'/account/order';
 
             /* $response = $client->request('POST', '/api/v1/stores/iTeqRkyxUMuszQTzXqxXEYKyyn63w2/invoices', [
             'body' => json_encode([
@@ -111,7 +71,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                 'metadata' =>
                 ['orderId' => $transaction->getOrderTransaction()->getId()],
             'checkout'=>[
-                'redirectURL'=>$transaction->getReturnUrl(),
+                'redirectURL'=>$accountUrl,
                 'redirectAutomatically'=>true
             ]
             ])
@@ -125,7 +85,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                         'orderId' => $transaction->getOrderTransaction()->getId(),
                     ],
                     'checkout' => [
-                        'redirectURL' => 'http://localhost/account/order',
+                        'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true
                     ]
                 ])

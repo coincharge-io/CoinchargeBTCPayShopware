@@ -1,7 +1,7 @@
 {
     "name": "coincharge/shopware6-btcpay",
     "description": "Description for the plugin Shopware BTCPay Plugin",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "type": "shopware-platform-plugin",
     "license": "MIT",
     "authors": [
