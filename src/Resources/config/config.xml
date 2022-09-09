@@ -24,16 +24,24 @@
             <helpText>BTCPay Server Store Id.</helpText>
             <helpText lang="de-DE">BTCPay Server Store Id.</helpText>
         </input-field>
-        <component name="coincharge-btcpay-test-connection">
-            <name>test</name>
+        <component name="coincharge-btcpay-create-webhook">
+            <name>webhook</name>
         </component>
+        <input-field type="password">
+            <name>btcpayWebhookId</name>
+            <label>Webhook id</label>
+            <label lang="de-DE">Webhook id</label>
+        </input-field>
         <input-field type="password">
             <name>btcpayWebhookSecret</name>
             <label>Webhook secret</label>
             <label lang="de-DE">Webhook secret</label>
         </input-field>
-        <component name="coincharge-btcpay-create-webhook">
-            <name>webhook</name>
+
+
+        <component name="coincharge-btcpay-test-connection">
+            <name>test</name>
         </component>
+
     </card>
 </config>

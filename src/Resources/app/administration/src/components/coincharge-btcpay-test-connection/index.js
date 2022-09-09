@@ -23,7 +23,7 @@ Component.register('coincharge-btcpay-test-connection', {
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({
                         title: 'BTCPay Server',
-                        message: this.$tc('coincharge-btcpay-test-connection.error')
+                        message: ApiResponse.message
                     })
                     this.isLoading = false;
                     return;

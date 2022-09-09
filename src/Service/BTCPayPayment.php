@@ -54,7 +54,6 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     {
 
         try {
-            $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
             $client = new Client([
                 'headers' => [
@@ -64,7 +63,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
             ]);
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
 
-            /*  $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
+              $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
                  'body' => json_encode([
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
@@ -78,36 +77,13 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                         'redirectAutomatically' => true
                     ]
                 ]) 
-            ]); */
-             $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
-                 'body' => json_encode([
-                    'amount' => 5,
-                    'currency' => 'SATS',
-                    'metadata' =>
-                    [
-                        'orderId' => $transaction->getOrderTransaction()->getId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber()
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true
-                    ]
-                ]) 
             ]); 
 
-            
             $body = json_decode($response->getBody()->getContents());
-            $customFieldSetRepository->upsert([
-                [
-                    'id' => $transaction->getOrderTransaction()->getId(),
-                    'customFields' => [
-                        'invoiceId' => $body->id
-                    ],
-                ],
-            ], $context);
+            
             return $body->checkoutLink;
         } catch (\Exception $e) {
-            //$this->logger->error($e);
+            $this->logger->error($e);
             throw new \Exception;
         }
     }

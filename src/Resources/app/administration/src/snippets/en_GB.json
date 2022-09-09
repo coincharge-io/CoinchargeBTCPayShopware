@@ -7,5 +7,9 @@
         "success": "Connection was successfully established",
         "error": "Connection could not be established. Please check your API credentials",
         "button": "Test connection"
+    },
+    "coincharge-btcpay-create-webhook": {
+        "button": "Create webhook",
+        "error": "Problem with creating webhook"
     }
 }

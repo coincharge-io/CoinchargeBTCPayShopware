@@ -42,8 +42,11 @@ class AdminController extends AbstractController
     /**
      * @Route("/api/_action/btcpay/webhook", name="api.action.btcpay.webhook", methods={"POST"})
      */
-    public function generateWebhook(Request $request, Context $context)
+    public function generateWebhook(Request $request)
     {
+        if($this->isWebhookEnabled()){
+            return new JsonResponse(['success' => true, 'message' => 'Webhook already created.']);
+        }
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -61,19 +64,19 @@ class AdminController extends AbstractController
         $body = json_decode($response->getBody()->getContents());
 
         if (200 !== $response->getStatusCode()) {
-            return new JsonResponse(['success' => false, 'data' => $body]);
+            return new JsonResponse(['success' => false, 'message' => $body]);
         }
         $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
-        return new JsonResponse(['success' => true, 'data' => $body]);
+        $this->configurationService->setSetting('btcpayWebhookId', $body->id);
+
+        return new JsonResponse(['success' => true, 'message' => $body]);
     }
 
     /**
      * @Route("/api/_action/btcpay/verify", name="api.action.btcpay.verify.webhook", methods={"GET"})
      */
-    public function verifyApiKey(Context $context)
+    public function verifyApiKey()
     {
-
-
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -84,9 +87,11 @@ class AdminController extends AbstractController
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices');
 
         if (200 !== $response->getStatusCode()) {
-            return new JsonResponse(['success' => false]);
+            return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
         }
-
+        if(!$this->isWebhookEnabled()){
+            return new JsonResponse(['success' => true, 'message' => 'You need to create a webhook.']);
+        }
         return new JsonResponse(['success' => true]);
     }
     /**
@@ -122,7 +127,8 @@ class AdminController extends AbstractController
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody->metadata->orderNumber));
         //check custom field order status
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
-        var_dump(($this->orderRepository->search($criteria, $context))->orderNumber);
+        
+        
         switch ($body['type']) {
             case 'InvoiceReceivedPayment':
                 if ($body['afterExpiration']) {
@@ -357,9 +363,21 @@ class AdminController extends AbstractController
             $this->logger->error("Error processing payment data for invoice");
         }
     }
-    private function updateStatus($order, $status)
+    private function isWebhookEnabled()
     {
-        //Update order status in database
+        $client = new Client([
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
+            ]
+        ]);
+        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks/' . $this->configurationService->getSetting('btcpayWebhookId'));
+        $body = json_decode($response->getBody()->getContents());
+
+        if (200 !== $response->getStatusCode()||($body->enabled==false)) {
+            return false;
+        }
+        return true;
     }
     private function invoiceIsFullyPaid($invoiceId)
     {

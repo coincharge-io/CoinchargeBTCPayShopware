@@ -33,17 +33,6 @@ class  ShopwareBTCPay extends Plugin
                     ],
                     'customFields' => [
                         [
-                            'name' => 'btcpayInvoiceId',
-                            'label' => 'Invoice ID',
-                            'type' => CustomFieldTypes::TEXT,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'btcpayInvoiceId',
-                                    'en-GB' => 'btcpayInvoiceId'
-                                ]
-                            ]
-                        ],
-                        [
                             'name' => 'btcpayOrderStatus',
                             'label' => 'Order Status',
                             'type' => CustomFieldTypes::TEXT,
