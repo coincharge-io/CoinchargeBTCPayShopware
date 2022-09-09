@@ -54,6 +54,8 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
     {
 
         try {
+            $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+
             $client = new Client([
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -95,7 +97,14 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
 
             
             $body = json_decode($response->getBody()->getContents());
-
+            $customFieldSetRepository->upsert([
+                [
+                    'id' => $transaction->getOrderTransaction()->getId(),
+                    'customFields' => [
+                        'invoiceId' => $body->id
+                    ],
+                ],
+            ], $context);
             return $body->checkoutLink;
         } catch (\Exception $e) {
             //$this->logger->error($e);
