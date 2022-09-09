@@ -11,7 +11,7 @@ class ConfigurationService
     /**
      * @var SystemConfigService
      */
-    private $systemConfigService;
+    private SystemConfigService $systemConfigService;
 
     /**
      * @param SystemConfigService $systemConfigService
@@ -21,11 +21,11 @@ class ConfigurationService
         $this->systemConfigService = $systemConfigService;
     }
 
-    public function getSetting(string $setting, ?string $salesChannelId = null): ?string
+    public function getSetting(string $setting, ?string $salesChannelId = null)
     {
         return $this->systemConfigService->get("ShopwareBTCPay.config." . $setting, $salesChannelId);
     }
-    public function setSetting(string $setting,string $value, ?string $salesChannelId = null)
+    public function setSetting(string $setting, string $value, ?string $salesChannelId = null)
     {
         return $this->systemConfigService->set("ShopwareBTCPay.config." . $setting, $value, $salesChannelId);
     }

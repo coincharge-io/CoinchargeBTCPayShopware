@@ -12,11 +12,12 @@ use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use GuzzleHttp\Client;
 use Symfony\Component\HttpFoundation\Request;
 use Shopware\Core\Framework\Context;
-use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
 
 /**
  * @RouteScope(scopes={"api"})
@@ -30,11 +31,11 @@ class AdminController extends AbstractController
     private EntityRepository $orderRepository;
 
 
-    public function __construct(ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
+    public function __construct(ConfigurationService  $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
     {
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger->info = $logger;
+        $this->logger = $logger;
         $this->orderRepository = $orderRepository;
     }
     /**
@@ -49,7 +50,7 @@ class AdminController extends AbstractController
             ]
         ]);
         //TODO Test
-        $webhookUrl = $request->server->get('REQUEST_SCHEME').'://'.$request->server->get('HTTP_HOST') . '/api/_action/btcpay/webhook-endpoint';
+        $webhookUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/api/_action/btcpay/webhook-endpoint';
 
         $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks', [
             'body' => json_encode([
@@ -82,14 +83,7 @@ class AdminController extends AbstractController
         if (200 !== $response->getStatusCode()) {
             return new JsonResponse(['success' => false]);
         }
-        $this->orderRepository->create(
-            [['order_id' => '00B95524A4044FB08E1B309D220A5794',
-            'invoiceId' => '33',
-            'status' => '33',
-            'amount' => '33'
-            ]],
-            $context
-        );
+
         return new JsonResponse(['success' => true]);
     }
     /**
@@ -97,18 +91,21 @@ class AdminController extends AbstractController
      */
     public function webhookEndpoint(Request $request, Context $context)
     {
-        
+        /* $this->orderRepository->update([[
+            'id' => '00B95524A4044FB08E1B309D220A5794',
+                'customFields' => [
+                    'btcpay_order_status' => 'partiallyPaidAfterExpiration'
+                ]
+        ]], $context); */
         $header = 'Btcpay-Sig';
         $signature = $request->headers->get($header);
         $expectedHeader = 'sha256=' . hash_hmac('sha256', $signature, $this->configurationService->getSetting('btcpayWebhookSecret'));
         if ($signature !== $expectedHeader) {
             $this->logger->error('Invalid signature');
-            return new Response();
+            //return new Response();
         }
 
         $body = $request->request->all();
-        /* if ($body['type'] !== 'InvoicePaymentSettled') {
-        } */
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -118,94 +115,177 @@ class AdminController extends AbstractController
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId']);
 
         $responseBody = json_decode($response->getBody()->getContents());
-        //$context = $salesChannelContext->getContext();
+        $criteria = (new Criteria([$responseBody->metadata->orderId]));
+        //$order = $this->orderRepository->search($criteria, $context)->get($responseBody->metadata->orderId);
 
-        /* if ($responseBody->status === 'Settled') {
-            $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
-        } else {
-            $this->transactionStateHandler->reopen($responseBody->metadata->orderId, $context);
-        } */
-        /* switch ($body['type']) {
-			case 'InvoiceReceivedPayment':
-				if ($body['afterExpiration']) {
-					$this->transactionStateHandler->paid_partially($responseBody->metadata->orderId, $context);
-					$this->logger->info(__('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.'));
-				} else {
-					// No need to change order status here, only leave a note.
-					$this->logger->info(__('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.'));
-				}
+        switch ($body['type']) {
+            case 'InvoiceReceivedPayment':
+                if ($body['afterExpiration']) {
+                    $this->transactionStateHandler->payPartially($responseBody->metadata->orderId, $context);
+                    $this->logger->info('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.');
 
-				$this->updateOrderPayments($order);
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'partiallyPaidAfterExpiration'
+                                ],
+                            ],
+                        ], $context); */
+                } else {
 
-				break;
-			case 'InvoicePaymentSettled':
-				// We can't use $body->afterExpiration here as there is a bug affecting all version prior to
-				// BTCPay Server v1.7.0.0, see https://github.com/btcpayserver/btcpayserver/issues/
-				// Therefore we check if the invoice is in expired or expired paid partial status, instead.
-				$orderStatus = $order->get_status();
-				if ($orderStatus === 'expired' ||
-					$orderStatus === 'expired_paid_partially') {
-					// Check if also the invoice is now fully paid.
-					if ($this>invoiceIsFullyPaid($body['invoiceId'])) {
-						$this->logger->debug('Invoice fully paid.');
-						$this->updateStatus($order, 'expired_paid_late');
-						$order->add_order_note(__('Invoice fully settled after invoice was already expired. Needs manual checking.'));
-						//$order->payment_complete();
-					} else {
-						$this->logger->debug('Invoice NOT fully paid.');
-						$this->updateStatus($order, 'expired_paid_partially');
-						$this->logger->info(__('(Partial) payment settled but invoice not settled yet (could be more transactions incoming). Needs manual checking.'));
-					}
-				} else {
-					// No need to change order status here, only leave a note.
-					$this->logger->info(__('Invoice (partial) payment settled.'));
-				}
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'waitingForSettlement'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->logger->info('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.');
+                }
 
-				// Store payment data (exchange rate, address).
-				$this->updateOrderPayments($order);
+                break;
+            case 'InvoicePaymentSettled':
+                // We can't use $body->afterExpiration here as there is a bug affecting all version prior to
+                // BTCPay Server v1.7.0.0, see https://github.com/btcpayserver/btcpayserver/issues/
+                // Therefore we check if the invoice is in expired or expired paid partial status, instead.
+                if (
+                    $responseBody->status === 'expired' ||
+                    ($responseBody->status === 'expired' && $responseBody->additionalStatus === 'PaidPartial')
+                ) {
+                    // Check if also the invoice is now fully paid.
+                    if ($this->invoiceIsFullyPaid($body['invoiceId'])) {
+                        /*  $this->orderRepository->upsert([
+                                [
+                                    'id' => $responseBody->metadata->orderId,
+                                    'customFields' => [
+                                        'btcpay_order_status' => 'settledAfterInvoiceWasExpired'
+                                    ],
+                                ],
+                            ], $context); */
+                        $this->logger->debug('Invoice fully paid.');
+                        $this->logger->info('Invoice fully settled after invoice was already expired. Needs manual checking.');
+                    } else {
+                        /* $this->orderRepository->upsert([
+                                [
+                                    'id' => $responseBody->metadata->orderId,
+                                    'customFields' => [
+                                        'btcpay_order_status' => 'notFullyPaid'
+                                    ],
+                                ],
+                            ], $context); */
+                        $this->logger->debug('Invoice NOT fully paid.');
+                        $this->logger->info('(Partial) payment settled but invoice not settled yet (could be more transactions incoming). Needs manual checking.');
+                    }
+                } else {
+                    // No need to change order status here, only leave a note.
+                    $this->logger->info('Invoice (partial) payment settled.');
+                }
 
-				break;
-			case 'InvoiceProcessing': // The invoice is paid in full.
-				$this->updateStatus($order, 'processing');
-				if ($body->overPaid) {
-					$this->logger->info(__('Invoice payment received fully with overpayment, waiting for settlement.'));
-				} else {
-					$this->logger->info(__('Invoice payment received fully, waiting for settlement.'));
-				}
-				break;
-			case 'InvoiceInvalid':
-				$this->updateStatus($order, 'invalid');
-				if ($body->manuallyMarked) {
-					$this->logger->info(__('Invoice manually marked invalid.'));
-				} else {
-					$this->logger->info(__('Invoice became invalid.'));
-				}
-				break;
-			case 'InvoiceExpired':
-				if ($body->partiallyPaid) {
-					$this->updateStatus($order, 'expired_paid_partially');
-					$this->logger->info(__('Invoice expired but was paid partially, please check.'));
-				} else {
-					$this->updateStatus($order, 'expired');
-					$this->logger->info(__('Invoice expired.'));
-				}
-				break;
-			case 'InvoiceSettled':
-				$order->payment_complete();
-				if ($body->overPaid) {
-					$this->logger->info(__('Invoice payment settled but was overpaid.'));
-					$this->updateStatus($order, $configuredOrderStates[OrderStates::SETTLED_PAID_OVER]);
-				} else {
-					$this->logger->info(__('Invoice payment settled.'));
-					 $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
+                break;
+            case 'InvoiceProcessing': // The invoice is paid in full.
+                $this->transactionStateHandler->process($responseBody->metadata->orderId, $context);
+                if ($body['overPaid']) {
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'paidFullyWithOverpayment'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->logger->info('Invoice payment received fully with overpayment, waiting for settlement.');
+                } else {
 
-				}
+                    /*  $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'paidFully'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->logger->info('Invoice payment received fully, waiting for settlement.');
+                }
+                break;
+            case 'InvoiceInvalid':
+                $this->transactionStateHandler->cancel($responseBody->metadata->orderId, $context);
+                if ($body['manuallyMarked']) {
 
-				// Store payment data (exchange rate, address).
-				$this->updateOrderPayments($order);
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'manuallyMarked'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->logger->info('Invoice manually marked invalid.');
+                } else {
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'invalid'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->logger->info('Invoice became invalid.');
+                }
+                break;
+            case 'InvoiceExpired':
+                if ($body['partiallyPaid']) {
 
-				break;
-		} */
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'invoiceExpiredPaidPartially'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->transactionStateHandler->payPartially($responseBody->metadata->orderId, $context);
+                    $this->logger->info('Invoice expired but was paid partially, please check.');
+                } else {
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'invoiceExpired'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->transactionStateHandler->fail($responseBody->metadata->orderId, $context);
+                    $this->logger->info('Invoice expired.');
+                }
+                break;
+            case 'InvoiceSettled':
+                if ($body['overPaid']) {
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'settledOverpaid'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
+                    $this->logger->info('Invoice payment settled but was overpaid.');
+                } else {
+                    /* $this->orderRepository->upsert([
+                            [
+                                'id' => $responseBody->metadata->orderId,
+                                'customFields' => [
+                                    'btcpay_order_status' => 'paid'
+                                ],
+                            ],
+                        ], $context); */
+                    $this->logger->info('Invoice payment settled.');
+                    $this->transactionStateHandler->paid($responseBody->metadata->orderId, $context);
+                }
+                break;
+        }
         return new Response();
 
         /*BTCPay server doesn't send information about invoice on redirect
@@ -215,71 +295,75 @@ class AdminController extends AbstractController
          */
         //$this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
     }
-    /**
-     * @Route("/api/_action/btcpay/verify-credentials", name="api.action.btcpay.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
-     */
-    public function verifyCredentials(Request $request, Context $context)
+
+
+    private function updateOrderPayments(string $invoiceId)
     {
-        $apiKey = $request->request->get('api-key');
-        $this->configurationService->setSetting('btcpayApiKey', $apiKey);
+        try {
+            $client = new Client([
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
+                ]
+            ]);
 
-
-    }
-
-
-    private function updateOrderPayments(string $invoiceId){
-        try { $client = new Client([
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
-            ]
-        ]);
-
-        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices'.$invoiceId.'/payment-methods');
-        $invoicePaymentMethod = json_decode($response->getBody()->getContents());
-        foreach ($invoicePaymentMethod as $orderData) {
-            if($orderData->paymentMethodPaid==0){
-                $this->logger->info("Invoice isn't paid");
-                return false;
-            }
-            $invoiceData = [
-                "paymentMethod" => $orderData->paymentMethod,
-                "cryptoCode" => $orderData->cryptoCode,
-                "destination" => $orderData->destination,
-                "paymentLink" => $orderData->paymentLink,
-                "rate" => $orderData->rate,
-                "paymentMethodPaid" => $orderData->paymentMethodPaid,
-                "totalPaid" => $orderData->totalPaid,
-                "due" => $orderData->due,
-                "amount" => $orderData->amount,
-                "networkFee" => $orderData->networkFee,
-                "providedComment" => $orderData->providedComment,
-                "consumedLightningAddress" => $orderData->consumedLightningAddress,
-            ];
-            //TODO Update database records
-            foreach ($orderData->payments as $index => $trx) {
-                //TODO Extract order_id
-                $paymentData = [
-                    "order_id" => '',
-                    "receivedDate" => $trx->receivedDate,
-                    "value" => $trx->value,
-                    "fee" => $trx->fee,
-                    "status" => $trx->status,
-                    "destination" => $trx->destination,
+            $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices' . $invoiceId . '/payment-methods');
+            $invoicePaymentMethod = json_decode($response->getBody()->getContents());
+            foreach ($invoicePaymentMethod as $orderData) {
+                if ($orderData->paymentMethodPaid == 0) {
+                    $this->logger->info("Invoice isn't paid");
+                    return false;
+                }
+                $invoiceData = [
+                    "paymentMethod" => $orderData->paymentMethod,
+                    "cryptoCode" => $orderData->cryptoCode,
+                    "destination" => $orderData->destination,
+                    "paymentLink" => $orderData->paymentLink,
+                    "rate" => $orderData->rate,
+                    "paymentMethodPaid" => $orderData->paymentMethodPaid,
+                    "totalPaid" => $orderData->totalPaid,
+                    "due" => $orderData->due,
+                    "amount" => $orderData->amount,
+                    "networkFee" => $orderData->networkFee,
+                    "providedComment" => $orderData->providedComment,
+                    "consumedLightningAddress" => $orderData->consumedLightningAddress,
                 ];
+                //TODO Update database records
+                foreach ($orderData->payments as $index => $trx) {
+                    //TODO Extract order_id
+                    $paymentData = [
+                        "order_id" => '',
+                        "receivedDate" => $trx->receivedDate,
+                        "value" => $trx->value,
+                        "fee" => $trx->fee,
+                        "status" => $trx->status,
+                        "destination" => $trx->destination,
+                    ];
+                }
             }
+        } catch (\Exception $e) {
+            $this->logger->error($e);
+            $this->logger->error("Error processing payment data for invoice");
         }
-    }catch(\Exception $e)
-    {
-        $this->logger->error($e);
-        $this->logger->error("Error processing payment data for invoice");
-    }
     }
     private function updateStatus($order, $status)
     {
         //Update order status in database
     }
-    private function invoiceIsFullyPaid(){
+    private function invoiceIsFullyPaid($invoiceId)
+    {
+        $client = new Client([
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
+            ]
+        ]);
+        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $invoiceId);
 
+        $responseBody = json_decode($response->getBody()->getContents());
+        if ($responseBody->status !== 'Settled') {
+            return false;
+        }
+        return true;
     }
 }

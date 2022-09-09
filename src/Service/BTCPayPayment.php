@@ -15,24 +15,20 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-
+use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
 
 class BTCPayPayment implements AsynchronousPaymentHandlerInterface
 {
     private ConfigurationService  $configurationService;
     private LoggerInterface $logger;
-    private EntityRepository $orderRepository;
 
-    public function __construct(ConfigurationService  $configurationService, EntityRepository $orderRepository)
+    public function __construct(ConfigurationService $configurationService, LoggerInterface $logger)
     {
         $this->configurationService = $configurationService;
-        $this->orderRepository = $orderRepository;
-    }
-    public function setLogger(LoggerInterface $logger): void
-    {
         $this->logger = $logger;
+
     }
+    
     /**
      * @throws AsyncPaymentProcessException
      */
@@ -139,15 +135,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
             
         } */
             $body = json_decode($response->getBody()->getContents());
-            $this->orderRepository->create(
-                [
-                    'order_id' => $transaction->getOrderTransaction()->getId(),
-                    'invoiceId' => $body->id,
-                    'status' => $body->status,
-                    'amount' => $body->amount
-                ],
-                $context->getContext()
-            );
+           
             return $body->checkoutLink;
         } catch (\Exception $e) {
             //$this->logger->error($e);
