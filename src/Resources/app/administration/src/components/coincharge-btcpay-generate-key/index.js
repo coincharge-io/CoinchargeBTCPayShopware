@@ -20,7 +20,8 @@ Component.register('coincharge-btcpay-generate-key', {
             const btcpayServerUrl = document.getElementById("ShopwareBTCPay.config.btcpayServerUrl").value
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.isLoading = true;
-            return window.open(filteredUrl + '/api-keys/authorize/?applicationName=BTCPay%20Shopware%20plugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&selectiveStores=true', '_blank');
+            const url = window.location.origin + '/api/_action/coincharge/credentials';
+            return window.open(filteredUrl + '/api-keys/authorize/?applicationName=CoinchargePaymentPlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&selectiveStores=true&redirect=' + url, '_blank');
 
         },
         removeTrailingSlash(serverUrl) {

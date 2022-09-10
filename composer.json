@@ -16,8 +16,8 @@
     "extra": {
         "shopware-plugin-class": "Coincharge\\ShopwareBTCPay\\ShopwareBTCPay",
         "label": {
-            "de-DE": "Coincharge BTCPay",
-            "en-GB": "Coincharge BTCPay"
+            "de-DE": "Coincharge Zahlung",
+            "en-GB": "Coincharge Payment"
         },
         "description": {
             "de-DE": "Bitcoin-Zahlungen akzeptieren",

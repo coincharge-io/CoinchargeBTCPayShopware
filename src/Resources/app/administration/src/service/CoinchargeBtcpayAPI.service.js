@@ -1,7 +1,7 @@
 const ApiService = Shopware.Classes.ApiService;
 
 export default class CoinchargeBtcpayApiService extends ApiService {
-    constructor(httpClient, loginService, apiEndpoint = 'btcpay') {
+    constructor(httpClient, loginService, apiEndpoint = 'coincharge') {
         super(httpClient, loginService, apiEndpoint);
     }
     verifyApiKey() {

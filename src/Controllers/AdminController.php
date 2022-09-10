@@ -40,7 +40,7 @@ class AdminController extends AbstractController
         $this->orderRepository = $orderRepository;
     }
     /**
-     * @Route("/api/_action/btcpay/webhook", name="api.action.btcpay.webhook", methods={"POST"})
+     * @Route("/api/_action/coincharge/webhook", name="api.action.coincharge.webhook", methods={"POST"})
      */
     public function generateWebhook(Request $request)
     {
@@ -73,10 +73,11 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/api/_action/btcpay/verify", name="api.action.btcpay.verify.webhook", methods={"GET"})
+     * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
      */
     public function verifyApiKey()
     {
+
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -95,7 +96,7 @@ class AdminController extends AbstractController
         return new JsonResponse(['success' => true]);
     }
     /**
-     * @Route("/api/_action/btcpay/webhook-endpoint", name="api.action.btcpay.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
+     * @Route("/api/_action/coincharge/webhook-endpoint", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
     public function webhookEndpoint(Request $request, Context $context)
     {
@@ -314,55 +315,7 @@ class AdminController extends AbstractController
     }
 
 
-    private function updateOrderPayments(string $invoiceId)
-    {
-        try {
-            $client = new Client([
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
-                ]
-            ]);
-
-            $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices' . $invoiceId . '/payment-methods');
-            $invoicePaymentMethod = json_decode($response->getBody()->getContents());
-            foreach ($invoicePaymentMethod as $orderData) {
-                if ($orderData->paymentMethodPaid == 0) {
-                    $this->logger->info("Invoice isn't paid");
-                    return false;
-                }
-                $invoiceData = [
-                    "paymentMethod" => $orderData->paymentMethod,
-                    "cryptoCode" => $orderData->cryptoCode,
-                    "destination" => $orderData->destination,
-                    "paymentLink" => $orderData->paymentLink,
-                    "rate" => $orderData->rate,
-                    "paymentMethodPaid" => $orderData->paymentMethodPaid,
-                    "totalPaid" => $orderData->totalPaid,
-                    "due" => $orderData->due,
-                    "amount" => $orderData->amount,
-                    "networkFee" => $orderData->networkFee,
-                    "providedComment" => $orderData->providedComment,
-                    "consumedLightningAddress" => $orderData->consumedLightningAddress,
-                ];
-                //TODO Update database records
-                foreach ($orderData->payments as $index => $trx) {
-                    //TODO Extract order_id
-                    $paymentData = [
-                        "order_id" => '',
-                        "receivedDate" => $trx->receivedDate,
-                        "value" => $trx->value,
-                        "fee" => $trx->fee,
-                        "status" => $trx->status,
-                        "destination" => $trx->destination,
-                    ];
-                }
-            }
-        } catch (\Exception $e) {
-            $this->logger->error($e);
-            $this->logger->error("Error processing payment data for invoice");
-        }
-    }
+    
     private function isWebhookEnabled()
     {
         $client = new Client([
@@ -394,5 +347,18 @@ class AdminController extends AbstractController
             return false;
         }
         return true;
+    }
+
+    /**
+     * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
+     */
+    public function updateCredentials(Request $request){
+        $body = $request->request->all();
+        $this->logger->error($body);
+        if($body['apiKey']){
+            $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
+        }
+        return new RedirectResponse('http://localhost/admin#/sw/extension/config/ShopwareBTCPay');
+
     }
 }
