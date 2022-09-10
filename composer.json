@@ -1,6 +1,6 @@
 {
     "name": "coincharge/shopware6-btcpay",
-    "description": "Description for the plugin Shopware BTCPay Plugin",
+    "description": "Accept Bitcoin payments",
     "version": "0.0.1",
     "type": "shopware-platform-plugin",
     "license": "MIT",
@@ -20,8 +20,8 @@
             "en-GB": "Coincharge BTCPay"
         },
         "description": {
-            "de-DE": "Beschreibung in der Administration für das Plugin",
-            "en-GB": "Description in the administration for this plugin"
+            "de-DE": "Bitcoin-Zahlungen akzeptieren",
+            "en-GB": "Accept Bitcoin payments"
         }
     },
     "autoload": {

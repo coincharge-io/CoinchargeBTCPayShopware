@@ -13,8 +13,12 @@ use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
+use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Content\Media\File\MediaFile;
+use Shopware\Core\Content\Media\MediaEntity;
 
 use Coincharge\ShopwareBTCPay\Service\BTCPayPayment;
+
 class  ShopwareBTCPay extends Plugin
 {
 	public function install(InstallContext $context): void
@@ -38,8 +42,8 @@ class  ShopwareBTCPay extends Plugin
                             'type' => CustomFieldTypes::TEXT,
                             'config' => [
                                 'label' => [
-                                    'de-DE' => 'btcpayOrderStatus',
-                                    'en-GB' => 'btcpayOrderStatus'
+                                    'de-DE' => 'Auftragsstatus',
+                                    'en-GB' => 'Order Status'
                                 ]
                             ]
                         ],
@@ -49,8 +53,8 @@ class  ShopwareBTCPay extends Plugin
                             'type' => CustomFieldTypes::TEXT,
                             'config' => [
                                 'label' => [
-                                    'de-DE' => 'paymentMethod',
-                                    'en-GB' => 'paymentMethod'
+                                    'de-DE' => 'Zahlungsmethode',
+                                    'en-GB' => 'Payment Method'
                                 ]
                             ]
                         ],
@@ -60,8 +64,8 @@ class  ShopwareBTCPay extends Plugin
                             'type' => CustomFieldTypes::BOOL,
                             'config' => [
                                 'label' => [
-                                    'de-DE' => 'paidAfterExpiration',
-                                    'en-GB' => 'paidAfterExpiration'
+                                    'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
+                                    'en-GB' => 'Paid After Invoice Expiration'
                                 ]
                             ]
                         ],
@@ -71,8 +75,8 @@ class  ShopwareBTCPay extends Plugin
                             'type' => CustomFieldTypes::BOOL,
                             'config' => [
                                 'label' => [
-                                    'de-DE' => 'overpaid',
-                                    'en-GB' => 'overpaid'
+                                    'de-DE' => 'Überbezahlt',
+                                    'en-GB' => 'Overpaid '
                                 ]
                             ]
                         ],
@@ -120,12 +124,18 @@ class  ShopwareBTCPay extends Plugin
         $examplePaymentData = [
             // payment handler will be selected by the identifier
             'handlerIdentifier' => BTCPayPayment::class,
-            'name' => 'BTCPay Server',
-            'description' => 'Example payment description',
             'pluginId' => $pluginId,
-            'customFields' => [
-                'payment_method_name' => 'btcpay_server'
-            ]
+            'mediaId' => $this->ensureMedia(),
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Coincharge-Zahlung',
+                    'description' => 'Zahlen mit Bitcoin'
+                ],
+                'en-GB' => [
+                    'name' => 'Coincharge payment',
+                    'description' => 'Pay with Bitcoin'
+                ],
+            ],
         ];
 
         /** @var EntityRepositoryInterface $paymentRepository */
@@ -161,5 +171,43 @@ class  ShopwareBTCPay extends Plugin
         // Fetch ID for update
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', BTCPayPayment::class));
         return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+    }
+    private function getMediaEntity(string $fileName): ?MediaEntity
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('fileName', $fileName));
+
+        return $this->mediaRepository->search($criteria, $this->context)->first();
+    }
+    private function ensureMedia(): string
+    {
+        $filePath = realpath(__DIR__ . '/../Resources/config/plugin.png');
+        $fileName = hash_file('md5', $filePath);
+        $media = $this->getMediaEntity($fileName);
+        if ($media) {
+            return $media->getId();
+        }
+
+        $mediaFile = new MediaFile(
+            $filePath,
+            mime_content_type($filePath),
+            pathinfo($filePath, PATHINFO_EXTENSION),
+            filesize($filePath)
+        );
+        $mediaId = Uuid::randomHex();
+        $this->mediaRepository->create([
+            [
+                'id' => $mediaId,
+            ],
+        ], $this->context);
+
+        $this->fileSaver->persistFileToMedia(
+            $mediaFile,
+            $fileName,
+            $mediaId,
+            $this->context
+        );
+
+        return $mediaId;
     }
 }
