@@ -17,7 +17,7 @@ use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Service\ConfigurationService;
 
-class CoinchargeBTCPayPayment implements AsynchronousPaymentHandlerInterface
+class BTCPayPayment implements AsynchronousPaymentHandlerInterface
 {
     private ConfigurationService  $configurationService;
     private LoggerInterface $logger;

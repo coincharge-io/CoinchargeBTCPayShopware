@@ -2,8 +2,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="Coincharge\Shopware\Service\CoinchargeBTCPayPayment">
-            <argument type="service" id="Coincharge\ShopwareBTCPay\Service\ConfigurationService"/>
+        <service id="Coincharge\Shopware\Service\BTCPayPayment">
+            <argument type="service" id="Coincharge\Shopware\Service\ConfigurationService"/>
             <argument type="service" id="monolog.logger"/>
             <tag name="shopware.payment.method.async" />
         </service>
