@@ -15,9 +15,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Coincharge\ShopwareBTCPay\Service\ConfigurationService;
+use Coincharge\Shopware\Service\ConfigurationService;
 
-class BTCPayPayment implements AsynchronousPaymentHandlerInterface
+class CoinchargeBTCPayPayment implements AsynchronousPaymentHandlerInterface
 {
     private ConfigurationService  $configurationService;
     private LoggerInterface $logger;
