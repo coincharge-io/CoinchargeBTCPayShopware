@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Coincharge\ShopwareBTCPay;
+namespace Coincharge\Shopware;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
@@ -17,7 +17,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Content\Media\MediaEntity;
 
-use Coincharge\Shopware\Service\CoinchargeBTCPayPayment;
+use Coincharge\Shopware\Service\BTCPayPayment;
 
 class  CoinchargePayment extends Plugin
 {
@@ -120,10 +120,11 @@ class  CoinchargePayment extends Plugin
         /** @var PluginIdProvider $pluginIdProvider */
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
-
-        $examplePaymentData = [
+        
+        
+         $examplePaymentData = [
             // payment handler will be selected by the identifier
-            'handlerIdentifier' => CoinchargeBTCPayPayment::class,
+            'handlerIdentifier' => BTCPayPayment::class,
             'pluginId' => $pluginId,
             'mediaId' => $this->ensureMedia(),
             'translations' => [
@@ -132,7 +133,7 @@ class  CoinchargePayment extends Plugin
                     'description' => 'Zahlen mit Bitcoin'
                 ],
                 'en-GB' => [
-                    'name' => 'Coincharge payment',
+                    'name' => 'Coincharge Payment',
                     'description' => 'Pay with Bitcoin'
                 ],
             ],
@@ -181,7 +182,7 @@ class  CoinchargePayment extends Plugin
     }
     private function ensureMedia(): string
     {
-        $filePath = realpath(__DIR__ . '/../Resources/config/plugin.png');
+        $filePath = realpath(__DIR__ . '/../Resources/icons/bitcoin.svg');
         $fileName = hash_file('md5', $filePath);
         $media = $this->getMediaEntity($fileName);
         if ($media) {

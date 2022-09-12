@@ -5,7 +5,7 @@ import template from './coincharge-btcpay-test-connection.html.twig';
 Component.register('coincharge-btcpay-test-connection', {
     template,
     inject: [
-        'coinchargeBtcpayApiService'
+        ['coinchargeBtcpayApiService']
     ],
     mixins: [
         Mixin.getByName('notification')
@@ -18,7 +18,6 @@ Component.register('coincharge-btcpay-test-connection', {
     methods: {
         check() {
             this.isLoading = true;
-
             this.coinchargeBtcpayApiService.verifyApiKey().then((ApiResponse) => {
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({

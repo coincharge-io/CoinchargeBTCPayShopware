@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\ShopwareBTCPay\Controllers;
+namespace Coincharge\Shopware\Controllers;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -66,9 +66,9 @@ class AdminController extends AbstractController
         if (200 !== $response->getStatusCode()) {
             return new JsonResponse(['success' => false, 'message' => $body]);
         }
-        $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
+        /* $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
         $this->configurationService->setSetting('btcpayWebhookId', $body->id);
-
+ */
         return new JsonResponse(['success' => true, 'message' => $body]);
     }
 
@@ -324,10 +324,15 @@ class AdminController extends AbstractController
                 'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
             ]
         ]);
+        if(empty($this->configurationService->getSetting('btcpayWebhookId'))){
+            return false;
+        }
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks/' . $this->configurationService->getSetting('btcpayWebhookId'));
         $body = json_decode($response->getBody()->getContents());
-
-        if (200 !== $response->getStatusCode()||($body->enabled==false)) {
+        if(empty($body)){
+            return false;
+        }
+        if (200 !== $response->getStatusCode()||$body->enabled==false) {
             return false;
         }
         return true;
@@ -354,11 +359,20 @@ class AdminController extends AbstractController
      */
     public function updateCredentials(Request $request){
         $body = $request->request->all();
-        $this->logger->error($body);
+        $this->logger->info('apikey--->'.$request->request->get('apiKey'));
+
+        $this->logger->info('permissions--->'.($body['permissions'][0])[1]);
         if($body['apiKey']){
             $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
         }
-        return new RedirectResponse('http://localhost/admin#/sw/extension/config/ShopwareBTCPay');
+        if($body['permissions']){
+            $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
+        }
+        $this->logger->info($request);
+        //TODO Define function for getting plugin page url
+        $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/CoinchargePayment';
+
+        return new RedirectResponse($redirectUrl);
 
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\ShopwareBTCPay\Service;
+namespace Coincharge\Shopware\Service;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
@@ -62,8 +62,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                 ]
             ]);
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
-
-              $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
+             $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
                  'body' => json_encode([
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),

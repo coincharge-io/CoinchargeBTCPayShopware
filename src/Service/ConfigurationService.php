@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\ShopwareBTCPay\Service;
+namespace Coincharge\Shopware\Service;
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class ConfigurationService
 {
+    CONST DOMAIN = 'CoinchargePayment.config.';
     /**
      * @var SystemConfigService
      */
@@ -23,11 +24,11 @@ class ConfigurationService
 
     public function getSetting(string $setting, ?string $salesChannelId = null)
     {
-        return $this->systemConfigService->get("ShopwareBTCPay.config." . $setting, $salesChannelId);
+        return $this->systemConfigService->get(self::DOMAIN . $setting, $salesChannelId);
     }
     public function setSetting(string $setting, string $value, ?string $salesChannelId = null)
     {
-        return $this->systemConfigService->set("ShopwareBTCPay.config." . $setting, $value, $salesChannelId);
+        return $this->systemConfigService->set(self::DOMAIN . $setting, $value, $salesChannelId);
     }
     public function getShopName(?string $salesChannelId): string
     {
