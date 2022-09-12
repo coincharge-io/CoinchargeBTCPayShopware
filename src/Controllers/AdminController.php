@@ -54,7 +54,7 @@ class AdminController extends AbstractController
             ]
         ]);
         //TODO Test
-        $webhookUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/api/_action/btcpay/webhook-endpoint';
+        $webhookUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/api/_action/coincharge/webhook-endpoint';
 
         $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks', [
             'body' => json_encode([
@@ -104,7 +104,7 @@ class AdminController extends AbstractController
         $header = 'btcpay-sig';
         $signature = $request->headers->get($header);
         $body = $request->request->all();
-
+        
         $expectedHeader = 'sha256=' . hash_hmac('sha256', file_get_contents("php://input"), $this->configurationService->getSetting('btcpayWebhookSecret'));
         //TODO file_get_contents("php://input") use it for body or change it to be uniform
         if ($signature !== $expectedHeader) {
@@ -355,7 +355,7 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
+     * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
     public function updateCredentials(Request $request){
         $body = $request->request->all();
