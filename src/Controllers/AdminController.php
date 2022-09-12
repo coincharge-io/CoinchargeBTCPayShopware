@@ -368,7 +368,6 @@ class AdminController extends AbstractController
         if($body['permissions']){
             $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
         }
-        $this->logger->info($request);
         //TODO Define function for getting plugin page url
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/CoinchargePayment';
 
