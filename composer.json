@@ -14,10 +14,10 @@
         "guzzlehttp/guzzle": "^7.4"
     },
     "extra": {
-        "shopware-plugin-class": "Coincharge\\Shopware\\CoinchargePayment",
+        "shopware-plugin-class": "Coincharge\\Shopware\\BTCPayments",
         "label": {
-            "de-DE": "Coincharge Zahlung",
-            "en-GB": "Coincharge Payment"
+            "de-DE": "BTCPayShopware",
+            "en-GB": "BTCPayShopware"
         },
         "description": {
             "de-DE": "Bitcoin-Zahlungen akzeptieren",

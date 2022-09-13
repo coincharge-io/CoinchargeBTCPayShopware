@@ -15,8 +15,8 @@ Component.register('coincharge-btcpay-create-webhook', {
             isLoading: false,
             webhookValues:
             {
-                'CoinchargePayment.config.btcpayWebhookSecret': '',
-                'CoinchargePayment.config.btcpayWebhookId': ''
+                'BTCPayShopware.config.btcpayWebhookSecret': '',
+                'BTCPayShopware.config.btcpayWebhookId': ''
             }
         };
     },
@@ -35,8 +35,8 @@ Component.register('coincharge-btcpay-create-webhook', {
                     this.isLoading = false;
                     return;
                 }
-                this.webhookValues['CoinchargePayment.config.btcpayWebhookSecret'] = ApiResponse.message.secret
-                this.webhookValues['CoinchargePayment.config.btcpayWebhookId'] = ApiResponse.message.id
+                this.webhookValues['BTCPayShopware.config.btcpayWebhookSecret'] = ApiResponse.message.secret
+                this.webhookValues['BTCPayShopware.config.btcpayWebhookId'] = ApiResponse.message.id
                 systemConfig.saveValues(this.webhookValues)
 
                 this.createNotificationSuccess({

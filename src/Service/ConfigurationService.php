@@ -8,7 +8,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class ConfigurationService
 {
-    CONST DOMAIN = 'CoinchargePayment.config.';
+    protected CONST DOMAIN = 'BTCPayShopware.config.';
     /**
      * @var SystemConfigService
      */

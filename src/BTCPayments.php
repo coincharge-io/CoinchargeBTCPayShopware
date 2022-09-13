@@ -17,9 +17,9 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Content\Media\MediaEntity;
 
-use Coincharge\Shopware\Service\BTCPayPayment;
+use Coincharge\Shopware\Service\BTCPayServerPayment;
 
-class  CoinchargePayment extends Plugin
+class  BTCPayments extends Plugin
 {
 	public function install(InstallContext $context): void
     {
@@ -124,16 +124,16 @@ class  CoinchargePayment extends Plugin
         
          $examplePaymentData = [
             // payment handler will be selected by the identifier
-            'handlerIdentifier' => BTCPayPayment::class,
+            'handlerIdentifier' => BTCPayServerPayment::class,
             'pluginId' => $pluginId,
             'mediaId' => $this->ensureMedia(),
             'translations' => [
                 'de-DE' => [
-                    'name' => 'Coincharge-Zahlung',
+                    'name' => 'BTCPayShopware',
                     'description' => 'Zahlen mit Bitcoin'
                 ],
                 'en-GB' => [
-                    'name' => 'Coincharge Payment',
+                    'name' => 'BTCPayShopware',
                     'description' => 'Pay with Bitcoin'
                 ],
             ],

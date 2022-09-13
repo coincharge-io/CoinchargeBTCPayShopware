@@ -62,7 +62,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                 ]
             ]);
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
-             $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
+            $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
                  'body' => json_encode([
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
@@ -76,7 +76,7 @@ class BTCPayPayment implements AsynchronousPaymentHandlerInterface
                         'redirectAutomatically' => true
                     ]
                 ]) 
-            ]); 
+            ]);  
 
             $body = json_decode($response->getBody()->getContents());
             
