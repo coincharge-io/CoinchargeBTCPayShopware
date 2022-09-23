@@ -27,9 +27,6 @@
             <label>BTCPay Server Store Id</label>
             <disabled>true</disabled>
         </input-field>
-        <component name="coincharge-btcpay-create-webhook">
-            <name>webhook</name>
-        </component>
         <input-field type="password">
             <name>btcpayWebhookId</name>
             <disabled>true</disabled>
