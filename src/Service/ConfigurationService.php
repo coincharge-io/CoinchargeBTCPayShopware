@@ -8,7 +8,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class ConfigurationService
 {
-    protected CONST DOMAIN = 'BTCPayShopware.config.';
+    protected CONST DOMAIN = 'BTCPay.config.';
     /**
      * @var SystemConfigService
      */
@@ -26,7 +26,7 @@ class ConfigurationService
     {
         return $this->systemConfigService->get(self::DOMAIN . $setting, $salesChannelId);
     }
-    public function setSetting(string $setting, string $value, ?string $salesChannelId = null)
+    public function setSetting(string $setting, $value, ?string $salesChannelId = null)
     {
         return $this->systemConfigService->set(self::DOMAIN . $setting, $value, $salesChannelId);
     }

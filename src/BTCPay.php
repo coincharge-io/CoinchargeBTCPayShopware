@@ -19,7 +19,7 @@ use Shopware\Core\Content\Media\MediaEntity;
 
 use Coincharge\Shopware\Service\BTCPayServerPayment;
 
-class  BTCPayments extends Plugin
+class BTCPay extends Plugin
 {
 	public function install(InstallContext $context): void
     {
@@ -121,12 +121,10 @@ class  BTCPayments extends Plugin
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
         
-        
-         $examplePaymentData = [
-            // payment handler will be selected by the identifier
+        //TODO integrate 'mediaId' => $this->ensureMedia(),
+        $examplePaymentData = [
             'handlerIdentifier' => BTCPayServerPayment::class,
             'pluginId' => $pluginId,
-            'mediaId' => $this->ensureMedia(),
             'translations' => [
                 'de-DE' => [
                     'name' => 'BTCPayShopware',

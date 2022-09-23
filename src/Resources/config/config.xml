@@ -3,11 +3,16 @@
 
     <card>
         <title>BTCPay Server</title>
+        <input-field type="checkbox">
+            <name>integrationStatus</name>
+            <label>Connected to the BTCPay Server</label>
+            <disabled>true</disabled>
+            <helpText>It shows whether or not the plugin is connected to your BTCPayServer</helpText>
+            <helpText lang="de-DE"> Es zeigt an, ob das Plugin mit Ihrem BTCPayServer verbunden ist oder nicht</helpText>
+        </input-field>
         <input-field>
             <name>btcpayServerUrl</name>
             <label>BTCPay Server URL</label>
-            <helpText>BTCPay Server URL.</helpText>
-            <helpText lang="de-DE">BTCPay Server URL.</helpText>
         </input-field>
         <component name="coincharge-btcpay-generate-key">
             <name>generate</name>
@@ -15,25 +20,25 @@
         <input-field>
             <name>btcpayApiKey</name>
             <label>BTCPay API Key</label>
-            <helpText>BTCPay API Key.</helpText>
-            <helpText lang="de-DE">BTCPay API Key.</helpText>
+            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayServerStoreId</name>
             <label>BTCPay Server Store Id</label>
-            <helpText>BTCPay Server Store Id.</helpText>
-            <helpText lang="de-DE">BTCPay Server Store Id.</helpText>
+            <disabled>true</disabled>
         </input-field>
         <component name="coincharge-btcpay-create-webhook">
             <name>webhook</name>
         </component>
         <input-field type="password">
             <name>btcpayWebhookId</name>
+            <disabled>true</disabled>
             <label>Webhook id</label>
             <label lang="de-DE">Webhook id</label>
         </input-field>
         <input-field type="password">
             <name>btcpayWebhookSecret</name>
+            <disabled>true</disabled>
             <label>Webhook secret</label>
             <label lang="de-DE">Webhook secret</label>
         </input-field>

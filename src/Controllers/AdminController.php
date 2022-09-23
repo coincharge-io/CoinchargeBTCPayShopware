@@ -66,9 +66,9 @@ class AdminController extends AbstractController
         if (200 !== $response->getStatusCode()) {
             return new JsonResponse(['success' => false, 'message' => $body]);
         }
-        /* $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
+        $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
         $this->configurationService->setSetting('btcpayWebhookId', $body->id);
- */
+ 
         return new JsonResponse(['success' => true, 'message' => $body]);
     }
 
@@ -77,7 +77,6 @@ class AdminController extends AbstractController
      */
     public function verifyApiKey()
     {
-
         $client = new Client([
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -91,8 +90,10 @@ class AdminController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
         }
         if(!$this->isWebhookEnabled()){
-            return new JsonResponse(['success' => true, 'message' => 'You need to create a webhook.']);
+            return new JsonResponse(['success' => false, 'message' => 'You need to create a webhook.']);
         }
+        $this->configurationService->getSetting('integrationStatus',true);
+
         return new JsonResponse(['success' => true]);
     }
     /**
@@ -358,18 +359,18 @@ class AdminController extends AbstractController
      * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
     public function updateCredentials(Request $request){
-        $body = $request->request->all();
-        $this->logger->info('apikey--->'.$request->request->get('apiKey'));
 
-        $this->logger->info('permissions--->'.($body['permissions'][0])[1]);
+        $body = $request->request->all();
+
         if($body['apiKey']){
             $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
         }
         if($body['permissions']){
             $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
         }
-        //TODO Define function for getting plugin page url
-        $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/CoinchargePayment';
+        $this->generateWebhook($request);
+
+        $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
 
         return new RedirectResponse($redirectUrl);
 

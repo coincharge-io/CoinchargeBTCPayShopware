@@ -25,6 +25,7 @@
         </service>
         <service id="Coincharge\Shopware\Util\Logger" class="Monolog\Logger">
             <factory service="Coincharge\Shopware\Util\Log\LoggerFactory" method="createRotating"/>
+            <argument type="string">btcpay_shopware</argument>
         </service>
     </services>
 </container>
