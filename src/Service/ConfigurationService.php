@@ -30,7 +30,7 @@ class ConfigurationService
     {
         return $this->systemConfigService->set(self::DOMAIN . $setting, $value, $salesChannelId);
     }
-    public function getShopName(?string $salesChannelId): string
+    public function getShopName(?string $salesChannelId)
     {
         return $this->systemConfigService->get("core.basicInformation.shopName");
     }

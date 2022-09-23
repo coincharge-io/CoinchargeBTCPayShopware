@@ -28,7 +28,6 @@ class BTCPay extends Plugin
             $customFieldSetRepository->upsert([
                 [
                     'name' => 'btcpayServer',
-                    // 'global' => true,
                     'config' => [
                         'label' => [
                             'de-DE' => 'BTCPayServer Information',
@@ -168,45 +167,7 @@ class BTCPay extends Plugin
         $paymentRepository = $this->container->get('payment_method.repository');
 
         // Fetch ID for update
-        $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', BTCPayPayment::class));
+        $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', BTCPayServerPayment::class));
         return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
-    }
-    private function getMediaEntity(string $fileName): ?MediaEntity
-    {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('fileName', $fileName));
-
-        return $this->mediaRepository->search($criteria, $this->context)->first();
-    }
-    private function ensureMedia(): string
-    {
-        $filePath = realpath(__DIR__ . '/../Resources/icons/bitcoin.svg');
-        $fileName = hash_file('md5', $filePath);
-        $media = $this->getMediaEntity($fileName);
-        if ($media) {
-            return $media->getId();
-        }
-
-        $mediaFile = new MediaFile(
-            $filePath,
-            mime_content_type($filePath),
-            pathinfo($filePath, PATHINFO_EXTENSION),
-            filesize($filePath)
-        );
-        $mediaId = Uuid::randomHex();
-        $this->mediaRepository->create([
-            [
-                'id' => $mediaId,
-            ],
-        ], $this->context);
-
-        $this->fileSaver->persistFileToMedia(
-            $mediaFile,
-            $fileName,
-            $mediaId,
-            $this->context
-        );
-
-        return $mediaId;
     }
 }

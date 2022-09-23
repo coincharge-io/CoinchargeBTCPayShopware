@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/master/src/Core/System/SystemConfig/Schema/config.xsd">
-
     <card>
         <title>BTCPay Server</title>
         <input-field type="checkbox">
@@ -10,12 +9,13 @@
             <helpText>It shows whether or not the plugin is connected to your BTCPayServer</helpText>
             <helpText lang="de-DE"> Es zeigt an, ob das Plugin mit Ihrem BTCPayServer verbunden ist oder nicht</helpText>
         </input-field>
+
         <input-field>
             <name>btcpayServerUrl</name>
             <label>BTCPay Server URL</label>
         </input-field>
-        <component name="coincharge-btcpay-generate-key">
-            <name>generate</name>
+        <component name="coincharge-btcpay-buttons">
+            <name>buttons</name>
         </component>
     </card>
     <card>
@@ -24,12 +24,10 @@
         <input-field>
             <name>btcpayApiKey</name>
             <label>BTCPay API Key</label>
-            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayServerStoreId</name>
             <label>BTCPay Server Store Id</label>
-            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayWebhookId</name>
@@ -43,11 +41,6 @@
             <label>Webhook secret</label>
             <label lang="de-DE">Webhook secret</label>
         </input-field>
-
-
-        <component name="coincharge-btcpay-test-connection">
-            <name>test</name>
-        </component>
-
     </card>
+
 </config>

@@ -1,5 +1,6 @@
 const { Component, Mixin } = Shopware;
 import template from './coincharge-btcpay-test-connection.html.twig';
+import './coincharge-btcpay-test-connection.scss';
 
 
 Component.register('coincharge-btcpay-test-connection', {

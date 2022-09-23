@@ -43,14 +43,13 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
         }
         return new RedirectResponse($redirectUrl);
     }
-    /**
-     * @throws CustomerCanceledAsyncPaymenException
-     */
+    
+    //Webhook handles this part
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
 
-    private function sendReturnUrlToBTCPay($transaction, $context): string
+    private function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context): string
     {
 
         try {
@@ -82,7 +81,7 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
             
             return $body->checkoutLink;
         } catch (\Exception $e) {
-            $this->logger->error($e);
+            $this->logger->error(print_r($e,true));
             throw new \Exception;
         }
     }

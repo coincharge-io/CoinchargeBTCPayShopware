@@ -1,15 +1,8 @@
 {
-    "coincharge-btcpay-generate-key": {
-        "button": "Generate API key",
-        "error": "Provided url isn't valid"
+    "coincharge-btcpay-generate-credentials": {
+        "button": "Berechtigungsnachweise generieren"
     },
     "coincharge-btcpay-test-connection": {
-        "success": "Connection was successfully established",
-        "error": "Connection could not be established. Please check your API credentials",
-        "button": "Test connection"
-    },
-    "coincharge-btcpay-create-webhook": {
-        "button": "Create webhook",
-        "error": "Problem with creating webhook"
+        "button": "Verbindung testen"
     }
 }

@@ -1,6 +1,6 @@
 const { Component, Mixin, ApiService } = Shopware;
 import template from './coincharge-btcpay-generate-key.html.twig';
-
+import './coincharge-btcpay-generate-key.scss';
 
 Component.register('coincharge-btcpay-generate-key', {
     template,

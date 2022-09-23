@@ -60,13 +60,13 @@ class AdminController extends AbstractController
                 'url' => $webhookUrl //TODO Define function for shop base url
             ])
         ]);
-        $body = json_decode($response->getBody()->getContents());
-
         if (200 !== $response->getStatusCode()) {
             $this->logger->error("Webhook couldn't be created");
             return false;
             //return new JsonResponse(['success' => false, 'message' => $body]);
         }
+        $body = json_decode($response->getBody()->getContents());
+
         $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
         $this->configurationService->setSetting('btcpayWebhookId', $body->id);
 
@@ -169,8 +169,8 @@ class AdminController extends AbstractController
                 // BTCPay Server v1.7.0.0, see https://github.com/btcpayserver/btcpayserver/issues/
                 // Therefore we check if the invoice is in expired or expired paid partial status, instead.
                 if (
-                    $responseBody->status === 'expired' ||
-                    ($responseBody->status === 'expired' && $responseBody->additionalStatus === 'PaidPartial')
+                    $responseBody->status == 'expired' ||
+                    ($responseBody->status == 'expired' && $responseBody->additionalStatus == 'PaidPartial')
                 ) {
                     // Check if also the invoice is now fully paid.
                     if ($this->invoiceIsFullyPaid($body['invoiceId'])) {
@@ -325,12 +325,16 @@ class AdminController extends AbstractController
             return false;
         }
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks/' . $this->configurationService->getSetting('btcpayWebhookId'));
+        if (200 !== $response->getStatusCode()) {
+            $this->logger->error("An error occurred while trying to fetch webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " isn't enabled.");
+            return false;
+        }
         $body = json_decode($response->getBody()->getContents());
         if (empty($body)) {
             $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " doesn't exist.");
             return false;
         }
-        if (200 !== $response->getStatusCode() || $body->enabled == false) {
+        if ($body->enabled == false) {
             $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " isn't enabled.");
             return false;
         }
@@ -367,6 +371,8 @@ class AdminController extends AbstractController
         if ($body['permissions']) {
             $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
         }
+        $this->configurationService->setSetting('btcpayWebhookSecret', '');
+        $this->configurationService->setSetting('btcpayWebhookId', '');
         $this->generateWebhook($request);
 
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
