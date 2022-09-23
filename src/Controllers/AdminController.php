@@ -39,13 +39,12 @@ class AdminController extends AbstractController
         $this->logger = $logger;
         $this->orderRepository = $orderRepository;
     }
-    /**
-     * @Route("/api/_action/coincharge/webhook", name="api.action.coincharge.webhook", methods={"POST"})
-     */
+
     public function generateWebhook(Request $request)
     {
-        if($this->isWebhookEnabled()){
-            return new JsonResponse(['success' => true, 'message' => 'Webhook already created.']);
+        if ($this->isWebhookEnabled()) {
+            $this->logger->info('Webhook exists');
+            return true;
         }
         $client = new Client([
             'headers' => [
@@ -64,18 +63,20 @@ class AdminController extends AbstractController
         $body = json_decode($response->getBody()->getContents());
 
         if (200 !== $response->getStatusCode()) {
-            return new JsonResponse(['success' => false, 'message' => $body]);
+            $this->logger->error("Webhook couldn't be created");
+            return false;
+            //return new JsonResponse(['success' => false, 'message' => $body]);
         }
         $this->configurationService->setSetting('btcpayWebhookSecret', $body->secret);
         $this->configurationService->setSetting('btcpayWebhookId', $body->id);
- 
-        return new JsonResponse(['success' => true, 'message' => $body]);
+
+        return true;
     }
 
     /**
      * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
      */
-    public function verifyApiKey()
+    public function verifyApiKey(Request $request)
     {
         $client = new Client([
             'headers' => [
@@ -87,12 +88,14 @@ class AdminController extends AbstractController
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices');
 
         if (200 !== $response->getStatusCode()) {
+            $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
         }
-        if(!$this->isWebhookEnabled()){
-            return new JsonResponse(['success' => false, 'message' => 'You need to create a webhook.']);
+        if (!$this->generateWebhook($request)) {
+            $this->configurationService->setSetting('integrationStatus', false);
+            return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
         }
-        $this->configurationService->getSetting('integrationStatus',true);
+        $this->configurationService->setSetting('integrationStatus', true);
 
         return new JsonResponse(['success' => true]);
     }
@@ -101,11 +104,11 @@ class AdminController extends AbstractController
      */
     public function webhookEndpoint(Request $request, Context $context)
     {
-       
+
         $header = 'btcpay-sig';
         $signature = $request->headers->get($header);
         $body = $request->request->all();
-        
+
         $expectedHeader = 'sha256=' . hash_hmac('sha256', file_get_contents("php://input"), $this->configurationService->getSetting('btcpayWebhookSecret'));
         //TODO file_get_contents("php://input") use it for body or change it to be uniform
         if ($signature !== $expectedHeader) {
@@ -129,8 +132,8 @@ class AdminController extends AbstractController
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody->metadata->orderNumber));
         //check custom field order status
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
-        
-        
+
+
         switch ($body['type']) {
             case 'InvoiceReceivedPayment':
                 if ($body['afterExpiration']) {
@@ -306,17 +309,10 @@ class AdminController extends AbstractController
                 break;
         }
         return new Response();
-
-        /*BTCPay server doesn't send information about invoice on redirect
-         *There are two options
-         *We can trust BTCPay server and update state on every call from BTCPay
-         *Better option would be to set a webhook and listen to the events from BTCPay server
-         */
-        //$this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(),$context);
     }
 
 
-    
+
     private function isWebhookEnabled()
     {
         $client = new Client([
@@ -325,15 +321,17 @@ class AdminController extends AbstractController
                 'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
             ]
         ]);
-        if(empty($this->configurationService->getSetting('btcpayWebhookId'))){
+        if (empty($this->configurationService->getSetting('btcpayWebhookId'))) {
             return false;
         }
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks/' . $this->configurationService->getSetting('btcpayWebhookId'));
         $body = json_decode($response->getBody()->getContents());
-        if(empty($body)){
+        if (empty($body)) {
+            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " doesn't exist.");
             return false;
         }
-        if (200 !== $response->getStatusCode()||$body->enabled==false) {
+        if (200 !== $response->getStatusCode() || $body->enabled == false) {
+            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " isn't enabled.");
             return false;
         }
         return true;
@@ -358,14 +356,15 @@ class AdminController extends AbstractController
     /**
      * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
-    public function updateCredentials(Request $request){
+    public function updateCredentials(Request $request): RedirectResponse
+    {
 
         $body = $request->request->all();
 
-        if($body['apiKey']){
+        if ($body['apiKey']) {
             $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
         }
-        if($body['permissions']){
+        if ($body['permissions']) {
             $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
         }
         $this->generateWebhook($request);
@@ -373,6 +372,5 @@ class AdminController extends AbstractController
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
 
         return new RedirectResponse($redirectUrl);
-
     }
 }

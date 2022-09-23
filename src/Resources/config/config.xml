@@ -17,6 +17,10 @@
         <component name="coincharge-btcpay-generate-key">
             <name>generate</name>
         </component>
+    </card>
+    <card>
+        <title>Credentials</title>
+        <title lang="de-DE">Berechtigungsnachweise</title>
         <input-field>
             <name>btcpayApiKey</name>
             <label>BTCPay API Key</label>
@@ -27,13 +31,13 @@
             <label>BTCPay Server Store Id</label>
             <disabled>true</disabled>
         </input-field>
-        <input-field type="password">
+        <input-field>
             <name>btcpayWebhookId</name>
             <disabled>true</disabled>
             <label>Webhook id</label>
             <label lang="de-DE">Webhook id</label>
         </input-field>
-        <input-field type="password">
+        <input-field>
             <name>btcpayWebhookSecret</name>
             <disabled>true</disabled>
             <label>Webhook secret</label>
