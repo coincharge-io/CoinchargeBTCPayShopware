@@ -1,1 +1,1 @@
-BTCPay Server Integration
+Accept Bitcoin with Shopware & BTCPay Server
