@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\Shopware\Controllers;
+namespace Coincharge\Shopware\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

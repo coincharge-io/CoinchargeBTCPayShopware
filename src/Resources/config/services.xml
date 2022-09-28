@@ -7,7 +7,7 @@
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
             <tag name="shopware.payment.method.async" />
         </service>
-        <service id="Coincharge\Shopware\Controllers\AdminController" public="true">
+        <service id="Coincharge\Shopware\Controller\AdminController" public="true">
             <argument type="service" id="Coincharge\Shopware\Service\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
