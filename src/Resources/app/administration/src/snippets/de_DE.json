@@ -3,6 +3,7 @@
         "button": "Berechtigungsnachweise generieren"
     },
     "coincharge-btcpay-test-connection": {
-        "button": "Verbindung testen"
+        "button": "Verbindung testen",
+        "success": "Das Plugin ist mit dem Server verbunden"
     }
 }

@@ -3,6 +3,7 @@
         "button": "Generate credentials"
     },
     "coincharge-btcpay-test-connection": {
-        "button": "Test connection"
+        "button": "Test connection",
+        "success": "The plugin is connected to the server"
     }
 }
