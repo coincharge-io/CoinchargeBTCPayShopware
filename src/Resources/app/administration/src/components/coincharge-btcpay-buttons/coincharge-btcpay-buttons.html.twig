@@ -1,6 +1,8 @@
 <sw-container columns="repeat(2, auto)" gap="0px 30px">
-	<coincharge-btcpay-generate-key></coincharge-btcpay-generate-key>
-
-	<coincharge-btcpay-test-connection></coincharge-btcpay-test-connection>
-
+	<div>
+		<sw-button class="sw-button-coincharge" :isloading="isLoading" @click="generateAPIKey">{{ $tc('coincharge-btcpay-generate-credentials.button') }}</sw-button>
+	</div>
+	<div>
+		<sw-button-process class="sw-button-coincharge" :isloading="isLoading" @click="testConnection">{{ $tc('coincharge-btcpay-test-connection.button') }}</sw-button>
+	</div>
 </sw-container>

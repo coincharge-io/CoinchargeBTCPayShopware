@@ -126,11 +126,11 @@ class BTCPay extends Plugin
             'pluginId' => $pluginId,
             'translations' => [
                 'de-DE' => [
-                    'name' => 'BTCPayShopware',
+                    'name' => 'Bitcoin',
                     'description' => 'Zahlen mit Bitcoin'
                 ],
                 'en-GB' => [
-                    'name' => 'BTCPayShopware',
+                    'name' => 'Bitcoin',
                     'description' => 'Pay with Bitcoin'
                 ],
             ],

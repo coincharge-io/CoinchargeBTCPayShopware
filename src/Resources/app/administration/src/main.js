@@ -1,5 +1,3 @@
-import './components/coincharge-btcpay-generate-key';
-import './components/coincharge-btcpay-test-connection';
 import './components/coincharge-btcpay-buttons';
 
 import CoinchargeBtcpayApiService from './service/CoinchargeBtcpayAPI.service';

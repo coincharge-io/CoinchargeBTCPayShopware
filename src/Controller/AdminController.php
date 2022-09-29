@@ -95,7 +95,7 @@ class AdminController extends AbstractController
             $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
         }
-        $this->configurationService->setSetting('integrationStatus', true);
+        //$this->configurationService->setSetting('integrationStatus', true);
 
         return new JsonResponse(['success' => true]);
     }
