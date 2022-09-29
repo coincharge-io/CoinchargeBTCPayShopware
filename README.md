@@ -10,7 +10,7 @@ With a BTCPay Server you are a dedicated payment processor for Bitcoin and Light
 
 You can run your own BTCPay server or share an existing BTCPay server.
 
-**Other advantages of a BTCPay Server include:
+**Other advantages of a BTCPay Server include:**
 
 - Accept Bitcoin and Lightning payments
 - No middleman - Direct payment between end customer and merchant.
@@ -19,7 +19,7 @@ You can run your own BTCPay server or share an existing BTCPay server.
 - Control over the balance with its own private keys (non-custodial)
 - Higher privacy and security
 
-**Advantages for merchants:
+**Advantages for merchants:**
 
 - No transaction fees
 - No monthly fees
