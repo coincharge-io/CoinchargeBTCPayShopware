@@ -8,7 +8,7 @@
 
 With a BTCPay Server you are a dedicated payment processor for Bitcoin and Lightning payments. Run your own BTCPay Server and incoming Bitcoin payments will be credited directly to your own Bitcoin Wallet.
 
-You can run your own BTCPay server or share an existing BTCPay server.
+You can run your own BTCPay Server or use an shared BTCPay Server.
 
 **Other advantages of a BTCPay Server include:**
 
@@ -29,7 +29,7 @@ You can run your own BTCPay server or share an existing BTCPay server.
 # What does the Bitcoin extension offer?
 
 - Quick and easy integration into your own store
-- Connection to a BTCPay server is completely automated
+- Connection to a BTCPay Server is completely automated
 - The euro payment amount is calculated automatically using real-time Bitcoin exchange rates
 - In the checkout, the payer can choose between Bitcoin and Lightning.
 
@@ -37,14 +37,14 @@ You can run your own BTCPay server or share an existing BTCPay server.
 
 Accept Bitcoin and Lightning payments in your self-managed Shopware 6 online store.
 
-All you need is your own BTCPay server or an account with a BTCPay server that can be shared.
+All you need is your own BTCPay Server or an account with a BTCPay Server that can be shared.
 
-Coincharge's Bitcoin extension allows you to connect to this BTCPay server quickly and easily.
+Coincharge's Bitcoin extension allows you to connect to this BTCPay Server quickly and easily.
 
 # What does Coincharge offer?
-Coincharge provides the extension to allow Shopware Bitcoin payments to be processed through the BTCPay server.
+Coincharge provides the extension to allow Shopware Bitcoin payments to be processed through the BTCPay Server.
 
-The Shopware Bitcoin extension for the BTCPay server is provided by Coincharge free of charge.
+The Shopware Bitcoin extension for the BTCPay Server is provided by Coincharge free of charge.
 
-On request, Coincharge integrates the Bitcoin extension into your online store, connects the online store to a BTCPay server and sets up a BTCPay server for you if required.
+On request, Coincharge integrates the Bitcoin extension into your online store, connects the online store to a BTCPay Server and sets up a BTCPay Server for you if required.
 
