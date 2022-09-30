@@ -3,5 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/routing
         https://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <import resource="../../Controller/*Controller.php" type="annotation" />
+    <import resource="../../Configuration/*Controller.php" type="annotation" />
+    <import resource="../../Webhook/*Controller.php" type="annotation" />
+
 </routes>

@@ -32,7 +32,7 @@ class AdminController extends AbstractController
     private EntityRepository $orderRepository;
 
 
-    public function __construct(ConfigurationService  $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
+    public function __construct(ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
     {
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;

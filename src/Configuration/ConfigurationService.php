@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\Shopware\Service;
+namespace Coincharge\Shopware\Configuration;
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 

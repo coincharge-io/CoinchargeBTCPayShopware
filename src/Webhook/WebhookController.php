@@ -1,8 +1,26 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\Shopware\Webhook;
 
-class WebhookController 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Coincharge\Shopware\Webhook\WebhookServiceInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Shopware\Core\Framework\Context;
+
+class WebhookController extends AbstractController
 {
-    
+    private WebhookServiceInterface $webhookService;
+    public function __construct(WebhookServiceInterface $webhookService)
+    {
+        $this->webhookService = $webhookService;
+    }
+    /**
+     * @Route("/api/_action/coincharge/webhook-endpoint", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
+     */
+    public function endpoint(Request $request, Context $context)
+    {
+        $this->webhookService->executeWebhook($request,  $context);
+    }
 }

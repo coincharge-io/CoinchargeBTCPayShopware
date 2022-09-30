@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\Shopware\Service;
+namespace Coincharge\Shopware\PaymentMethod;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;

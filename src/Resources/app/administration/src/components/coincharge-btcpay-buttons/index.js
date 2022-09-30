@@ -17,10 +17,6 @@ Component.register('coincharge-btcpay-buttons', {
                 'BTCPay.config.btcpayServerUrl': '',
                 'BTCPay.config.integrationStatus': false
             },
-            integrationStatus:
-                { 'BTCPay.config.integrationStatus': false },
-            serverUrl:
-                { 'BTCPay.config.btcpayServerUrl': '' }
         };
     },
     methods: {

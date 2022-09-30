@@ -1,16 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\Shopware\Client;
+
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
+use Coincharge\Shopware\Service\ConfigurationService;
 
 class BTCPayServerClient extends AbstractClient
 {
-    public function __construct(LoggerInterface $logger)
+    private ConfigurationService $configurationService;
+    public function __construct(LoggerInterface $logger, ConfigurationService $configurationService)
     {
         $authorizationHeader = $this->createAuthHeader();
 
-        
         $client = new Client([
             'base_uri' => $this->configurationService->getSetting('btcpayServerUrl'),
             'headers' => [
@@ -19,23 +23,23 @@ class BTCPayServerClient extends AbstractClient
         ]);
         parent::__construct($client, $logger);
     }
-    public function sendPostRequest(string $resourceUri, array $data, array $headers = [])
+    public function sendPostRequest(string $resourceUri, array $data, array $headers = []): array
     {
         $headers['content-type'] = 'application/json';
         $options = [
             'headers' => $headers,
             'json'  => $data
         ];
-        $this->post($resourceUri, $options);
+        return $this->post($resourceUri, $options);
     }
-    public function sendGetRequest(string $resourceUri,  array $headers = [])
+    public function sendGetRequest(string $resourceUri,  array $headers = []): array
     {
         $options = [
             'headers' => $headers
         ];
-        $this->get($resourceUri, $options);
+        return $this->get($resourceUri, $options);
     }
-    private function createAuthHeader(): string
+    public function createAuthHeader(): string
     {
         return 'token ' . $this->configurationService->getSetting('btcpayApiKey');
     }
