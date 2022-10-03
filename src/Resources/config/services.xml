@@ -2,27 +2,36 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="Coincharge\Shopware\Service\BTCPayServerPayment">
-            <argument type="service" id="Coincharge\Shopware\Service\ConfigurationService"/>
+        <service id="Coincharge\Shopware\Configuration\ConfigurationService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+        <service id="Coincharge\Shopware\Configuration\ConfigurationController">
+            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
+            <argument type="service" id="Coincharge\Shopware\Webhook\WebhookService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Coincharge\Shopware\PaymentMethod\BTCPayServerPayment">
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
             <tag name="shopware.payment.method.async" />
         </service>
         <service id="Coincharge\Shopware\Client\BTCPayServerClient">
-            <argument type="service" id="Coincharge\Shopware\Service\ConfigurationService"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
         </service>
-        <service id="Coincharge\Shopware\Controller\AdminController" public="true">
-            <argument type="service" id="Coincharge\Shopware\Service\ConfigurationService"/>
+        <!-- <service id="Coincharge\Shopware\Controller\AdminController" public="true">
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
             <argument type="service" id="order.repository"/>
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-        </service>
-        <service id="Coincharge\Shopware\Configuration\ConfigurationService">
-            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
-        </service>
+        </service> -->
+
         <service id="Coincharge\Shopware\Util\Log\LoggerFactory">
             <argument type="string">%kernel.logs_dir%/%%s_%kernel.environment%.log</argument>
             <argument>%shopware.logger.file_rotation_count%</argument>
@@ -35,26 +44,25 @@
 
         <service id="Coincharge\Shopware\Client\BTCPayServerClient" public="true">
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-            <argument type="service" id="Coincharge\Shopware\Service\ConfigurationService"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
         </service>
 
         <service id="Coincharge\Shopware\Order\OrderService" public="true">
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="order.repository"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
         </service>
         <service id="Coincharge\Shopware\Webhook\WebhookService" public="true">
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Order\OrderService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="Coincharge\Shopware\Order\OrderService"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
         </service>
         <service id="Coincharge\Shopware\Webhook\WebhookController" public="true">
             <argument type="service" id="Coincharge\Shopware\Webhook\WebhookService"/>
         </service>
-        <service id="Coincharge\Shopware\Configuration\ConfigurationController">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Coincharge\Shopware\Webhook\WebhookService"/>
-        </service>
+
     </services>
 </container>

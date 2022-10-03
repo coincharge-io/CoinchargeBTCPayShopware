@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\Shopware\Configuration;
 
@@ -9,6 +11,9 @@ use Coincharge\Shopware\Webhook\WebhookServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Shopware\Core\Framework\Routing\Annotation\RouteScope;
+use Symfony\Component\Routing\Annotation\Route;
+
 
 /**
  * @RouteScope(scopes={"api"})
@@ -20,13 +25,13 @@ class ConfigurationController extends AbstractController
     private ConfigurationService $configurationService;
     private WebhookServiceInterface $webhookService;
 
-    public function __construct(BTCPayServerClientInterface $client,ConfigurationService $configurationService, WebhookServiceInterface $webhookService)
+    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService)
     {
-     $this->client = $client;
-     $this->configurationService = $configurationService;
-     $this->webhookService = $webhookService;
+        $this->client = $client;
+        $this->configurationService = $configurationService;
+        $this->webhookService = $webhookService;
     }
-    
+
     /**
      * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
      */

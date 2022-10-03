@@ -1,17 +1,17 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Coincharge\Shopware\Client;
 
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Service\ConfigurationService;
+use Coincharge\Shopware\Configuration\ConfigurationService;
 
 class BTCPayServerClient extends AbstractClient
 {
-    private ConfigurationService $configurationService;
-    public function __construct(LoggerInterface $logger, ConfigurationService $configurationService)
+    protected ConfigurationService $configurationService;
+    protected LoggerInterface $logger;
+    
+    public function __construct( ConfigurationService $configurationService,LoggerInterface $logger)
     {
         $authorizationHeader = $this->createAuthHeader();
 

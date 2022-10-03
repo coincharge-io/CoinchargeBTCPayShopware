@@ -8,7 +8,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Coincharge\Shopware\Webhook\WebhookServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\Routing\Annotation\RouteScope;
+use Symfony\Component\Routing\Annotation\Route;
 
+
+
+/**
+ * @RouteScope(scopes={"api"})
+ */
 class WebhookController extends AbstractController
 {
     private WebhookServiceInterface $webhookService;

@@ -7,15 +7,13 @@ namespace Coincharge\Shopware\PaymentMethod;
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
-use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymenException;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Service\ConfigurationService;
+use Coincharge\Shopware\Configuration\ConfigurationService;
 
 class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
 {

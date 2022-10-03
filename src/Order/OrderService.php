@@ -1,13 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\Shopware\Order;
+
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Coincharge\Shopware\Order\OrderServiceInterface;
 
 class OrderService implements OrderServiceInterface
 {
@@ -16,10 +18,11 @@ class OrderService implements OrderServiceInterface
 
     public function __construct(BTCPayServerClientInterface $client, EntityRepository $orderRepository)
     {
-     $this->client = $client;
-     $this->orderRepository = $orderRepository;   
+        $this->client = $client;
+        $this->orderRepository = $orderRepository;
     }
-    protected function invoiceIsFullyPaid($invoiceId):bool
+
+    protected function invoiceIsFullyPaid($invoiceId): bool
     {
         /* $client = new Client([
             'headers' => [
@@ -38,7 +41,7 @@ class OrderService implements OrderServiceInterface
         return true;
     }
 
-    public function update(int $orderNumber, array $fields = ['btcpayOrderStatus' => 'New'],Context $context):void
+    public function update(int $orderNumber, array $fields = ['btcpayOrderStatus' => 'New'], Context $context): void
     {
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $orderNumber));
