@@ -13,11 +13,7 @@ use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
-use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\Content\Media\File\MediaFile;
-use Shopware\Core\Content\Media\MediaEntity;
-
-use Coincharge\Shopware\Service\BTCPayServerPayment;
+use Coincharge\Shopware\PaymentMethod\BTCPayServerPayment;
 
 class BTCPay extends Plugin
 {

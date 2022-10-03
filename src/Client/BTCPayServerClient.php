@@ -6,13 +6,15 @@ use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 
-class BTCPayServerClient extends AbstractClient
+class BTCPayServerClient extends AbstractClient implements BTCPayServerClientInterface
 {
     protected ConfigurationService $configurationService;
     protected LoggerInterface $logger;
     
-    public function __construct( ConfigurationService $configurationService,LoggerInterface $logger)
+    public function __construct(ConfigurationService $configurationService,LoggerInterface $logger)
     {
+        $this->configurationService=$configurationService;
+        
         $authorizationHeader = $this->createAuthHeader();
 
         $client = new Client([

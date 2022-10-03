@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 
 
 
@@ -26,8 +27,9 @@ class WebhookController extends AbstractController
     /**
      * @Route("/api/_action/coincharge/webhook-endpoint", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
-    public function endpoint(Request $request, Context $context)
+    public function endpoint(Request $request, Context $context):Response
     {
         $this->webhookService->executeWebhook($request,  $context);
+        return new Response();
     }
 }

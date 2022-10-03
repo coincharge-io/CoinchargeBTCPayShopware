@@ -6,5 +6,5 @@ use Shopware\Core\Framework\Context;
 
 interface OrderServiceInterface
 {
-    public function update(int $orderNumber, array $fields = ['btcpayOrderStatus' => 'New'], Context $context): void;
+    public function update(string $orderNumber, array $fields, Context $context): void;
 }

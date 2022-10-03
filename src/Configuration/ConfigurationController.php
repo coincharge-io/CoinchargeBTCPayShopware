@@ -6,7 +6,7 @@ namespace Coincharge\Shopware\Configuration;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
-use Coincharge\Shopware\Service\ConfigurationService;
+use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Webhook\WebhookServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -46,17 +46,20 @@ class ConfigurationController extends AbstractController
 
         $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices');
  */
+        /* $this->configurationService->setSetting('integrationStatus', false);
+        return; */
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+
         $response = $this->client->sendGetRequest($uri);
-        if (empty($response)) {
+        if (!is_array($response)) {
             $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
         }
-        if (!$this->webhookService->registerWebhook($request)) {
+        if (!$this->webhookService->registerWebhook($request, null)) {
             $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
         }
-        //$this->configurationService->setSetting('integrationStatus', true);
+        $this->configurationService->setSetting('integrationStatus', true);
 
         return new JsonResponse(['success' => true]);
     }
@@ -76,7 +79,7 @@ class ConfigurationController extends AbstractController
         }
         $this->configurationService->setSetting('btcpayWebhookSecret', '');
         $this->configurationService->setSetting('btcpayWebhookId', '');
-        $this->webhookService->registerWebhook($request);
+        $this->webhookService->registerWebhook($request, null);
 
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
 

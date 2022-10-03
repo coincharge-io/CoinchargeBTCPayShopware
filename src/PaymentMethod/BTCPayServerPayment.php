@@ -11,17 +11,19 @@ use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
+use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 
 class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
 {
+    private BTCPayServerClientInterface $client;
     private ConfigurationService  $configurationService;
     private LoggerInterface $logger;
 
-    public function __construct(ConfigurationService $configurationService, LoggerInterface $logger)
+    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, LoggerInterface $logger)
     {
+        $this->client = $client;
         $this->configurationService = $configurationService;
         $this->logger = $logger;
     }
@@ -41,7 +43,7 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
         }
         return new RedirectResponse($redirectUrl);
     }
-    
+
     //Webhook handles this part
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
@@ -51,17 +53,10 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
     {
 
         try {
-
-            $client = new Client([
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
-                ]
-            ]);
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
-             
-            $response = $client->request('POST', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices', [
-                 'body' => json_encode([
+
+            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+            $response = $this->client->sendPostRequest($uri, [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
                     'metadata' =>
@@ -72,15 +67,13 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true
-                    ]
-                ]) 
-            ]); 
+                    ]]
+                
+            ); 
 
-            $body = json_decode($response->getBody()->getContents());
-            
-            return $body->checkoutLink;
+            return $response['checkoutLink'];
         } catch (\Exception $e) {
-            $this->logger->error(print_r($e,true));
+            $this->logger->error(print_r($e, true));
             throw new \Exception;
         }
     }

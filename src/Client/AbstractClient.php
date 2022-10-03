@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Client;
 
+use Exception;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
@@ -23,11 +24,11 @@ class AbstractClient
     }
     protected function get(string $uri, array $options): array
     {
-        return $this->request->get(Request::METHOD_GET, $uri, $options);
+        return $this->request(Request::METHOD_GET, $uri, $options);
     }
     protected function post(string $uri, array $options): array
     {
-        return $this->request->post(Request::METHOD_POST, $uri, $options);
+        return $this->request(Request::METHOD_POST, $uri, $options);
     }
 
     private function request(string $method, string $uri, array $options = []): array
@@ -35,9 +36,10 @@ class AbstractClient
         try{
             $response = $this->client->request($method, $uri, $options);
             $body = $response->getBody()->getContents();
-        }catch(RequestException $requestException){
-            throw $this->logger->error("Exception ".$requestException." - options ". $options);
-        }
+        }catch(\Exception $requestException){
+             $this->logger->error($requestException->getMessage());
+            throw new \Exception( $requestException->getMessage());
+            }
         return \json_decode($body, true) ?? [];
     }
 }

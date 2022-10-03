@@ -14,8 +14,7 @@ Component.register('coincharge-btcpay-buttons', {
         return {
             isLoading: false,
             config: {
-                'BTCPay.config.btcpayServerUrl': '',
-                'BTCPay.config.integrationStatus': false
+                'BTCPay.config.btcpayServerUrl': ''
             },
         };
     },
@@ -26,9 +25,8 @@ Component.register('coincharge-btcpay-buttons', {
             const btcpayServerUrl = document.getElementById("BTCPay.config.btcpayServerUrl").value
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.config['BTCPay.config.btcpayServerUrl'] = filteredUrl
-
             const url = window.location.origin + '/api/_action/coincharge/credentials';
-            systemConfig.saveValues(this.config['BTCPay.config.btcpayServerUrl'])
+            systemConfig.saveValues({ 'BTCPay.config.btcpayServerUrl': this.config['BTCPay.config.btcpayServerUrl'] })
             return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&selectiveStores=true&redirect=' + url);
 
         },
@@ -37,10 +35,7 @@ Component.register('coincharge-btcpay-buttons', {
         },
         testConnection() {
             this.isLoading = true;
-            const systemConfig = ApiService.getByName('systemConfigApiService')
             this.coinchargeBtcpayApiService.verifyApiKey().then((ApiResponse) => {
-                this.config['BTCPay.config.integrationStatus'] = ApiResponse.success ? true : false;
-                systemConfig.saveValues(this.config['BTCPay.config.integrationStatus'])
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({
                         title: 'BTCPay Server',
@@ -55,6 +50,7 @@ Component.register('coincharge-btcpay-buttons', {
                 });
 
                 this.isLoading = false;
+                window.location.reload();
             });
         },
     }

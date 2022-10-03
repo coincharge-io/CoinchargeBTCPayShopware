@@ -9,12 +9,11 @@ use Shopware\Core\Framework\Context;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Coincharge\Shopware\Order\OrderServiceInterface;
 
 class OrderService implements OrderServiceInterface
 {
     private BTCPayServerClientInterface $client;
-    private EntityRepository $orderRepository;
+    protected EntityRepository $orderRepository;
 
     public function __construct(BTCPayServerClientInterface $client, EntityRepository $orderRepository)
     {
@@ -22,7 +21,7 @@ class OrderService implements OrderServiceInterface
         $this->orderRepository = $orderRepository;
     }
 
-    protected function invoiceIsFullyPaid($invoiceId): bool
+    public function invoiceIsFullyPaid($invoiceId): bool
     {
         /* $client = new Client([
             'headers' => [
@@ -41,7 +40,7 @@ class OrderService implements OrderServiceInterface
         return true;
     }
 
-    public function update(int $orderNumber, array $fields = ['btcpayOrderStatus' => 'New'], Context $context): void
+    public function update(string $orderNumber, array $fields = ['btcpayOrderStatus' => 'New'], Context $context): void
     {
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $orderNumber));
