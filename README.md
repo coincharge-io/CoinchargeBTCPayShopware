@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ![Image of shopwarebtcpay](https://shopware.coincharge.io/media/e1/41/ca/1664280813/shopware-btcpay-plugin.png)
 
 # Bitcoin payments for Shopware
@@ -48,3 +49,12 @@ The Shopware Bitcoin extension for the BTCPay Server is provided by Coincharge f
 
 On request, Coincharge integrates the Bitcoin extension into your online store, connects the online store to a BTCPay Server and sets up a BTCPay Server for you if required.
 
+=======
+#BTCPayShopware
+
+
+##Support
+
+##Licence
+The MIT License (MIT). Please see [License File] for more information.
+>>>>>>> 0.0.1

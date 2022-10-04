@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\Shopware;
 
@@ -6,6 +8,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\ActivateContext;
 use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
@@ -13,78 +16,78 @@ use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
-use Shopware\Core\Framework\Uuid\Uuid;
+use Coincharge\Shopware\PaymentMethod\BTCPayServerPayment;
 use Shopware\Core\Content\Media\File\MediaFile;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\MediaEntity;
-
-use Coincharge\Shopware\Service\BTCPayServerPayment;
+use Shopware\Core\Content\Media\File\FileSaver;
 
 class BTCPay extends Plugin
 {
-	public function install(InstallContext $context): void
+    public function install(InstallContext $context): void
     {
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
-    
-            $customFieldSetRepository->upsert([
-                [
-                    'name' => 'btcpayServer',
-                    'config' => [
-                        'label' => [
-                            'de-DE' => 'BTCPayServer Information',
-                            'en-GB' => 'BTCPayServer Information'
+
+        $customFieldSetRepository->upsert([
+            [
+                'name' => 'btcpayServer',
+                'config' => [
+                    'label' => [
+                        'de-DE' => 'BTCPayServer Information',
+                        'en-GB' => 'BTCPayServer Information'
+                    ]
+                ],
+                'customFields' => [
+                    [
+                        'name' => 'btcpayOrderStatus',
+                        'label' => 'Order Status',
+                        'type' => CustomFieldTypes::TEXT,
+                        'config' => [
+                            'label' => [
+                                'de-DE' => 'Auftragsstatus',
+                                'en-GB' => 'Order Status'
+                            ]
                         ]
                     ],
-                    'customFields' => [
-                        [
-                            'name' => 'btcpayOrderStatus',
-                            'label' => 'Order Status',
-                            'type' => CustomFieldTypes::TEXT,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Auftragsstatus',
-                                    'en-GB' => 'Order Status'
-                                ]
+                    [
+                        'name' => 'paymentMethod',
+                        'label' => 'Payment Method',
+                        'type' => CustomFieldTypes::TEXT,
+                        'config' => [
+                            'label' => [
+                                'de-DE' => 'Zahlungsmethode',
+                                'en-GB' => 'Payment Method'
                             ]
-                        ],
-                        [
-                            'name' => 'paymentMethod',
-                            'label' => 'Payment Method',
-                            'type' => CustomFieldTypes::TEXT,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Zahlungsmethode',
-                                    'en-GB' => 'Payment Method'
-                                ]
-                            ]
-                        ],
-                        [
-                            'name' => 'paidAfterExpiration',
-                            'label' => 'Paid After Expiration',
-                            'type' => CustomFieldTypes::BOOL,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
-                                    'en-GB' => 'Paid After Invoice Expiration'
-                                ]
-                            ]
-                        ],
-                        [
-                            'name' => 'overpaid',
-                            'label' => 'Received more than expected',
-                            'type' => CustomFieldTypes::BOOL,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Überbezahlt',
-                                    'en-GB' => 'Overpaid '
-                                ]
-                            ]
-                        ],
+                        ]
                     ],
-                    'relations' => [[
-                        'entityName' => 'order'
-                    ]],
-                ]
-            ], $context->getContext()); 
+                    [
+                        'name' => 'paidAfterExpiration',
+                        'label' => 'Paid After Expiration',
+                        'type' => CustomFieldTypes::BOOL,
+                        'config' => [
+                            'label' => [
+                                'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
+                                'en-GB' => 'Paid After Invoice Expiration'
+                            ]
+                        ]
+                    ],
+                    [
+                        'name' => 'overpaid',
+                        'label' => 'Received more than expected',
+                        'type' => CustomFieldTypes::BOOL,
+                        'config' => [
+                            'label' => [
+                                'de-DE' => 'Überbezahlt',
+                                'en-GB' => 'Overpaid '
+                            ]
+                        ]
+                    ],
+                ],
+                'relations' => [[
+                    'entityName' => 'order'
+                ]],
+            ]
+        ], $context->getContext());
         $this->addPaymentMethod($context->getContext());
     }
 
@@ -93,6 +96,13 @@ class BTCPay extends Plugin
         // Only set the payment method to inactive when uninstalling. Removing the payment method would
         // cause data consistency issues, since the payment method might have been used in several orders
         $this->setPaymentMethodIsActive(false, $context->getContext());
+        
+        $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
+
+        $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
+        $customFieldSetRepository->delete(array_values($customFieldIds->getData()), $context->getContext());
     }
 
     public function activate(ActivateContext $context): void
@@ -119,18 +129,19 @@ class BTCPay extends Plugin
         /** @var PluginIdProvider $pluginIdProvider */
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
-        
+
         //TODO integrate 'mediaId' => $this->ensureMedia(),
         $examplePaymentData = [
             'handlerIdentifier' => BTCPayServerPayment::class,
             'pluginId' => $pluginId,
+            'mediaId' => $this->ensureMedia($context),
             'translations' => [
                 'de-DE' => [
-                    'name' => 'BTCPayShopware',
+                    'name' => 'Bitcoin',
                     'description' => 'Zahlen mit Bitcoin'
                 ],
                 'en-GB' => [
-                    'name' => 'BTCPayShopware',
+                    'name' => 'Bitcoin',
                     'description' => 'Pay with Bitcoin'
                 ],
             ],
@@ -169,5 +180,47 @@ class BTCPay extends Plugin
         // Fetch ID for update
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', BTCPayServerPayment::class));
         return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+    }
+
+    private function getMediaEntity(string $fileName, Context $context): ?MediaEntity
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('fileName', $fileName));
+        $mediaRepository = $this->container->get('media.repository');
+
+        return $mediaRepository->search($criteria, $context)->first();
+    }
+    private function ensureMedia(Context $context): string
+    {
+        $filePath = realpath(__DIR__ . '/Resources/icons/bitcoin.svg');
+        $fileName = hash_file('md5', $filePath);
+        $media = $this->getMediaEntity($fileName, $context);
+        $mediaRepository = $this->container->get('media.repository');
+
+        if ($media) {
+            return $media->getId();
+        }
+
+        $mediaFile = new MediaFile(
+            $filePath,
+            mime_content_type($filePath),
+            pathinfo($filePath, PATHINFO_EXTENSION),
+            filesize($filePath)
+        );
+        $mediaId = Uuid::randomHex();
+        $mediaRepository->create([
+            [
+                'id' => $mediaId,
+            ],
+        ], $context);
+        $fileSaver = $this->container->get(FileSaver::class);
+        $fileSaver->persistFileToMedia(
+            $mediaFile,
+            $fileName,
+            $mediaId,
+            $context
+        );
+
+        return $mediaId;
     }
 }

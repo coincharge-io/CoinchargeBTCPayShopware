@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\Shopware\Service;
+namespace Coincharge\Shopware\Configuration;
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
@@ -32,6 +32,6 @@ class ConfigurationService
     }
     public function getShopName(?string $salesChannelId)
     {
-        return $this->systemConfigService->get("core.basicInformation.shopName");
+        return $this->systemConfigService->get("core.basicInformation.shopName", $salesChannelId);
     }
 }
