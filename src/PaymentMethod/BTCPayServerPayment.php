@@ -56,7 +56,7 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
 
             $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-            /* $response = $this->client->sendPostRequest($uri, [
+            $response = $this->client->sendPostRequest($uri, [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
                     'metadata' =>
@@ -68,20 +68,7 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true
                     ]]
-            );  */ 
-            $response = $this->client->sendPostRequest($uri, [
-                'amount' => 1,
-                'currency' => 'SATS',
-                'metadata' =>
-                [
-                    'orderId' => $transaction->getOrderTransaction()->getId(),
-                    'orderNumber' => $transaction->getOrder()->getOrderNumber()
-                ],
-                'checkout' => [
-                    'redirectURL' => $accountUrl,
-                    'redirectAutomatically' => true
-                ]]
-        );  
+            );  
 
             return $response['checkoutLink'];
         } catch (\Exception $e) {
