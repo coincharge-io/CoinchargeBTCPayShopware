@@ -27,7 +27,6 @@
 
         <service id="Coincharge\Shopware\Order\OrderService">
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="order.repository"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
         </service>
         <service id="Coincharge\Shopware\Webhook\WebhookService">

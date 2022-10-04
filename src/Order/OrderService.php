@@ -5,22 +5,16 @@ declare (strict_types = 1);
 namespace Coincharge\Shopware\Order;
 
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
-use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 
 class OrderService
 {
     private BTCPayServerClientInterface $client;
-    private EntityRepository $orderRepository;
     private ConfigurationService $configurationService;
 
-    public function __construct(BTCPayServerClientInterface $client, EntityRepository $orderRepository, ConfigurationService $configurationService)
+    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService)
     {
         $this->client = $client;
-        $this->orderRepository = $orderRepository;
         $this->configurationService = $configurationService;
     }
 
