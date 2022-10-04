@@ -28,12 +28,14 @@
         <service id="Coincharge\Shopware\Order\OrderService">
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
             <argument type="service" id="order.repository"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
         </service>
         <service id="Coincharge\Shopware\Webhook\WebhookService">
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Order\OrderService"/>
+            <argument type="service" id="order.repository"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
         </service>
         <service id="Coincharge\Shopware\Webhook\WebhookController" public="true">

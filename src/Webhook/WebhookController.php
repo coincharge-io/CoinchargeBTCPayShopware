@@ -13,13 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 
-
 /**
  * @RouteScope(scopes={"api"})
  */
 class WebhookController extends AbstractController
 {
     private WebhookServiceInterface $webhookService;
+
     public function __construct(WebhookServiceInterface $webhookService)
     {
         $this->webhookService = $webhookService;

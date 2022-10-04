@@ -32,6 +32,6 @@ class ConfigurationService
     }
     public function getShopName(?string $salesChannelId)
     {
-        return $this->systemConfigService->get("core.basicInformation.shopName");
+        return $this->systemConfigService->get("core.basicInformation.shopName", $salesChannelId);
     }
 }

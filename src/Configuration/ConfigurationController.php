@@ -80,7 +80,7 @@ class ConfigurationController extends AbstractController
         $this->configurationService->setSetting('btcpayWebhookSecret', '');
         $this->configurationService->setSetting('btcpayWebhookId', '');
         $this->webhookService->registerWebhook($request, null);
-
+        
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
 
         return new RedirectResponse($redirectUrl);
