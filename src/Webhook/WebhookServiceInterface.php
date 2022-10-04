@@ -13,7 +13,7 @@ interface WebhookServiceInterface
 {
     public function registerWebhook(Request $request, ?string $salesChannelId): bool;
 
-    public function checkWebhookStatus(): bool;
+    public function isWebhookEnabled(): bool;
 
     public function executeWebhook(Request $request, Context $context): Response;
 }

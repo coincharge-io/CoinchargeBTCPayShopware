@@ -37,17 +37,7 @@ class ConfigurationController extends AbstractController
      */
     public function verifyApiKey(Request $request)
     {
-        /* $client = new Client([
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'token ' . $this->configurationService->getSetting('btcpayApiKey')
-            ]
-        ]);
 
-        $response = $client->request('GET', $this->configurationService->getSetting('btcpayServerUrl') . '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices');
- */
-        /* $this->configurationService->setSetting('integrationStatus', false);
-        return; */
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
         $response = $this->client->sendGetRequest($uri);
@@ -70,17 +60,10 @@ class ConfigurationController extends AbstractController
     {
 
         $body = $request->request->all();
-
-        if ($body['apiKey']) {
-            $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
-        }
-        if ($body['permissions']) {
-            $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
-        }
-        $this->configurationService->setSetting('btcpayWebhookSecret', '');
-        $this->configurationService->setSetting('btcpayWebhookId', '');
-        $this->webhookService->registerWebhook($request, null);
+        $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
         
+        $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
+
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
 
         return new RedirectResponse($redirectUrl);

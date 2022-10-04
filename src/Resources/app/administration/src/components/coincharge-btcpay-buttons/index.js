@@ -26,7 +26,13 @@ Component.register('coincharge-btcpay-buttons', {
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.config['BTCPay.config.btcpayServerUrl'] = filteredUrl
             const url = window.location.origin + '/api/_action/coincharge/credentials';
-            systemConfig.saveValues({ 'BTCPay.config.btcpayServerUrl': this.config['BTCPay.config.btcpayServerUrl'] })
+            systemConfig.saveValues({
+                'BTCPay.config.btcpayServerUrl': this.config['BTCPay.config.btcpayServerUrl'],
+                'BTCPay.config.btcpayApiKey': '',
+                'BTCPay.config.btcpayServerStoreId': '',
+                'BTCPay.config.btcpayWebhookId': '',
+                'BTCPay.config.btcpayWebhookSecret': ''
+            })
             return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&selectiveStores=true&redirect=' + url);
 
         },

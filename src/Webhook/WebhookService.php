@@ -39,7 +39,7 @@ class WebhookService implements WebhookServiceInterface
 
     public function registerWebhook(Request $request, ?string $salesChannelId): bool
     {
-        if ($this->checkWebhookStatus()) {
+        if ($this->isWebhookEnabled()) {
             $this->logger->info('Webhook exists');
             return true;
         }
@@ -60,7 +60,7 @@ class WebhookService implements WebhookServiceInterface
 
         return true;
     }
-    public function checkWebhookStatus(): bool
+    public function isWebhookEnabled(): bool
     {
 
         if (empty($this->configurationService->getSetting('btcpayWebhookId'))) {
