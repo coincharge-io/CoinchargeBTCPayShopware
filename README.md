@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ![Image of shopwarebtcpay](https://shopware.coincharge.io/media/e1/41/ca/1664280813/shopware-btcpay-plugin.png)
 
 # Bitcoin payments for Shopware
@@ -57,4 +56,4 @@ On request, Coincharge integrates the Bitcoin extension into your online store, 
 
 ##Licence
 The MIT License (MIT). Please see [License File] for more information.
->>>>>>> 0.0.1
+
