@@ -21,7 +21,7 @@ use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\File\FileSaver;
-
+use Coincharge\Shopware\Installer\PaymentMethodInstaller;
 class BTCPay extends Plugin
 {
     public function install(InstallContext $context): void
@@ -88,15 +88,20 @@ class BTCPay extends Plugin
                 ]],
             ]
         ], $context->getContext());
-        $this->addPaymentMethod($context->getContext());
+        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
+            $this->addPaymentMethod(new $paymentMethod(), $context->getContext());
+        }
+        //$this->addPaymentMethod($context->getContext());
     }
 
     public function uninstall(UninstallContext $context): void
     {
         // Only set the payment method to inactive when uninstalling. Removing the payment method would
         // cause data consistency issues, since the payment method might have been used in several orders
-        $this->setPaymentMethodIsActive(false, $context->getContext());
-        
+        //$this->setPaymentMethodIsActive(false, $context->getContext());
+        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
+            $this->setPaymentMethodIsActive(false, $context->getContext());
+        }
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
@@ -107,17 +112,23 @@ class BTCPay extends Plugin
 
     public function activate(ActivateContext $context): void
     {
-        $this->setPaymentMethodIsActive(true, $context->getContext());
+        //$this->setPaymentMethodIsActive(true, $context->getContext());
+        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
+            $this->setPaymentMethodIsActive(true, $context->getContext());       
+         }
         parent::activate($context);
     }
 
     public function deactivate(DeactivateContext $context): void
     {
-        $this->setPaymentMethodIsActive(false, $context->getContext());
+        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
+            $this->setPaymentMethodIsActive(false, $context->getContext());
+                 }
+        //$this->setPaymentMethodIsActive(false, $context->getContext());
         parent::deactivate($context);
     }
 
-    private function addPaymentMethod(Context $context): void
+    private function addPaymentMethod($paymentMethod, Context $context): void
     {
         $paymentMethodExists = $this->getPaymentMethodId();
 
@@ -132,19 +143,11 @@ class BTCPay extends Plugin
 
         //TODO integrate 'mediaId' => $this->ensureMedia(),
         $examplePaymentData = [
-            'handlerIdentifier' => BTCPayServerPayment::class,
+            'handlerIdentifier' => $paymentMethod,
             'pluginId' => $pluginId,
-            'mediaId' => $this->ensureMedia($context),
-            'translations' => [
-                'de-DE' => [
-                    'name' => 'Bitcoin',
-                    'description' => 'Zahlen mit Bitcoin'
-                ],
-                'en-GB' => [
-                    'name' => 'Bitcoin',
-                    'description' => 'Pay with Bitcoin'
-                ],
-            ],
+            'mediaId' => $this->ensureMedia($context, $paymentMethod->getName()),
+            'name' =>  $paymentMethod->getName(),
+            'description' =>  $paymentMethod->getDescription()
         ];
 
         /** @var EntityRepositoryInterface $paymentRepository */
@@ -190,9 +193,9 @@ class BTCPay extends Plugin
 
         return $mediaRepository->search($criteria, $context)->first();
     }
-    private function ensureMedia(Context $context): string
+    private function ensureMedia(Context $context, string $logoName): string
     {
-        $filePath = realpath(__DIR__ . '/Resources/icons/bitcoin.svg');
+        $filePath = realpath(__DIR__ . '/Resources/icons/'.strtolower($logoName).'..svg');
         $fileName = hash_file('md5', $filePath);
         $media = $this->getMediaEntity($fileName, $context);
         $mediaRepository = $this->container->get('media.repository');

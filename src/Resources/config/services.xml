@@ -5,7 +5,19 @@
         <service id="Coincharge\Shopware\Configuration\ConfigurationService">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
-        <service id="Coincharge\Shopware\PaymentMethod\BTCPayServerPayment">
+        <!-- <service id="Coincharge\Shopware\PaymentMethod\BTCPayServerPayment">
+            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
+            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+            <tag name="shopware.payment.method.async" />
+        </service> -->
+        <service id="Coincharge\Shopware\PaymentMethod\BitcoinPayment">
+            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
+            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+            <tag name="shopware.payment.method.async" />
+        </service>
+        <service id="Coincharge\Shopware\PaymentMethod\LightningPayment">
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>

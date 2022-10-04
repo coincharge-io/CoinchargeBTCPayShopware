@@ -98,12 +98,13 @@ class WebhookService implements WebhookServiceInterface
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
         //check custom field order status
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
+
         switch ($body['type']) {
             case 'InvoiceReceivedPayment':
                 if ($body['afterExpiration']) {
                     $this->transactionStateHandler->payPartially($responseBody['metadata']['orderId'], $context);
                     $this->logger->info('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.');
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -114,7 +115,7 @@ class WebhookService implements WebhookServiceInterface
                         ],
                     ], $context);
                 } else {
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -136,7 +137,7 @@ class WebhookService implements WebhookServiceInterface
                 ) {
                     // Check if also the invoice is now fully paid.
                     if ($this->orderService->invoiceIsFullyPaid($body['invoiceId'])) {
-                        $this->orderRepository->upsert([
+                        $this->orderRepository->update([
                             [
                                 'id' => $orderId,
                                 'customFields' => [
@@ -148,7 +149,7 @@ class WebhookService implements WebhookServiceInterface
                         ], $context);
                         $this->logger->info('Invoice fully settled after invoice was already expired. Needs manual checking.');
                     } else {
-                        $this->orderRepository->upsert([
+                        $this->orderRepository->update([
                             [
                                 'id' => $orderId,
                                 'customFields' => [
@@ -171,7 +172,7 @@ class WebhookService implements WebhookServiceInterface
 
                     $this->logger->info('Invoice payment received fully with overpayment, waiting for settlement.');
                 } else {
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -186,7 +187,7 @@ class WebhookService implements WebhookServiceInterface
             case 'InvoiceInvalid':
                 $this->transactionStateHandler->cancel($responseBody['metadata']['orderId'], $context);
                 if ($body['manuallyMarked']) {
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -196,7 +197,7 @@ class WebhookService implements WebhookServiceInterface
                     ], $context);
                     $this->logger->info('Invoice manually marked invalid.');
                 } else {
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -210,7 +211,7 @@ class WebhookService implements WebhookServiceInterface
             case 'InvoiceExpired':
                 if ($body['partiallyPaid']) {
 
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -221,7 +222,7 @@ class WebhookService implements WebhookServiceInterface
                     $this->transactionStateHandler->payPartially($responseBody['metadata']['orderId'], $context);
                     $this->logger->info('Invoice expired but was paid partially, please check.');
                 } else {
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -236,7 +237,7 @@ class WebhookService implements WebhookServiceInterface
             case 'InvoiceSettled':
                 if ($body['overPaid']) {
 
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [
@@ -248,7 +249,7 @@ class WebhookService implements WebhookServiceInterface
                     $this->transactionStateHandler->paid($responseBody['metadata']['orderId'], $context);
                     $this->logger->info('Invoice payment settled but was overpaid.');
                 } else {
-                    $this->orderRepository->upsert([
+                    $this->orderRepository->update([
                         [
                             'id' => $orderId,
                             'customFields' => [

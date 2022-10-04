@@ -23,17 +23,14 @@
         <title lang="de-DE">Berechtigungsnachweise</title>
         <input-field>
             <name>btcpayApiKey</name>
-            <disabled>true</disabled>
             <label>BTCPay API Key</label>
         </input-field>
         <input-field>
             <name>btcpayServerStoreId</name>
             <label>BTCPay Server Store Id</label>
-            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayWebhookId</name>
-            <disabled>true</disabled>
             <label>Webhook id</label>
             <label lang="de-DE">Webhook id</label>
         </input-field>
