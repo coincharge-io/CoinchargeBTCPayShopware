@@ -186,7 +186,7 @@ class BTCPay extends Plugin
         $examplePaymentData = [
             'handlerIdentifier' => BTCPayServerPayment::class,
             'pluginId' => $pluginId,
-            'mediaId'  =>  $this->ensureMedia($context),
+            'mediaId' => $this->ensureMedia($context),
             'translations' => [
                 'de-DE' => [
                     'name' => 'Bitcoin',
@@ -234,19 +234,19 @@ class BTCPay extends Plugin
         return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
     }
     
-    private function getMediaEntity(string $fileName): ?MediaEntity
+    private function getMediaEntity(string $fileName, Context $context): ?MediaEntity
     {
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('fileName', $fileName));
         $mediaRepository = $this->container->get('media.repository');
 
-        return $mediaRepository->search($criteria, $this->context)->first();
+        return $mediaRepository->search($criteria, $context)->first();
     }
     private function ensureMedia(Context $context): string
     {
         $filePath = realpath(__DIR__ . '/Resources/icons/bitcoin.svg');
         $fileName = hash_file('md5', $filePath);
-        $media = $this->getMediaEntity($fileName);
+        $media = $this->getMediaEntity($fileName, $context);
         $mediaRepository = $this->container->get('media.repository');
 
         if ($media) {
