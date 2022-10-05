@@ -42,7 +42,7 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC-LightningNetwork']
+                        'paymentMethods' => ['BTC-LightningNetwork', 'BTC-LNURLPAY']
                     ]
                 ]
             );

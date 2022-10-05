@@ -8,6 +8,11 @@ use Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler;
 
 class BitcoinPaymentMethod
 {
+    public function getName(): string
+    {
+        return 'Bitcoin';
+    }
+
     public function getTranslations(): array
     {
         return [

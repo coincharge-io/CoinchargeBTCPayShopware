@@ -8,7 +8,10 @@ use Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler;
 
 class LightningPaymentMethod
 {
-    
+    public function getName(): string
+    {
+        return 'Lightning';
+    }
 
     public function getTranslations(): array
     {
@@ -23,7 +26,7 @@ class LightningPaymentMethod
             ],
         ];
     }
-    
+
     public function getPaymentHandler(): string
     {
         return LightningPaymentMethodHandler::class;

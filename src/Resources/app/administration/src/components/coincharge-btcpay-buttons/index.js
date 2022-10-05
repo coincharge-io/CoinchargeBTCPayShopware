@@ -33,7 +33,7 @@ Component.register('coincharge-btcpay-buttons', {
                 'BTCPay.config.btcpayWebhookId': '',
                 'BTCPay.config.btcpayWebhookSecret': ''
             })
-            return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&selectiveStores=true&redirect=' + url);
+            return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=' + url);
 
         },
         removeTrailingSlash(serverUrl) {

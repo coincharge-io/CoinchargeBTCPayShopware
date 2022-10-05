@@ -37,7 +37,6 @@ class ConfigurationController extends AbstractController
      */
     public function verifyApiKey(Request $request)
     {
-
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
         $response = $this->client->sendGetRequest($uri);
@@ -50,7 +49,7 @@ class ConfigurationController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
         }
         $this->configurationService->setSetting('integrationStatus', true);
-
+        $this->checkEnabledPaymentMethodsBTCPayStore();
         return new JsonResponse(['success' => true]);
     }
     /**
@@ -61,11 +60,24 @@ class ConfigurationController extends AbstractController
 
         $body = $request->request->all();
         $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
-        
+
         $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
 
         $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/BTCPay';
 
         return new RedirectResponse($redirectUrl);
+    }
+
+    private function checkEnabledPaymentMethodsBTCPayStore()
+    {
+        $paymentMethods = ['BTC' => 'BTC', 'BTC-LightningNetwork' => 'Lightning'];
+        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/payment-methods';
+        $response = $this->client->sendGetRequest($uri);
+        foreach ($response as $key => $val) {
+            if (array_key_exists($key, $paymentMethods)) {
+                $configName = 'btcpayStorePaymentMethod' . $paymentMethods[$key];
+                $this->configurationService->setSetting($configName, $val['enabled']);
+            }
+        }
     }
 }

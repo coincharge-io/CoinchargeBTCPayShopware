@@ -19,6 +19,22 @@
         </component>
     </card>
     <card>
+        <title>BTCPay Store Payment Methods</title>
+        <title lang="de-DE">BTCPay Store Zahlungsmöglichkeiten</title>
+        <input-field type="bool">
+            <name>btcpayStorePaymentMethodBTC</name>
+            <label>Bitcoin</label>
+            <helpText>Shows whether or not you can use this payment method in your store</helpText>
+            <helpText lang="de-DE">Zeigt an, ob Sie diese Zahlungsmethode in Ihrem Geschäft verwenden können oder nicht</helpText>
+        </input-field>
+        <input-field type="bool">
+            <name>btcpayStorePaymentMethodLightning</name>
+            <label>Lightning</label>
+            <helpText>Shows whether or not you can use this payment method in your store</helpText>
+            <helpText lang="de-DE">Zeigt an, ob Sie diese Zahlungsmethode in Ihrem Geschäft verwenden können oder nicht</helpText>
+        </input-field>
+    </card>
+    <card>
         <title>Credentials</title>
         <title lang="de-DE">Berechtigungsnachweise</title>
         <input-field>
