@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Coincharge\Shopware\PaymentMethod;
+namespace Coincharge\Shopware\PaymentHandler;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 
-class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
+abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
 {
     private BTCPayServerClientInterface $client;
     private ConfigurationService  $configurationService;
@@ -48,32 +48,8 @@ class BTCPayServerPayment implements AsynchronousPaymentHandlerInterface
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
+    abstract public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
 
-    private function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context): string
-    {
-
-        try {
-            $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
-
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-            $response = $this->client->sendPostRequest($uri, [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
-                    'metadata' =>
-                    [
-                        'orderId' => $transaction->getOrderTransaction()->getId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber()
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true
-                    ]]
-            ); 
-
-            return $response['checkoutLink'];
-        } catch (\Exception $e) {
-            $this->logger->error(print_r($e, true));
-            throw new \Exception;
-        }
     }
-}
+
+   

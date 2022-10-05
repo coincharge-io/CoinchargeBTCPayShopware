@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Coincharge\Shopware\PaymentMethod;
+namespace Coincharge\Shopware\PaymentHandler;
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 
-class LightningPayment extends AbstractPaymentMethod
+class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     private BTCPayServerClientInterface $client;
     private ConfigurationService  $configurationService;

@@ -109,9 +109,7 @@ class WebhookService implements WebhookServiceInterface
                             'id' => $orderId,
                             'customFields' => [
                                 'btcpayOrderStatus' => 'partiallyPaid',
-                                'paidAfterExpiration' => true,
-                                'paymentMethod' => $body['paymentMethod']
-                            ],
+                                'paidAfterExpiration' => true                            ],
                         ],
                     ], $context);
                 } else {
@@ -142,9 +140,7 @@ class WebhookService implements WebhookServiceInterface
                                 'id' => $orderId,
                                 'customFields' => [
                                     'btcpayOrderStatus' => 'settled',
-                                    'paidAfterExpiration' => true,
-                                    'paymentMethod' => $body['paymentMethod']
-                                ],
+                                    'paidAfterExpiration' => true                                ],
                             ],
                         ], $context);
                         $this->logger->info('Invoice fully settled after invoice was already expired. Needs manual checking.');

@@ -22,6 +22,8 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Coincharge\Shopware\Installer\PaymentMethodInstaller;
+use Coincharge\Shopware\PaymentMethod\PaymentMethods;
+
 class BTCPay extends Plugin
 {
     public function install(InstallContext $context): void
@@ -46,17 +48,6 @@ class BTCPay extends Plugin
                             'label' => [
                                 'de-DE' => 'Auftragsstatus',
                                 'en-GB' => 'Order Status'
-                            ]
-                        ]
-                    ],
-                    [
-                        'name' => 'paymentMethod',
-                        'label' => 'Payment Method',
-                        'type' => CustomFieldTypes::TEXT,
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'Zahlungsmethode',
-                                'en-GB' => 'Payment Method'
                             ]
                         ]
                     ],
@@ -88,7 +79,7 @@ class BTCPay extends Plugin
                 ]],
             ]
         ], $context->getContext());
-        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
+        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->addPaymentMethod(new $paymentMethod(), $context->getContext());
         }
         //$this->addPaymentMethod($context->getContext());
@@ -99,8 +90,8 @@ class BTCPay extends Plugin
         // Only set the payment method to inactive when uninstalling. Removing the payment method would
         // cause data consistency issues, since the payment method might have been used in several orders
         //$this->setPaymentMethodIsActive(false, $context->getContext());
-        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
-            $this->setPaymentMethodIsActive(false, $context->getContext());
+        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+            $this->setPaymentMethodIsActive(new $paymentMethod(), false, $context->getContext());
         }
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
         $criteria = new Criteria();
@@ -113,16 +104,16 @@ class BTCPay extends Plugin
     public function activate(ActivateContext $context): void
     {
         //$this->setPaymentMethodIsActive(true, $context->getContext());
-        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
-            $this->setPaymentMethodIsActive(true, $context->getContext());       
+        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+            $this->setPaymentMethodIsActive(new $paymentMethod(), true, $context->getContext());       
          }
         parent::activate($context);
     }
 
     public function deactivate(DeactivateContext $context): void
     {
-        foreach (PaymentMethodInstaller::PAYMENT_METHODS as $paymentMethod) {
-            $this->setPaymentMethodIsActive(false, $context->getContext());
+        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+            $this->setPaymentMethodIsActive(new $paymentMethod(), false, $context->getContext());
                  }
         //$this->setPaymentMethodIsActive(false, $context->getContext());
         parent::deactivate($context);
@@ -130,7 +121,7 @@ class BTCPay extends Plugin
 
     private function addPaymentMethod($paymentMethod, Context $context): void
     {
-        $paymentMethodExists = $this->getPaymentMethodId();
+        $paymentMethodExists = $this->getPaymentMethodId($paymentMethod);
 
         // Payment method exists already, no need to continue here
         if ($paymentMethodExists) {
@@ -143,7 +134,7 @@ class BTCPay extends Plugin
 
         //TODO integrate 'mediaId' => $this->ensureMedia(),
         $examplePaymentData = [
-            'handlerIdentifier' => $paymentMethod,
+            'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
             'pluginId' => $pluginId,
             'mediaId' => $this->ensureMedia($context, $paymentMethod->getName()),
             'name' =>  $paymentMethod->getName(),
@@ -155,12 +146,12 @@ class BTCPay extends Plugin
         $paymentRepository->create([$examplePaymentData], $context);
     }
 
-    private function setPaymentMethodIsActive(bool $active, Context $context): void
+    private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
     {
         /** @var EntityRepositoryInterface $paymentRepository */
         $paymentRepository = $this->container->get('payment_method.repository');
 
-        $paymentMethodId = $this->getPaymentMethodId();
+        $paymentMethodId = $this->getPaymentMethodId($paymentMethod);
 
         // Payment does not even exist, so nothing to (de-)activate here
         if (!$paymentMethodId) {
@@ -175,13 +166,13 @@ class BTCPay extends Plugin
         $paymentRepository->update([$paymentMethod], $context);
     }
 
-    private function getPaymentMethodId(): ?string
+    private function getPaymentMethodId($paymentMethod): ?string
     {
         /** @var EntityRepositoryInterface $paymentRepository */
         $paymentRepository = $this->container->get('payment_method.repository');
 
         // Fetch ID for update
-        $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', BTCPayServerPayment::class));
+        $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethod->getPaymentHandler()));
         return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
     }
 
@@ -195,7 +186,7 @@ class BTCPay extends Plugin
     }
     private function ensureMedia(Context $context, string $logoName): string
     {
-        $filePath = realpath(__DIR__ . '/Resources/icons/'.strtolower($logoName).'..svg');
+        $filePath = realpath(__DIR__ . '/Resources/icons/'.strtolower($logoName).'.svg');
         $fileName = hash_file('md5', $filePath);
         $media = $this->getMediaEntity($fileName, $context);
         $mediaRepository = $this->container->get('media.repository');
