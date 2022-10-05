@@ -137,7 +137,7 @@ class BTCPay extends Plugin
             'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
             'pluginId' => $pluginId,
             'mediaId' => $this->ensureMedia($context, $paymentMethod->getName()),
-            'translations' => [$paymentMethod->getTranslations()]
+            'translations' => $paymentMethod->getTranslations()
         ];
 
         /** @var EntityRepositoryInterface $paymentRepository */
