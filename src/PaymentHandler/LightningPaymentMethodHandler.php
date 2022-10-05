@@ -1,6 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
+
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Psr\Log\LoggerInterface;
@@ -18,8 +21,7 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
         $this->client = $client;
         $this->configurationService = $configurationService;
         $this->logger = $logger;
-        parent::__construct($client, $configurationService,$logger);
-
+        parent::__construct($client, $configurationService, $logger);
     }
     public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
@@ -27,7 +29,9 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
 
             $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-            $response = $this->client->sendPostRequest($uri, [
+            $response = $this->client->sendPostRequest(
+                $uri,
+                [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
                     'metadata' =>
@@ -39,8 +43,9 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
                         'paymentMethods' => ['BTC-LightningNetwork']
-                    ]]
-            ); 
+                    ]
+                ]
+            );
 
             return $response['checkoutLink'];
         } catch (\Exception $e) {
