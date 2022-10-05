@@ -53,6 +53,7 @@
             <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Coincharge\Shopware\Webhook\WebhookService"/>
+            <argument type="service" id="payment_method.repository"/>
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>

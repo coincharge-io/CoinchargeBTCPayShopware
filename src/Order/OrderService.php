@@ -6,7 +6,6 @@ namespace Coincharge\Shopware\Order;
 
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
-use Shopware\Core\Framework\Context;
 
 class OrderService
 {
@@ -29,5 +28,4 @@ class OrderService
         }
         return true;
     }
-    
 }

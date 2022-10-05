@@ -6,6 +6,7 @@ namespace Coincharge\Shopware\Configuration;
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
+
 class ConfigurationService
 {
     protected CONST DOMAIN = 'BTCPay.config.';

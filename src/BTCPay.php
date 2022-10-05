@@ -16,12 +16,10 @@ use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
-use Coincharge\Shopware\PaymentMethod\BTCPayServerPayment;
 use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\File\FileSaver;
-use Coincharge\Shopware\Installer\PaymentMethodInstaller;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
 
 class BTCPay extends Plugin
@@ -104,9 +102,9 @@ class BTCPay extends Plugin
     public function activate(ActivateContext $context): void
     {
         //$this->setPaymentMethodIsActive(true, $context->getContext());
-        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+        /* foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->setPaymentMethodIsActive(new $paymentMethod(), true, $context->getContext());
-        }
+        } */
         parent::activate($context);
     }
 
