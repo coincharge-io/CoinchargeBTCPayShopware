@@ -24,12 +24,14 @@
         <input-field type="bool">
             <name>btcpayStorePaymentMethodBTC</name>
             <label>Bitcoin</label>
+            <disabled>true</disabled>
             <helpText>Shows whether or not you can use this payment method in your store</helpText>
             <helpText lang="de-DE">Zeigt an, ob Sie diese Zahlungsmethode in Ihrem Geschäft verwenden können oder nicht</helpText>
         </input-field>
         <input-field type="bool">
             <name>btcpayStorePaymentMethodLightning</name>
             <label>Lightning</label>
+            <disabled>true</disabled>
             <helpText>Shows whether or not you can use this payment method in your store</helpText>
             <helpText lang="de-DE">Zeigt an, ob Sie diese Zahlungsmethode in Ihrem Geschäft verwenden können oder nicht</helpText>
         </input-field>
@@ -40,21 +42,22 @@
         <input-field>
             <name>btcpayApiKey</name>
             <label>BTCPay API Key</label>
+            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayServerStoreId</name>
             <label>BTCPay Server Store Id</label>
+            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayWebhookId</name>
             <label>Webhook id</label>
-            <label lang="de-DE">Webhook id</label>
+            <disabled>true</disabled>
         </input-field>
         <input-field>
             <name>btcpayWebhookSecret</name>
             <disabled>true</disabled>
             <label>Webhook secret</label>
-            <label lang="de-DE">Webhook secret</label>
         </input-field>
     </card>
 
