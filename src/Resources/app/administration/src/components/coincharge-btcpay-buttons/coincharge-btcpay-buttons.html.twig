@@ -1,4 +1,4 @@
-<sw-container columns="repeat(2, auto)" gap="0px 30px">
+<sw-container columns="repeat(3, minmax(0, 1fr))">
 	<sw-button class="sw-button-coincharge" @click="generateAPIKey">{{ $tc('coincharge-btcpay-generate-credentials.button') }}</sw-button>
 	<sw-button-process class="sw-button-coincharge" :process-success="isLoading" :is-loading="isLoading" @click="testConnection">{{ $tc('coincharge-btcpay-test-connection.button') }}</sw-button-process>
 </sw-container>
