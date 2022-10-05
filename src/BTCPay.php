@@ -105,8 +105,8 @@ class BTCPay extends Plugin
     {
         //$this->setPaymentMethodIsActive(true, $context->getContext());
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-            $this->setPaymentMethodIsActive(new $paymentMethod(), true, $context->getContext());       
-         }
+            $this->setPaymentMethodIsActive(new $paymentMethod(), true, $context->getContext());
+        }
         parent::activate($context);
     }
 
@@ -114,7 +114,7 @@ class BTCPay extends Plugin
     {
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->setPaymentMethodIsActive(new $paymentMethod(), false, $context->getContext());
-                 }
+        }
         //$this->setPaymentMethodIsActive(false, $context->getContext());
         parent::deactivate($context);
     }
@@ -137,8 +137,7 @@ class BTCPay extends Plugin
             'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
             'pluginId' => $pluginId,
             'mediaId' => $this->ensureMedia($context, $paymentMethod->getName()),
-            'name' =>  $paymentMethod->getName(),
-            'description' =>  $paymentMethod->getDescription()
+            'translations' => [$paymentMethod->getTranslations()]
         ];
 
         /** @var EntityRepositoryInterface $paymentRepository */
@@ -186,7 +185,7 @@ class BTCPay extends Plugin
     }
     private function ensureMedia(Context $context, string $logoName): string
     {
-        $filePath = realpath(__DIR__ . '/Resources/icons/'.strtolower($logoName).'.svg');
+        $filePath = realpath(__DIR__ . '/Resources/icons/' . strtolower($logoName) . '.svg');
         $fileName = hash_file('md5', $filePath);
         $media = $this->getMediaEntity($fileName, $context);
         $mediaRepository = $this->container->get('media.repository');
