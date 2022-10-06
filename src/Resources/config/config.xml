@@ -20,7 +20,7 @@
     </card>
     <card>
         <title>Available payment methods for your store based on the BTCPay Server store configuration</title>
-        <title lang="de-DE">Available payment methods for your store based on the BTCPay Server store configuration</title>
+        <title lang="de-DE">Verfügbare Zahlungsmethoden für Ihren Shop basierend auf der BTCPay Server Shop-Konfiguration</title>
         <input-field type="bool">
             <name>btcpayStorePaymentMethodBTC</name>
             <label>Bitcoin</label>
