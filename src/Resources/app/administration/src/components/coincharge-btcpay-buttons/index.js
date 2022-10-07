@@ -23,6 +23,12 @@ Component.register('coincharge-btcpay-buttons', {
             const systemConfig = ApiService.getByName('systemConfigApiService')
 
             const btcpayServerUrl = document.getElementById("BTCPay.config.btcpayServerUrl").value
+            if (!btcpayServerUrl) {
+                return this.createNotificationWarning({
+                    title: 'BTCPay Server',
+                    message: this.$tc('coincharge-btcpay-generate-credentials.missing_server')
+                })
+            }
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.config['BTCPay.config.btcpayServerUrl'] = filteredUrl
             const url = window.location.origin + '/api/_action/coincharge/credentials';

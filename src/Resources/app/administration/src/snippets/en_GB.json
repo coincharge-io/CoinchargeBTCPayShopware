@@ -1,6 +1,7 @@
 {
     "coincharge-btcpay-generate-credentials": {
-        "button": "Generate credentials"
+        "button": "Generate credentials",
+        "missing_server": "You need to provide BTCPay Server url"
     },
     "coincharge-btcpay-test-connection": {
         "button": "Test connection",
