@@ -38,54 +38,52 @@ class BTCPay extends Plugin
 
         $customFieldSetRepository->upsert(
             [
-            [
-                'name' => 'btcpayServer',
-                'config' => [
-                    'label' => [
-                        'de-DE' => 'BTCPayServer Information',
-                        'en-GB' => 'BTCPayServer Information'
-                    ]
-                ],
-                'customFields' => [
-                    [
-                        'name' => 'btcpayOrderStatus',
-                        'label' => 'Order Status',
-                        'type' => CustomFieldTypes::TEXT,
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'Auftragsstatus',
-                                'en-GB' => 'Order Status'
-                            ]
+                [
+                    'name' => 'btcpayServer',
+                    'config' => [
+                        'label' => [
+                            'de-DE' => 'BTCPayServer Information',
+                            'en-GB' => 'BTCPayServer Information'
                         ]
                     ],
-                    [
-                        'name' => 'paidAfterExpiration',
-                        'label' => 'Paid After Expiration',
-                        'type' => CustomFieldTypes::BOOL,
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
-                                'en-GB' => 'Paid After Invoice Expiration'
+                    'customFields' => [
+                        [
+                            'name' => 'btcpayOrderStatus',
+                            'type' => CustomFieldTypes::TEXT,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'Auftragsstatus',
+                                    'en-GB' => 'Order Status'
+                                ]
                             ]
-                        ]
-                    ],
-                    [
-                        'name' => 'overpaid',
-                        'label' => 'Received more than expected',
-                        'type' => CustomFieldTypes::BOOL,
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'Überbezahlt',
-                                'en-GB' => 'Overpaid '
+                        ],
+                        [
+                            'name' => 'paidAfterExpiration',
+                            'type' => CustomFieldTypes::BOOL,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
+                                    'en-GB' => 'Paid After Invoice Expiration'
+                                ]
                             ]
-                        ]
+                        ],
+                        [
+                            'name' => 'overpaid',
+                            'type' => CustomFieldTypes::BOOL,
+                            'config' => [
+                                'label' => [
+                                    'de-DE' => 'Überbezahlt',
+                                    'en-GB' => 'Overpaid '
+                                ]
+                            ]
+                        ],
                     ],
-                ],
-                'relations' => [[
-                    'entityName' => 'order'
-                ]],
-            ]
-            ], $context->getContext()
+                    'relations' => [[
+                        'entityName' => 'order'
+                    ]],
+                ]
+            ],
+            $context->getContext()
         );
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->addPaymentMethod(new $paymentMethod(), $context->getContext());
@@ -137,8 +135,8 @@ class BTCPay extends Plugin
         }
 
         /**
- * @var PluginIdProvider $pluginIdProvider 
-*/
+         * @var PluginIdProvider $pluginIdProvider 
+         */
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
 
@@ -151,8 +149,8 @@ class BTCPay extends Plugin
         ];
 
         /**
- * @var EntityRepositoryInterface $paymentRepository 
-*/
+         * @var EntityRepositoryInterface $paymentRepository 
+         */
         $paymentRepository = $this->container->get('payment_method.repository');
         $paymentRepository->create([$examplePaymentData], $context);
     }
@@ -160,8 +158,8 @@ class BTCPay extends Plugin
     private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
     {
         /**
- * @var EntityRepositoryInterface $paymentRepository 
-*/
+         * @var EntityRepositoryInterface $paymentRepository 
+         */
         $paymentRepository = $this->container->get('payment_method.repository');
 
         $paymentMethodId = $this->getPaymentMethodId($paymentMethod);
@@ -182,8 +180,8 @@ class BTCPay extends Plugin
     private function getPaymentMethodId($paymentMethod): ?string
     {
         /**
- * @var EntityRepositoryInterface $paymentRepository 
-*/
+         * @var EntityRepositoryInterface $paymentRepository 
+         */
         $paymentRepository = $this->container->get('payment_method.repository');
 
         // Fetch ID for update
@@ -219,10 +217,11 @@ class BTCPay extends Plugin
         $mediaId = Uuid::randomHex();
         $mediaRepository->create(
             [
-            [
-                'id' => $mediaId,
+                [
+                    'id' => $mediaId,
+                ],
             ],
-            ], $context
+            $context
         );
         $fileSaver = $this->container->get(FileSaver::class);
         $fileSaver->persistFileToMedia(

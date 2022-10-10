@@ -118,25 +118,15 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
-                                    'btcpayOrderStatus' => 'partiallyPaid',
-                                    'paidAfterExpiration' => true
+                                    'btcpayOrderStatus' => 'paidPartially',
+                                    'paidAfterExpiration' => true,
+                                    'overpaid'      => false
                                 ],
                             ],
                         ],
                         $context
                     );
                 } else {
-                    $this->orderRepository->upsert(
-                        [
-                            [
-                                'id' => $orderId,
-                                'customFields' => [
-                                    'btcpayOrderStatus' => 'waitingForSettlement',
-                                ],
-                            ],
-                        ],
-                        $context
-                    );
                     $this->logger->info('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.');
                 }
 
@@ -146,8 +136,8 @@ class WebhookService implements WebhookServiceInterface
                 // BTCPay Server v1.7.0.0, see https://github.com/btcpayserver/btcpayserver/issues/
                 // Therefore we check if the invoice is in expired or expired paid partial status, instead.
                 if (
-                    $responseBody['status'] == 'expired'
-                    || ($responseBody['status'] == 'expired' && $responseBody['additionalStatus'] == 'PaidPartial')
+                    $responseBody['status'] == 'Expired'
+                    || ($responseBody['status'] == 'Expired' && $responseBody['additionalStatus'] == 'PaidPartial')
                 ) {
                     // Check if also the invoice is now fully paid.
                     if ($this->orderService->invoiceIsFullyPaid($body['invoiceId'])) {
@@ -157,7 +147,8 @@ class WebhookService implements WebhookServiceInterface
                                     'id' => $orderId,
                                     'customFields' => [
                                         'btcpayOrderStatus' => 'settled',
-                                        'paidAfterExpiration' => true
+                                        'paidAfterExpiration' => true,
+                                        'overpaid'      =>  false
                                     ],
                                 ],
                             ],
@@ -170,12 +161,15 @@ class WebhookService implements WebhookServiceInterface
                                 [
                                     'id' => $orderId,
                                     'customFields' => [
-                                        'btcpayOrderStatus' => 'notFullyPaid'
+                                        'btcpayOrderStatus' => 'paidPartially',
+                                        'paidAfterExpiration' => true,
+                                        'overpaid'      => false
                                     ],
                                 ],
                             ],
                             $context
                         );
+                        $this->transactionStateHandler->payPartially($responseBody['metadata']['orderId'], $context);
                         $this->logger->debug('Invoice with orderId:' . $responseBody['metadata']['orderId'] . ' NOT fully paid.');
                         $this->logger->info('(Partial) payment settled but invoice not settled yet (could be more transactions incoming). Needs manual checking.');
                     }
@@ -191,23 +185,11 @@ class WebhookService implements WebhookServiceInterface
 
                     $this->logger->info('Invoice payment received fully with overpayment, waiting for settlement.');
                 } else {
-                    $this->orderRepository->upsert(
-                        [
-                            [
-                                'id' => $orderId,
-                                'customFields' => [
-                                    'btcpayOrderStatus' => 'waitingSettlement',
-                                    'overpaid' => false
-                                ],
-                            ],
-                        ],
-                        $context
-                    );
                     $this->logger->info('Invoice payment received fully, waiting for settlement.');
                 }
                 break;
             case 'InvoiceInvalid':
-                $this->transactionStateHandler->cancel($responseBody['metadata']['orderId'], $context);
+                $this->transactionStateHandler->fail($responseBody['metadata']['orderId'], $context);
                 if ($body['manuallyMarked']) {
                     $this->orderRepository->upsert(
                         [
@@ -215,6 +197,8 @@ class WebhookService implements WebhookServiceInterface
                                 'id' => $orderId,
                                 'customFields' => [
                                     'btcpayOrderStatus' => 'manuallyMarked',
+                                    'overpaid'  => false,
+                                    'paidAfterExpiration' => false
                                 ],
                             ],
                         ],
@@ -222,17 +206,6 @@ class WebhookService implements WebhookServiceInterface
                     );
                     $this->logger->info('Invoice manually marked invalid.');
                 } else {
-                    $this->orderRepository->upsert(
-                        [
-                            [
-                                'id' => $orderId,
-                                'customFields' => [
-                                    'btcpayOrderStatus' => 'invalid',
-                                ],
-                            ],
-                        ],
-                        $context
-                    );
                     $this->logger->info('Invoice became invalid.');
                 }
                 break;
@@ -244,7 +217,9 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
-                                    'btcpayOrderStatus' => 'invoiceExpiredPaidPartially',
+                                    'btcpayOrderStatus' => 'invoiceExpired',
+                                    'paidAfterExpiration' => true,
+                                    'overpaid'  => false
                                 ],
                             ],
                         ],
@@ -259,6 +234,8 @@ class WebhookService implements WebhookServiceInterface
                                 'id' => $orderId,
                                 'customFields' => [
                                     'btcpayOrderStatus' => 'invoiceExpired',
+                                    'paidAfterExpiration' => false,
+                                    'overpaid'  => false
                                 ],
                             ],
                         ],
@@ -277,6 +254,7 @@ class WebhookService implements WebhookServiceInterface
                                 'id' => $orderId,
                                 'customFields' => [
                                     'btcpayOrderStatus' => 'paid',
+                                    'paidAfterExpiration' => false,
                                     'overpaid' => true
                                 ],
                             ],
@@ -291,7 +269,9 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
-                                    'btcpayOrderStatus' => 'paid'
+                                    'btcpayOrderStatus' => 'paid',
+                                    'paidAfterExpiration' => false,
+                                    'overpaid' => false
                                 ],
                             ],
                         ],
