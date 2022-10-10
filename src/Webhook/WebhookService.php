@@ -27,7 +27,7 @@ class WebhookService implements WebhookServiceInterface
 {
     public const REQUIRED_HEADER = 'btcpay-sig';
     private BTCPayServerClientInterface $client;
-    protected ConfigurationService $configurationService;
+    private ConfigurationService $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private  $orderService;
     private EntityRepository $orderRepository;
