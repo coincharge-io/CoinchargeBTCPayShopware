@@ -22,6 +22,10 @@
         "description": {
             "de-DE": "Bitcoin-Zahlungen akzeptieren",
             "en-GB": "Accept Bitcoin payments"
+        },
+        "supportLink": {
+            "en-GB": "https://coincharge.io/en/shopware/",
+            "de-DE": "https://coincharge.io/shopware"
         }
     },
     "autoload": {

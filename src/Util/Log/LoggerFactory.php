@@ -61,14 +61,16 @@ class LoggerFactory
         $logger->pushProcessor(new PsrLogMessageProcessor(null, true));
         $logger->pushProcessor(new IntrospectionProcessor($this->logLevel));
         if ($this->logLevel < Logger::WARNING) {
-            $logger->pushProcessor(new WebProcessor(
-                null,
-                [
+            $logger->pushProcessor(
+                new WebProcessor(
+                    null,
+                    [
                     'url' => 'REQUEST_URI',
                     'http_method' => 'REQUEST_METHOD',
                     'server' => 'SERVER_NAME',
-                ]
-            ));
+                    ]
+                )
+            );
         }
 
         return $logger;

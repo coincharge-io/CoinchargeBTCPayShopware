@@ -44,8 +44,8 @@ class AbstractClient
             $body = $response->getBody()->getContents();
         }catch(\Exception $requestException){
              $this->logger->error($requestException->getMessage());
-            throw new \Exception( $requestException->getMessage());
-            }
+            throw new \Exception($requestException->getMessage());
+        }
         return \json_decode($body, true) ?? [];
     }
 }

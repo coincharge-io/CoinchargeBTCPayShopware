@@ -25,12 +25,14 @@ class BTCPayServerClient extends AbstractClient implements BTCPayServerClientInt
         
         $authorizationHeader = $this->createAuthHeader();
 
-        $client = new Client([
+        $client = new Client(
+            [
             'base_uri' => $this->configurationService->getSetting('btcpayServerUrl'),
             'headers' => [
                 'Authorization' => $authorizationHeader
             ]
-        ]);
+            ]
+        );
         parent::__construct($client, $logger);
     }
     public function sendPostRequest(string $resourceUri, array $data, array $headers = []): array

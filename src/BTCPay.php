@@ -36,7 +36,8 @@ class BTCPay extends Plugin
     {
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
-        $customFieldSetRepository->upsert([
+        $customFieldSetRepository->upsert(
+            [
             [
                 'name' => 'btcpayServer',
                 'config' => [
@@ -84,7 +85,8 @@ class BTCPay extends Plugin
                     'entityName' => 'order'
                 ]],
             ]
-        ], $context->getContext());
+            ], $context->getContext()
+        );
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->addPaymentMethod(new $paymentMethod(), $context->getContext());
         }
@@ -134,7 +136,9 @@ class BTCPay extends Plugin
             return;
         }
 
-        /** @var PluginIdProvider $pluginIdProvider */
+        /**
+ * @var PluginIdProvider $pluginIdProvider 
+*/
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
 
@@ -146,14 +150,18 @@ class BTCPay extends Plugin
             'translations' => $paymentMethod->getTranslations()
         ];
 
-        /** @var EntityRepositoryInterface $paymentRepository */
+        /**
+ * @var EntityRepositoryInterface $paymentRepository 
+*/
         $paymentRepository = $this->container->get('payment_method.repository');
         $paymentRepository->create([$examplePaymentData], $context);
     }
 
     private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
     {
-        /** @var EntityRepositoryInterface $paymentRepository */
+        /**
+ * @var EntityRepositoryInterface $paymentRepository 
+*/
         $paymentRepository = $this->container->get('payment_method.repository');
 
         $paymentMethodId = $this->getPaymentMethodId($paymentMethod);
@@ -173,7 +181,9 @@ class BTCPay extends Plugin
 
     private function getPaymentMethodId($paymentMethod): ?string
     {
-        /** @var EntityRepositoryInterface $paymentRepository */
+        /**
+ * @var EntityRepositoryInterface $paymentRepository 
+*/
         $paymentRepository = $this->container->get('payment_method.repository');
 
         // Fetch ID for update
@@ -207,11 +217,13 @@ class BTCPay extends Plugin
             filesize($filePath)
         );
         $mediaId = Uuid::randomHex();
-        $mediaRepository->create([
+        $mediaRepository->create(
+            [
             [
                 'id' => $mediaId,
             ],
-        ], $context);
+            ], $context
+        );
         $fileSaver = $this->container->get(FileSaver::class);
         $fileSaver->persistFileToMedia(
             $mediaFile,
