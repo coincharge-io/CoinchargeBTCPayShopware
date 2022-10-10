@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2022 Coincharge
+ * This file is open source and available under the MIT license.
+ * See the LICENSE file for more info.
+ *
+ * Author: Coincharge<shopware@coincharge.io>
+ */
+
 import './components/coincharge-btcpay-buttons';
 import './main.scss';
 import CoinchargeBtcpayApiService from './service/CoinchargeBtcpayAPI.service';

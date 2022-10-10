@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2022 Coincharge
+ * This file is open source and available under the MIT license.
+ * See the LICENSE file for more info.
+ *
+ * Author: Coincharge<shopware@coincharge.io>
+ */
+
 const { Component, Mixin, ApiService } = Shopware;
 import template from './coincharge-btcpay-buttons.html.twig';
 import './coincharge-btcpay-buttons.scss';

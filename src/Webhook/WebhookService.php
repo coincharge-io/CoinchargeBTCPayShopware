@@ -2,6 +2,14 @@
 
 declare(strict_types=1);
 
+/**
+ * Copyright (c) 2022 Coincharge
+ * This file is open source and available under the MIT license.
+ * See the LICENSE file for more info.
+ *
+ * Author: Coincharge<shopware@coincharge.io>
+ */
+
 namespace Coincharge\Shopware\Webhook;
 
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
@@ -18,14 +26,13 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 class WebhookService implements WebhookServiceInterface
 {
+    public const REQUIRED_HEADER = 'btcpay-sig';
     private BTCPayServerClientInterface $client;
     protected ConfigurationService $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private  $orderService;
     private EntityRepository $orderRepository;
     private LoggerInterface $logger;
-    public const WEBHOOK_CREATED = 'created';
-    public const REQUIRED_HEADER = 'btcpay-sig';
 
     public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler,  $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
     {
@@ -109,7 +116,8 @@ class WebhookService implements WebhookServiceInterface
                             'id' => $orderId,
                             'customFields' => [
                                 'btcpayOrderStatus' => 'partiallyPaid',
-                                'paidAfterExpiration' => true                            ],
+                                'paidAfterExpiration' => true
+                            ],
                         ],
                     ], $context);
                 } else {
@@ -140,7 +148,8 @@ class WebhookService implements WebhookServiceInterface
                                 'id' => $orderId,
                                 'customFields' => [
                                     'btcpayOrderStatus' => 'settled',
-                                    'paidAfterExpiration' => true                                ],
+                                    'paidAfterExpiration' => true
+                                ],
                             ],
                         ], $context);
                         $this->logger->info('Invoice fully settled after invoice was already expired. Needs manual checking.');

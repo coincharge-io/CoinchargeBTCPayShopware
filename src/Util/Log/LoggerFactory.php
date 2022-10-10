@@ -1,4 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Copyright (c) 2022 Coincharge
+ * This file is open source and available under the MIT license.
+ * See the LICENSE file for more info.
+ *
+ * Author: Coincharge<shopware@coincharge.io>
+ */
 
 namespace Coincharge\Shopware\Util\Log;
 
@@ -10,7 +20,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use Monolog\Processor\WebProcessor;
 use Psr\Log\LoggerInterface;
 
-class LoggerFactory 
+class LoggerFactory
 {
     protected const DEFAULT_LEVEL = Logger::WARNING;
     protected const ALLOWED_LOG_LEVEL = [

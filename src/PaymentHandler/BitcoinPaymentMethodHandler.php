@@ -2,6 +2,14 @@
 
 declare(strict_types=1);
 
+/**
+ * Copyright (c) 2022 Coincharge
+ * This file is open source and available under the MIT license.
+ * See the LICENSE file for more info.
+ *
+ * Author: Coincharge<shopware@coincharge.io>
+ */
+
 namespace Coincharge\Shopware\PaymentHandler;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
@@ -52,13 +60,5 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
             $this->logger->error(print_r($e, true));
             throw new \Exception;
         }
-    }
-    public function getName(): string
-    {
-        return 'Bitcoin';
-    }
-    public function getDescription(): string
-    {
-        return 'Pay with Bitcoin';
     }
 }
