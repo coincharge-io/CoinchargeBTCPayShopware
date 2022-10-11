@@ -143,6 +143,7 @@ class BTCPay extends Plugin
         $examplePaymentData = [
             'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
             'pluginId' => $pluginId,
+            'position' => $paymentMethod->getPosition(),
             'media' => [
                 'id' => $this->ensureMedia($context, $paymentMethod->getName()),
                 'mediaFolderId' => $this->getMediaDefaultFolderId($context),

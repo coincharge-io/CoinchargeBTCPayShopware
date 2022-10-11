@@ -20,6 +20,11 @@ class BitcoinPaymentMethod
     {
         return 'Bitcoin';
     }
+    
+    public function getPosition(): int
+    {
+        return -2;
+    }
 
     public function getTranslations(): array
     {

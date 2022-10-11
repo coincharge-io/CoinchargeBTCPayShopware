@@ -21,6 +21,11 @@ class LightningPaymentMethod
         return 'Lightning';
     }
 
+    public function getPosition(): int
+    {
+        return -1;
+    }
+
     public function getTranslations(): array
     {
         return [
