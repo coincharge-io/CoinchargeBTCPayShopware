@@ -1,6 +1,6 @@
 {
-    "name": "coincharge/shopware6-btcpay",
-    "description": "Accept Bitcoin payments",
+    "name": "coincharge/btcpay_shopware",
+    "description": "Accept Bitcoin and Lightning payment in Shopware with BTCPay server and Coincharge's Bitcoin extension.",
     "version": "0.1",
     "type": "shopware-platform-plugin",
     "license": "MIT",
@@ -20,8 +20,8 @@
             "en-GB": "BTCPayShopware"
         },
         "description": {
-            "de-DE": "Bitcoin-Zahlungen akzeptieren",
-            "en-GB": "Accept Bitcoin payments"
+            "de-DE": "Akzeptiere Bitcoin und Lightning Zahlung in Shopware mit dem BTCPay Server und der Bitcoin Erweiterung von Coincharge.",
+            "en-GB": "Accept Bitcoin and Lightning payment in Shopware with BTCPay server and Coincharge's Bitcoin extension."
         },
         "supportLink": {
             "en-GB": "https://coincharge.io/en/shopware/",

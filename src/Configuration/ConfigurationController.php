@@ -54,6 +54,7 @@ class ConfigurationController extends AbstractController
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
         $response = $this->client->sendGetRequest($uri);
+
         if (!is_array($response)) {
             $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
