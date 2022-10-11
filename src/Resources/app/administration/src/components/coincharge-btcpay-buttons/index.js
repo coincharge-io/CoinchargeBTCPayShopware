@@ -74,6 +74,11 @@ Component.register('coincharge-btcpay-buttons', {
 
                 this.isLoading = false;
                 window.location.reload();
+            }).catch(e => {
+                return this.createNotificationWarning({
+                    title: 'BTCPay Server',
+                    message: this.$tc('coincharge-btcpay-test-connection.error')
+                })
             });
         },
     }

@@ -5,6 +5,7 @@
     },
     "coincharge-btcpay-test-connection": {
         "button": "Verbindung testen",
-        "success": "Das Plugin ist mit dem Server verbunden"
+        "success": "Das Plugin ist mit dem Server verbunden",
+        "error": "Etwas ist schief gelaufen. Versuchen Sie es noch einmal."
     }
 }

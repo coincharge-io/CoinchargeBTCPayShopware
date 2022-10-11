@@ -5,6 +5,7 @@
     },
     "coincharge-btcpay-test-connection": {
         "button": "Test connection",
-        "success": "The plugin is connected to the server"
+        "success": "The plugin is connected to the server",
+        "error": "Something went wrong. Try again."
     }
 }
