@@ -140,11 +140,13 @@ class BTCPay extends Plugin
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
 
-        //TODO integrate 'mediaId' => $this->ensureMedia(),
         $examplePaymentData = [
             'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
             'pluginId' => $pluginId,
-            'mediaId' => $this->ensureMedia($context, $paymentMethod->getName()),
+            'media' => [
+                'id' => $this->ensureMedia($context, $paymentMethod->getName()),
+                'mediaFolderId' => $this->getMediaDefaultFolderId($context),
+            ],
             'translations' => $paymentMethod->getTranslations()
         ];
 
@@ -224,13 +226,26 @@ class BTCPay extends Plugin
             $context
         );
         $fileSaver = $this->container->get(FileSaver::class);
+        $savedFileName = \sprintf("btcpay_shopware_%s", strtolower($logoName));
         $fileSaver->persistFileToMedia(
             $mediaFile,
-            $fileName,
+            $savedFileName,
             $mediaId,
             $context
         );
 
         return $mediaId;
+    }
+    private function getMediaDefaultFolderId(Context $context): ?string
+    {
+        $mediaFolderRepository = $this->container->get('media_folder.repository');
+        $paymentMethodRepository = $this->container->get('payment_method.repository');
+
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('media_folder.defaultFolder.entity', $paymentMethodRepository->getDefinition()->getEntityName()));
+        $criteria->addAssociation('defaultFolder');
+        $criteria->setLimit(1);
+
+        return $mediaFolderRepository->searchIds($criteria, $context)->firstId();
     }
 }
