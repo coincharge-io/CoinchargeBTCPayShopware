@@ -2,7 +2,7 @@
 
 # Bitcoin payments for Shopware
 
-**Accept Bitcoin and Lightning payments for Shopware 6 with Coincharge's Bitcoin extension for BTCPay Server.**
+**Accept Bitcoin and Lightning payment in Shopware with BTCPay Server and Coincharge's Bitcoin extension..**
 
 # Bitcoin & Lightning payment processing with BTCPay Server.
 
