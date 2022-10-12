@@ -14,10 +14,10 @@
         "guzzlehttp/guzzle": "^7.4"
     },
     "extra": {
-        "shopware-plugin-class": "Coincharge\\Shopware\\BTCPayShopware",
+        "shopware-plugin-class": "Coincharge\\Shopware\\CoinchargeBTCPayShopware",
         "label": {
-            "de-DE": "BTCPayShopware",
-            "en-GB": "BTCPayShopware"
+            "de-DE": "CoinchargeBTCPayShopware",
+            "en-GB": "CoinchargeBTCPayShopware"
         },
         "description": {
             "de-DE": "Akzeptiere Bitcoin und Lightning Zahlung in Shopware mit dem BTCPay Server und der Bitcoin Erweiterung von Coincharge.",

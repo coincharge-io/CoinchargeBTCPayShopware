@@ -30,7 +30,7 @@ use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
 
-class BTCPayShopware extends Plugin
+class CoinchargeBTCPayShopware extends Plugin
 {
     public function install(InstallContext $context): void
     {
