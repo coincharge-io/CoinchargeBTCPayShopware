@@ -22,7 +22,7 @@ Component.register('coincharge-btcpay-buttons', {
         return {
             isLoading: false,
             config: {
-                'BTCPay.config.btcpayServerUrl': ''
+                'BTCPayShopware.config.btcpayServerUrl': ''
             },
         };
     },
@@ -30,7 +30,7 @@ Component.register('coincharge-btcpay-buttons', {
         generateAPIKey() {
             const systemConfig = ApiService.getByName('systemConfigApiService')
 
-            const btcpayServerUrl = document.getElementById("BTCPay.config.btcpayServerUrl").value
+            const btcpayServerUrl = document.getElementById("BTCPayShopware.config.btcpayServerUrl").value
             if (!btcpayServerUrl) {
                 return this.createNotificationWarning({
                     title: 'BTCPay Server',
@@ -38,17 +38,17 @@ Component.register('coincharge-btcpay-buttons', {
                 })
             }
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
-            this.config['BTCPay.config.btcpayServerUrl'] = filteredUrl
+            this.config['BTCPayShopware.config.btcpayServerUrl'] = filteredUrl
             const url = window.location.origin + '/api/_action/coincharge/credentials';
             systemConfig.saveValues({
-                'BTCPay.config.btcpayServerUrl': this.config['BTCPay.config.btcpayServerUrl'],
-                'BTCPay.config.btcpayApiKey': '',
-                'BTCPay.config.btcpayServerStoreId': '',
-                'BTCPay.config.btcpayWebhookId': '',
-                'BTCPay.config.btcpayWebhookSecret': '',
-                'BTCPay.config.integrationStatus': false,
-                'BTCPay.config.btcpayStorePaymentMethodBTC': false,
-                'BTCPay.config.btcpayStorePaymentMethodLightning': false
+                'BTCPayShopware.config.btcpayServerUrl': this.config['BTCPayShopware.config.btcpayServerUrl'],
+                'BTCPayShopware.config.btcpayApiKey': '',
+                'BTCPayShopware.config.btcpayServerStoreId': '',
+                'BTCPayShopware.config.btcpayWebhookId': '',
+                'BTCPayShopware.config.btcpayWebhookSecret': '',
+                'BTCPayShopware.config.integrationStatus': false,
+                'BTCPayShopware.config.btcpayStorePaymentMethodBTC': false,
+                'BTCPayShopware.config.btcpayStorePaymentMethodLightning': false
             })
             return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=' + url);
 

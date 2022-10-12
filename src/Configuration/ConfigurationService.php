@@ -17,7 +17,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class ConfigurationService
 {
-    protected const DOMAIN = 'BTCPay.config.';
+    protected const DOMAIN = 'BTCPayShopware.config.';
     /**
      * @var SystemConfigService
      */

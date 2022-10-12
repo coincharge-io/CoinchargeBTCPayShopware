@@ -14,7 +14,7 @@
         "guzzlehttp/guzzle": "^7.4"
     },
     "extra": {
-        "shopware-plugin-class": "Coincharge\\Shopware\\BTCPay",
+        "shopware-plugin-class": "Coincharge\\Shopware\\BTCPayShopware",
         "label": {
             "de-DE": "BTCPayShopware",
             "en-GB": "BTCPayShopware"
