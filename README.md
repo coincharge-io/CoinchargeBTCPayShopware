@@ -50,8 +50,8 @@ On request, Coincharge integrates the Bitcoin extension into your online store, 
 
 
 ## Support
-Installation instructions in English and German: https://coincharge.io/en/shopware/
-Explainer video on YouTube (in German language). Coming Soon
+- Installation instructions in English and German: https://coincharge.io/en/shopware/
+- Explainer video on YouTube (in German language). Coming Soon
 
 ## Licence
 The MIT License (MIT). Please see [License File] for more information.
