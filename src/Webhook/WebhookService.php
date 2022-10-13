@@ -50,7 +50,8 @@ class WebhookService implements WebhookServiceInterface
             return true;
         }
 
-        $webhookUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/api/_action/coincharge/webhook-endpoint';
+        //$webhookUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/api/_action/coincharge/webhook-endpoint';
+        $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
 
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks';
         $body = $this->client->sendPostRequest(

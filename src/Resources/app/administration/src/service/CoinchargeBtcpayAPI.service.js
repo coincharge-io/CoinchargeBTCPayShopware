@@ -9,12 +9,10 @@
 const ApiService = Shopware.Classes.ApiService;
 
 export default class CoinchargeBtcpayApiService extends ApiService {
-    constructor(httpClient, loginService, apiEndpoint = 'coincharge')
-    {
+    constructor(httpClient, loginService, apiEndpoint = 'coincharge') {
         super(httpClient, loginService, apiEndpoint);
     }
-    verifyApiKey()
-    {
+    verifyApiKey() {
         const apiRoute = `/_action/${this.getApiBasePath()}/verify`;
         const headers = this.getBasicHeaders()
 
@@ -24,10 +22,14 @@ export default class CoinchargeBtcpayApiService extends ApiService {
             (response) => {
                 return ApiService.handleResponse(response);
             }
+        ).catch(
+            (error) => {
+                console.error("Credentials aren't valid: " + error.message);
+                throw error;
+            }
         );
     }
-    generateWebhook()
-    {
+    generateWebhook() {
         const apiRoute = `/_action/${this.getApiBasePath()}/webhook`;
 
         return this.httpClient.post(
@@ -38,8 +40,8 @@ export default class CoinchargeBtcpayApiService extends ApiService {
             }
         ).catch(
             (error) => {
-            console.error("Webhook couldn't be created: " + error.message);
-            throw error;
+                console.error("Webhook couldn't be created: " + error.message);
+                throw error;
             }
         );
     }
