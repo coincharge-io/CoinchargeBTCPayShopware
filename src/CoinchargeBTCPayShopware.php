@@ -99,16 +99,17 @@ class CoinchargeBTCPayShopware extends Plugin
     {
         // Only set the payment method to inactive when uninstalling. Removing the payment method would
         // cause data consistency issues, since the payment method might have been used in several orders
-        //$this->setPaymentMethodIsActive(false, $context->getContext());
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->setPaymentMethodIsActive(new $paymentMethod(), false, $context->getContext());
         }
-        $customFieldSetRepository = $this->container->get('custom_field_set.repository');
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
+        if (!$context->keepUserData()) {
+            $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+            $criteria = new Criteria();
+            $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
 
-        $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
-        $customFieldSetRepository->delete(array_values($customFieldIds->getData()), $context->getContext());
+            $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
+            $customFieldSetRepository->delete(array_values($customFieldIds->getData()), $context->getContext());
+        }
     }
 
     public function activate(ActivateContext $context): void

@@ -51,6 +51,7 @@ class ConfigurationController extends AbstractController
      */
     public function verifyApiKey(Request $request, Context $context)
     {
+
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
         $response = $this->client->sendGetRequest($uri);
@@ -75,11 +76,9 @@ class ConfigurationController extends AbstractController
 
         $body = $request->request->all();
         $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
-
         $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
-
-        $redirectUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/admin#/sw/extension/config/CoinchargeBTCPayShopware';
-
+        $redirectUrl = $request->cookies->get('coincharge_btcpay_shopware_redirect');
+        $request->cookies->set('coincharge_btcpay_shopware_redirect', null);
         return new RedirectResponse($redirectUrl);
     }
 
