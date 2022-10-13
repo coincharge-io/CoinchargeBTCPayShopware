@@ -43,7 +43,8 @@ class CoinchargeBTCPayShopware extends Plugin
                     'config' => [
                         'label' => [
                             'de-DE' => 'BTCPayServer Information',
-                            'en-GB' => 'BTCPayServer Information'
+                            'en-GB' => 'BTCPayServer Information',
+                            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'BTCPayServer Information' //Fallback language
                         ]
                     ],
                     'customFields' => [
@@ -53,7 +54,8 @@ class CoinchargeBTCPayShopware extends Plugin
                             'config' => [
                                 'label' => [
                                     'de-DE' => 'Auftragsstatus',
-                                    'en-GB' => 'Order Status'
+                                    'en-GB' => 'Order Status',
+                                    '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
                                 ]
                             ]
                         ],
@@ -63,7 +65,8 @@ class CoinchargeBTCPayShopware extends Plugin
                             'config' => [
                                 'label' => [
                                     'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
-                                    'en-GB' => 'Paid After Invoice Expiration'
+                                    'en-GB' => 'Paid After Invoice Expiration',
+                                    '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Paid After Invoice Expiration'
                                 ]
                             ]
                         ],
@@ -73,7 +76,8 @@ class CoinchargeBTCPayShopware extends Plugin
                             'config' => [
                                 'label' => [
                                     'de-DE' => 'Überbezahlt',
-                                    'en-GB' => 'Overpaid '
+                                    'en-GB' => 'Overpaid',
+                                    '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Overpaid'
                                 ]
                             ]
                         ],

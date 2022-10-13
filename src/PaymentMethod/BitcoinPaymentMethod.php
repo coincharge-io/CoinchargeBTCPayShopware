@@ -20,7 +20,7 @@ class BitcoinPaymentMethod
     {
         return 'Bitcoin';
     }
-    
+
     public function getPosition(): int
     {
         return -2;
@@ -37,6 +37,10 @@ class BitcoinPaymentMethod
                 'description' => 'Pay with Bitcoin',
                 'name' => 'Bitcoin',
             ],
+            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
+                'description' => 'Pay with Bitcoin',
+                'name' => 'Bitcoin',
+            ], //Fallback language
         ];
     }
 
