@@ -51,7 +51,6 @@ class ConfigurationController extends AbstractController
      */
     public function verifyApiKey(Request $request, Context $context)
     {
-
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
         $response = $this->client->sendGetRequest($uri);

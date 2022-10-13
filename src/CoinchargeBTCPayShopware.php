@@ -29,6 +29,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 
 class CoinchargeBTCPayShopware extends Plugin
 {
@@ -104,6 +105,19 @@ class CoinchargeBTCPayShopware extends Plugin
         }
         if (!$context->keepUserData()) {
             $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+
+            $systemConfigRepository = $this->container->get('system_config.repository');
+            $criteria = (new Criteria())
+                ->addFilter(
+                    new ContainsFilter('configurationKey', 'CoinchargeBTCPayShopware.config')
+                );
+            $idSearchResult = $systemConfigRepository->searchIds($criteria, Context::createDefaultContext());
+
+            //Formatting IDs array and deleting config keys
+            $ids = \array_map(static function ($id) {
+                return ['id' => $id];
+            }, $idSearchResult->getIds());
+            $systemConfigRepository->delete($ids, Context::createDefaultContext());
             $criteria = new Criteria();
             $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
 
@@ -114,10 +128,7 @@ class CoinchargeBTCPayShopware extends Plugin
 
     public function activate(ActivateContext $context): void
     {
-        //$this->setPaymentMethodIsActive(true, $context->getContext());
-        /* foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-            $this->setPaymentMethodIsActive(new $paymentMethod(), true, $context->getContext());
-        } */
+
         parent::activate($context);
     }
 
@@ -126,7 +137,6 @@ class CoinchargeBTCPayShopware extends Plugin
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->setPaymentMethodIsActive(new $paymentMethod(), false, $context->getContext());
         }
-        //$this->setPaymentMethodIsActive(false, $context->getContext());
         parent::deactivate($context);
     }
 

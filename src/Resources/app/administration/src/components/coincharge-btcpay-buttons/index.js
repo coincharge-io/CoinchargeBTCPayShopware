@@ -39,7 +39,8 @@ Component.register('coincharge-btcpay-buttons', {
             }
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.config['CoinchargeBTCPayShopware.config.btcpayServerUrl'] = filteredUrl
-            const url = this.removeTrailingSlash(process.env.APP_URL) + '/api/_action/coincharge/credentials';
+            const clearedPathname = window.location.pathname.replace('/admin', '/')
+            const url = window.location.origin + clearedPathname + 'api/_action/coincharge/credentials';
             systemConfig.saveValues({
                 'CoinchargeBTCPayShopware.config.btcpayServerUrl': this.config['CoinchargeBTCPayShopware.config.btcpayServerUrl'],
                 'CoinchargeBTCPayShopware.config.btcpayApiKey': '',
