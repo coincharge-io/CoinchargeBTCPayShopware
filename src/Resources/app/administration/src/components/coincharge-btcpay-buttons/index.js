@@ -40,6 +40,7 @@ Component.register('coincharge-btcpay-buttons', {
             const filteredUrl = this.removeTrailingSlash(btcpayServerUrl)
             this.config['CoinchargeBTCPayShopware.config.btcpayServerUrl'] = filteredUrl
             const clearedPathname = window.location.pathname.replace('/admin', '/')
+            //TODO Find better solution
             const url = window.location.origin + clearedPathname + 'api/_action/coincharge/credentials';
             systemConfig.saveValues({
                 'CoinchargeBTCPayShopware.config.btcpayServerUrl': this.config['CoinchargeBTCPayShopware.config.btcpayServerUrl'],
@@ -51,7 +52,6 @@ Component.register('coincharge-btcpay-buttons', {
                 'CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodBTC': false,
                 'CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLightning': false
             })
-            document.cookie = "coincharge_btcpay_shopware_redirect=" + window.location.href + "; path=" + window.location.hostname + 'SameSite=Strict';
             return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=' + url);
 
         },
