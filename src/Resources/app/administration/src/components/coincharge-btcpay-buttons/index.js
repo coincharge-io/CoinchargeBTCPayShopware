@@ -52,8 +52,7 @@ Component.register('coincharge-btcpay-buttons', {
                 'CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodBTC': false,
                 'CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLightning': false
             })
-            return window.location.replace(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=' + url);
-
+            return window.open(filteredUrl + '/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=' + url, '_blank', 'noopener')
         },
         removeTrailingSlash(serverUrl) {
             return serverUrl.replace(/\/$/, '')
