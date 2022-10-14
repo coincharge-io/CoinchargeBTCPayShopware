@@ -17,25 +17,32 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+
 
 class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     private BTCPayServerClientInterface $client;
     private ConfigurationService  $configurationService;
+    private OrderTransactionStateHandler $transactionStateHandler;
     private LoggerInterface $logger;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, LoggerInterface $logger)
+    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
+        $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
-        parent::__construct($client, $configurationService, $logger);
+        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
     public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
             $accountUrl = parse_url($transaction->getReturnUrl(), PHP_URL_SCHEME) . '://' . parse_url($transaction->getReturnUrl(), PHP_URL_HOST) . '/account/order';
-
+            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
+                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+                return $accountUrl;
+            }
             $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,

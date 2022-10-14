@@ -22,17 +22,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 
 abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
 {
     private BTCPayServerClientInterface $client;
     private ConfigurationService  $configurationService;
+    private OrderTransactionStateHandler $transactionStateHandler;
     private LoggerInterface $logger;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, LoggerInterface $logger)
+    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
+        $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
     }
 
