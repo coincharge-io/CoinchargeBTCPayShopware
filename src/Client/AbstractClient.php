@@ -44,7 +44,6 @@ class AbstractClient
             $body = $response->getBody()->getContents();
         } catch (\Exception $requestException) {
             $this->logger->error($requestException->getMessage());
-            throw new \Exception($requestException->getMessage());
         }
         $this->logger->debug(
             'Received {code} from {method} {uri} with following response: {response}',
