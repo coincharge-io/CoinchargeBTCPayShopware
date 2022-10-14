@@ -39,13 +39,22 @@ class AbstractClient
 
     private function request(string $method, string $uri, array $options = []): array
     {
-        try{
+        try {
             $response = $this->client->request($method, $uri, $options);
             $body = $response->getBody()->getContents();
-        }catch(\Exception $requestException){
-             $this->logger->error($requestException->getMessage());
+        } catch (\Exception $requestException) {
+            $this->logger->error($requestException->getMessage());
             throw new \Exception($requestException->getMessage());
         }
+        $this->logger->debug(
+            'Received {code} from {method} {uri} with following response: {response}',
+            [
+                'method' => \mb_strtoupper($method),
+                'code' => \sprintf('%s', $response->getStatusCode()),
+                'uri' => $uri,
+                'response' => $body,
+            ]
+        );
         return \json_decode($body, true) ?? [];
     }
 }
