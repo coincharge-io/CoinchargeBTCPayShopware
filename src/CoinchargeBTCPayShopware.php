@@ -40,7 +40,7 @@ class CoinchargeBTCPayShopware extends Plugin
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
 
-        $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
+        $customFieldIds = $customFieldSetRepository->search($criteria, $context->getContext())->first();
         if (!$customFieldIds) {
             $customFieldSetRepository->upsert(
                 [
