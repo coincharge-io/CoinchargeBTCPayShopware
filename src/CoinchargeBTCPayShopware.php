@@ -55,6 +55,17 @@ class CoinchargeBTCPayShopware extends Plugin
                         ],
                         'customFields' => [
                             [
+                                'name' => 'invoiceId',
+                                'type' => CustomFieldTypes::TEXT,
+                                'config' => [
+                                    'label' => [
+                                        'de-DE' => 'Rechnungs-ID',
+                                        'en-GB' => 'Invoice ID',
+                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
+                                    ]
+                                ]
+                            ],
+                            [
                                 'name' => 'btcpayOrderStatus',
                                 'type' => CustomFieldTypes::TEXT,
                                 'config' => [

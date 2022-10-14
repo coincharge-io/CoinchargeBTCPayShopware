@@ -119,6 +119,7 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
+                                    'invoiceId' => $body['invoiceId'],
                                     'btcpayOrderStatus' => 'paidPartially',
                                     'paidAfterExpiration' => true,
                                     'overpaid'      => false
@@ -147,6 +148,7 @@ class WebhookService implements WebhookServiceInterface
                                 [
                                     'id' => $orderId,
                                     'customFields' => [
+                                        'invoiceId' => $body['invoiceId'],
                                         'btcpayOrderStatus' => 'settled',
                                         'paidAfterExpiration' => true,
                                         'overpaid'      =>  false
@@ -162,6 +164,7 @@ class WebhookService implements WebhookServiceInterface
                                 [
                                     'id' => $orderId,
                                     'customFields' => [
+                                        'invoiceId' => $body['invoiceId'],
                                         'btcpayOrderStatus' => 'paidPartially',
                                         'paidAfterExpiration' => true,
                                         'overpaid'      => false
@@ -197,6 +200,7 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
+                                    'invoiceId' => $body['invoiceId'],
                                     'btcpayOrderStatus' => 'manuallyMarked',
                                     'overpaid'  => false,
                                     'paidAfterExpiration' => false
@@ -218,6 +222,7 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
+                                    'invoiceId' => $body['invoiceId'],
                                     'btcpayOrderStatus' => 'invoiceExpired',
                                     'paidAfterExpiration' => true,
                                     'overpaid'  => false
@@ -234,6 +239,7 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
+                                    'invoiceId' => $body['invoiceId'],
                                     'btcpayOrderStatus' => 'invoiceExpired',
                                     'paidAfterExpiration' => false,
                                     'overpaid'  => false
@@ -254,6 +260,7 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
+                                    'invoiceId' => $body['invoiceId'],
                                     'btcpayOrderStatus' => 'paid',
                                     'paidAfterExpiration' => false,
                                     'overpaid' => true
@@ -270,6 +277,7 @@ class WebhookService implements WebhookServiceInterface
                             [
                                 'id' => $orderId,
                                 'customFields' => [
+                                    'invoiceId' => $body['invoiceId'],
                                     'btcpayOrderStatus' => 'paid',
                                     'paidAfterExpiration' => false,
                                     'overpaid' => false
