@@ -16,8 +16,8 @@
     "extra": {
         "shopware-plugin-class": "Coincharge\\Shopware\\CoinchargeBTCPayShopware",
         "label": {
-            "de-DE": "CoinchargeBTCPayShopware",
-            "en-GB": "CoinchargeBTCPayShopware"
+            "de-DE": "BTCPay Bitcoin Zahlung",
+            "en-GB": "BTCPay Bitcoin Payment"
         },
         "description": {
             "de-DE": "Akzeptiere Bitcoin und Lightning Zahlung in Shopware mit dem BTCPay Server und der Bitcoin Erweiterung von Coincharge.",
