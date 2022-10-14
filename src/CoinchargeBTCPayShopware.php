@@ -37,59 +37,65 @@ class CoinchargeBTCPayShopware extends Plugin
     {
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
-        $customFieldSetRepository->upsert(
-            [
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
+
+        $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
+        if (!$customFieldIds) {
+            $customFieldSetRepository->upsert(
                 [
-                    'name' => 'btcpayServer',
-                    'config' => [
-                        'label' => [
-                            'de-DE' => 'BTCPayServer Information',
-                            'en-GB' => 'BTCPayServer Information',
-                            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'BTCPayServer Information' //Fallback language
-                        ]
-                    ],
-                    'customFields' => [
-                        [
-                            'name' => 'btcpayOrderStatus',
-                            'type' => CustomFieldTypes::TEXT,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Auftragsstatus',
-                                    'en-GB' => 'Order Status',
-                                    '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
-                                ]
+                    [
+                        'name' => 'btcpayServer',
+                        'config' => [
+                            'label' => [
+                                'de-DE' => 'BTCPayServer Information',
+                                'en-GB' => 'BTCPayServer Information',
+                                '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'BTCPayServer Information' //Fallback language
                             ]
                         ],
-                        [
-                            'name' => 'paidAfterExpiration',
-                            'type' => CustomFieldTypes::BOOL,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
-                                    'en-GB' => 'Paid After Invoice Expiration',
-                                    '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Paid After Invoice Expiration'
+                        'customFields' => [
+                            [
+                                'name' => 'btcpayOrderStatus',
+                                'type' => CustomFieldTypes::TEXT,
+                                'config' => [
+                                    'label' => [
+                                        'de-DE' => 'Auftragsstatus',
+                                        'en-GB' => 'Order Status',
+                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
+                                    ]
                                 ]
-                            ]
-                        ],
-                        [
-                            'name' => 'overpaid',
-                            'type' => CustomFieldTypes::BOOL,
-                            'config' => [
-                                'label' => [
-                                    'de-DE' => 'Überbezahlt',
-                                    'en-GB' => 'Overpaid',
-                                    '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Overpaid'
+                            ],
+                            [
+                                'name' => 'paidAfterExpiration',
+                                'type' => CustomFieldTypes::BOOL,
+                                'config' => [
+                                    'label' => [
+                                        'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
+                                        'en-GB' => 'Paid After Invoice Expiration',
+                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Paid After Invoice Expiration'
+                                    ]
                                 ]
-                            ]
+                            ],
+                            [
+                                'name' => 'overpaid',
+                                'type' => CustomFieldTypes::BOOL,
+                                'config' => [
+                                    'label' => [
+                                        'de-DE' => 'Überbezahlt',
+                                        'en-GB' => 'Overpaid',
+                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Overpaid'
+                                    ]
+                                ]
+                            ],
                         ],
-                    ],
-                    'relations' => [[
-                        'entityName' => 'order'
-                    ]],
-                ]
-            ],
-            $context->getContext()
-        );
+                        'relations' => [[
+                            'entityName' => 'order'
+                        ]],
+                    ]
+                ],
+                $context->getContext()
+            );
+        }
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
             $this->addPaymentMethod(new $paymentMethod(), $context->getContext());
         }
