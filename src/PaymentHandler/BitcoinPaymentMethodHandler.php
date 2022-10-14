@@ -64,8 +64,8 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
 
             return $response['checkoutLink'];
         } catch (\Exception $e) {
-            $this->logger->error(print_r($e, true));
-            throw new \Exception;
+            $this->logger->error($e->getMessage());
+            throw new \Exception($e->getMessage());
         }
     }
 }
