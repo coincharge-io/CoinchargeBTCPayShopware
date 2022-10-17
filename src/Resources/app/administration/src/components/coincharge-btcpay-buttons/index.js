@@ -59,6 +59,13 @@ Component.register('coincharge-btcpay-buttons', {
         },
         testConnection() {
             this.isLoading = true;
+            if (!this.credentialsExist()) {
+                this.isLoading = false;
+                return this.createNotificationWarning({
+                    title: 'BTCPay Server',
+                    message: this.$tc('coincharge-btcpay-test-connection.missing_credentials')
+                })
+            }
             this.coinchargeBtcpayApiService.verifyApiKey().then((ApiResponse) => {
                 if (ApiResponse.success === false) {
                     this.createNotificationWarning({
@@ -76,11 +83,18 @@ Component.register('coincharge-btcpay-buttons', {
                 this.isLoading = false;
                 window.location.reload();
             }).catch(e => {
-                return this.createNotificationWarning({
+                this.isLoading = false;
+                return this.createNotificationError({
                     title: 'BTCPay Server',
                     message: this.$tc('coincharge-btcpay-test-connection.error')
                 })
             });
         },
+        credentialsExist() {
+            if (document.getElementById("CoinchargeBTCPayShopware.config.btcpayServerUrl").value === '' || document.getElementById("CoinchargeBTCPayShopware.config.btcpayApiKey").value === '' || document.getElementById("CoinchargeBTCPayShopware.config.btcpayServerStoreId").value === '') {
+                return false;
+            }
+            return true;
+        }
     }
 });

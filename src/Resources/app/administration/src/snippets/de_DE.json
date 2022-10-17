@@ -6,6 +6,7 @@
     "coincharge-btcpay-test-connection": {
         "button": "Verbindung testen",
         "success": "Das Plugin ist mit dem Server verbunden",
-        "error": "Etwas ist schief gelaufen. Versuchen Sie es noch einmal."
+        "error": "Ein Fehler ist aufgetreten. Prüfen Sie, ob die Anmeldedaten gültig sind und versuchen Sie es erneut.",
+        "missing_credentials": "Sie müssen zunächst einen Berechtigungsnachweis erstellen."
     }
 }

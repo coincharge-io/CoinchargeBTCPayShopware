@@ -24,7 +24,6 @@ export default class CoinchargeBtcpayApiService extends ApiService {
             }
         ).catch(
             (error) => {
-                console.error("Credentials aren't valid: " + error.message);
                 throw error;
             }
         );
@@ -40,7 +39,6 @@ export default class CoinchargeBtcpayApiService extends ApiService {
             }
         ).catch(
             (error) => {
-                console.error("Webhook couldn't be created: " + error.message);
                 throw error;
             }
         );

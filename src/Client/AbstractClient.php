@@ -42,14 +42,24 @@ class AbstractClient
         try {
             $response = $this->client->request($method, $uri, $options);
             $body = $response->getBody()->getContents();
-        } catch (\Exception $requestException) {
-            $this->logger->error($requestException->getMessage());
+        } catch (\GuzzleHttp\Exception\RequestException  $e) {
+            if ($e->hasResponse()) {
+                $response = $e->getResponse();
+                $this->logger->error($response->getReasonPhrase());
+                throw new \Exception($response->getReasonPhrase());
+            }
+            $response = $e->getHandlerContext();
+            if (isset($response['error'])) {
+                $this->logger->error($response['error']);
+                throw new \Exception($response['error']);
+            }
+            $this->logger->error('Unknown error');
+            throw new \Exception('Unknown error');
         }
         $this->logger->debug(
-            'Received {code} from {method} {uri} with following response: {response}',
+            '{method} {uri} with following response: {response}',
             [
                 'method' => \mb_strtoupper($method),
-                'code' => \sprintf('%s', $response->getStatusCode()),
                 'uri' => $uri,
                 'response' => $body,
             ]
