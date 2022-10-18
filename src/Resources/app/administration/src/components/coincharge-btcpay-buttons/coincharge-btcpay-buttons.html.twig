@@ -1,4 +1,4 @@
 <sw-container columns="repeat(2, auto)" gap="0px 10px">
-	<sw-button class="sw-button-coincharge" @click="generateAPIKey">{{ $tc('coincharge-btcpay-generate-credentials.button') }}</sw-button>
+	<sw-button v-tooltip.top="{ message:$tc('coincharge-btcpay-generate-credentials.info')}" class="sw-button-coincharge" @click="generateAPIKey">{{ $tc('coincharge-btcpay-generate-credentials.button') }}</sw-button>
 	<sw-button-process class="sw-button-coincharge" :process-success="isLoading" :is-loading="isLoading" @click="testConnection">{{ $tc('coincharge-btcpay-test-connection.button') }}</sw-button-process>
 </sw-container>

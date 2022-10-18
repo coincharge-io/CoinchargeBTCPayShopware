@@ -1,7 +1,8 @@
 {
     "coincharge-btcpay-generate-credentials": {
         "button": "Berechtigungsnachweise generieren",
-        "missing_server": "Sie müssen die BTCPay Server url angeben"
+        "missing_server": "Sie müssen die BTCPay Server url angeben",
+        "info": "Sie werden zur angegebenen BTCPayServer-URL weitergeleitet, um die erforderlichen Anmeldedaten zu generieren"
     },
     "coincharge-btcpay-test-connection": {
         "button": "Verbindung testen",
