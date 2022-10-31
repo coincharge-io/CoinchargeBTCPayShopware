@@ -94,14 +94,12 @@ class WebhookService implements WebhookServiceInterface
     {
         $signature = $request->headers->get(self::REQUIRED_HEADER);
         $body = $request->request->all();
-        $expectedHeader = 'sha256=' . hash_hmac('sha256', file_get_contents("php://input"), $this->configurationService->getSetting('btcpayWebhookSecret'));
-        //TODO file_get_contents("php://input") use it for body or change it to be uniform
+
+        $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('btcpayWebhookSecret'));
         if ($signature !== $expectedHeader) {
             $this->logger->error('Invalid signature');
             return new Response();
         }
-        $body = $request->request->all();
-
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId'];
         $responseBody = $this->client->sendGetRequest($uri);
         $criteria = new Criteria();
