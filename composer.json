@@ -10,8 +10,7 @@
         }
     ],
     "require": {
-        "shopware/core": "6.4.*",
-        "guzzlehttp/guzzle": "^7.4"
+        "shopware/core": "6.4.*"
     },
     "extra": {
         "shopware-plugin-class": "Coincharge\\Shopware\\CoinchargeBTCPayShopware",
