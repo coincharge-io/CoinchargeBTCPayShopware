@@ -38,7 +38,7 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
     public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
-            $accountUrl = $_SERVER['APP_URL'] . '/account/order';
+            $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
             if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
                 $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
                 return $accountUrl;

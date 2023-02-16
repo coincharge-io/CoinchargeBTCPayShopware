@@ -76,8 +76,6 @@ class ConfigurationController extends AbstractController
         $body = $request->request->all();
         $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
         $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
-        /* $redirectUrl = $request->cookies->get('coincharge_btcpay_shopware_redirect');
-        $request->cookies->set('coincharge_btcpay_shopware_redirect', null); */
         $redirectUrl =  $request->server->get('APP_URL') . '/admin#/sw/extension/config/CoinchargeBTCPayShopware';
 
         return new RedirectResponse($redirectUrl);

@@ -30,13 +30,17 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
     private ConfigurationService  $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private LoggerInterface $logger;
+    public string $baseSuccessUrl;
 
     public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
+	$this->logger = $logger; 
+	$appUrl = $_SERVER['APP_URL'];
+	$url=  "$appUrl/checkout/finish?orderId=";
+	$this->baseSuccessUrl = $url;
     }
 
     /**
@@ -52,6 +56,7 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
                 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
             );
         }
+	var_dump($redirectUrl);
         return new RedirectResponse($redirectUrl);
     }
 
