@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="Shopware\Core\Checkout\Payment\PaymentMethodDefinition">
+            <tag name="shopware.entity.definition"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\SalesChannel\SalesChannelPaymentMethodDefinition">
+            <tag name="shopware.sales_channel.entity.definition"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Aggregate\PaymentMethodTranslation\PaymentMethodTranslationDefinition">
+            <tag name="shopware.entity.definition"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\DataAbstractionLayer\PaymentMethodValidator">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\PaymentService">
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\PaymentTransactionChainProcessor"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\Token\JWTFactoryV2"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerRegistry"/>
+            <argument type="service" id="order_transaction.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\PreparedPaymentService">
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerRegistry"/>
+            <argument type="service" id="app_payment_method.repository"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Shopware\Core\System\StateMachine\Loader\InitialStateIdLoader"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Controller\PaymentController" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Payment\PaymentService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Order\OrderConverter"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\Token\JWTFactoryV2"/>
+            <argument type="service" id="order.repository"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentTransactionChainProcessor">
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\Token\JWTFactoryV2"/>
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerRegistry"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Shopware\Core\System\StateMachine\Loader\InitialStateIdLoader"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentRefundProcessor" public="true">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransactionCaptureRefund\OrderTransactionCaptureRefundStateHandler"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerRegistry"/>
+        </service>
+
+        <service id="shopware.jwt_signer" class="Lcobucci\JWT\Signer\Rsa\Sha256"/>
+
+        <service id="shopware.jwt_config" class="Lcobucci\JWT\Configuration">
+            <factory class="Shopware\Core\Checkout\Payment\Cart\Token\JWTConfigurationFactory"
+                     method="createJWTConfiguration"/>
+            <argument type="service" id="shopware.jwt_signer"/>
+            <argument type="service" id="shopware.private_key"/>
+            <argument type="service" id="shopware.public_key"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\Token\JWTFactoryV2">
+            <argument type="service" id="shopware.jwt_config"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerRegistry">
+            <argument type="tagged_locator" tag="shopware.payment.method.sync"/>
+            <argument type="tagged_locator" tag="shopware.payment.method.async"/>
+            <argument type="tagged_locator" tag="shopware.payment.method.prepared"/>
+            <argument type="tagged_locator" tag="shopware.payment.method.refund"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PrePayment">
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+
+            <tag name="shopware.payment.method.sync"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\DebitPayment">
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+
+            <tag name="shopware.payment.method.sync"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\CashPayment">
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+
+            <tag name="shopware.payment.method.sync"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\InvoicePayment">
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+
+            <tag name="shopware.payment.method.sync"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentHandler\DefaultPayment">
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+
+            <tag name="shopware.payment.method.sync"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\DataAbstractionLayer\PaymentHandlerIdentifierSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\DataAbstractionLayer\PaymentDistinguishableNameSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\DataAbstractionLayer\PaymentMethodIndexer">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\Dbal\Common\IteratorFactory"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="payment_method.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\DataAbstractionLayer\PaymentDistinguishableNameGenerator"/>
+
+            <tag name="shopware.entity_indexer"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\DataAbstractionLayer\PaymentDistinguishableNameGenerator">
+            <argument type="service" id="payment_method.repository"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\Cart\PaymentMethodValidator">
+            <tag name="shopware.cart.validator"/>
+        </service>
+
+        <!-- Sales Channel API -->
+        <service id="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute" public="true">
+            <argument type="service" id="sales_channel.payment_method.repository"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\SalesChannel\CachedPaymentMethodRoute" decorates="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Payment\SalesChannel\CachedPaymentMethodRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Shopware\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%shopware.cache.invalidation.payment_method_route%</argument>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\SalesChannel\SortedPaymentMethodRoute" decorates="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute" decoration-priority="-2000" public="true">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="Shopware\Core\Framework\Script\Execution\ScriptExecutor"/>
+        </service>
+
+        <service id="Shopware\Core\Checkout\Payment\SalesChannel\HandlePaymentMethodRoute" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Payment\PaymentService"/>
+            <argument type="service" id="Shopware\Core\Framework\Validation\DataValidator"/>
+        </service>
+    </services>
+</container>

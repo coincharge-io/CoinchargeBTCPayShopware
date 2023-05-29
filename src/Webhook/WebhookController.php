@@ -22,8 +22,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 
 /**
- * @RouteScope(scopes={"api"})
+ * @Route(defaults={"_routeScope"={"api"}})
  */
+
 class WebhookController extends AbstractController
 {
     private WebhookServiceInterface $webhookService;

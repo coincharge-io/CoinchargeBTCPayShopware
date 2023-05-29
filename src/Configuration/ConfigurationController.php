@@ -28,7 +28,7 @@ use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMet
 
 
 /**
- * @RouteScope(scopes={"api"})
+ * @Route(defaults={"_routeScope"={"api"}})
  */
 
 class ConfigurationController extends AbstractController
