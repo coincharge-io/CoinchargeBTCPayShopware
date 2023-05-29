@@ -51,7 +51,7 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'currency' => $context->getCurrency()->getIsoCode(),
                     'metadata' =>
                     [
-                        'orderId' => $transaction->getOrderTransaction()->getId(),
+                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
                         'orderNumber' => $transaction->getOrder()->getOrderNumber()
                     ],
                     'checkout' => [
