@@ -52,7 +52,8 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber()
+                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                        'transactionId' => $transaction->getOrderTransaction()->getId()
                     ],
                     'checkout' => [
                         'redirectURL' => $accountUrl,
