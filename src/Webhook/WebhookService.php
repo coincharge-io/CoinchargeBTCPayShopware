@@ -29,11 +29,11 @@ class WebhookService implements WebhookServiceInterface
     private BTCPayServerClientInterface $client;
     private ConfigurationService $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
-    private  $orderService;
+    private $orderService;
     private EntityRepository $orderRepository;
     private LoggerInterface $logger;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler,  $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
+    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
@@ -50,7 +50,6 @@ class WebhookService implements WebhookServiceInterface
             return true;
         }
 
-        //$webhookUrl = $request->server->get('REQUEST_SCHEME') . '://' . $request->server->get('HTTP_HOST') . '/api/_action/coincharge/webhook-endpoint';
         $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
 
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks';
@@ -104,7 +103,6 @@ class WebhookService implements WebhookServiceInterface
         $responseBody = $this->client->sendGetRequest($uri);
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
-        //check custom field order status
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
 
 
@@ -253,9 +251,9 @@ class WebhookService implements WebhookServiceInterface
                 }
                 break;
             case 'InvoiceSettled':
-		 //Webhook doesn't send overPaid
-		 //Bug
-                if (isset($body['overPaid'])&&$body['overPaid']) {
+                //Webhook doesn't send overPaid
+                //Bug
+                if (isset($body['overPaid']) && $body['overPaid']) {
 
                     $this->orderRepository->upsert(
                         [
@@ -273,7 +271,7 @@ class WebhookService implements WebhookServiceInterface
                     );
                     $this->transactionStateHandler->paid($responseBody['metadata']['transactionId'], $context);
                     $this->logger->info('Invoice payment settled but was overpaid.');
-	    } else {
+                } else {
                     $this->orderRepository->upsert(
                         [
                             [

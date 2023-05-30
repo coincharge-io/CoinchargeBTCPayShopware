@@ -167,7 +167,7 @@ class CoinchargeBTCPayShopware extends Plugin
         }
 
         /**
-         * @var PluginIdProvider $pluginIdProvider 
+         * @var PluginIdProvider $pluginIdProvider
          */
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
@@ -184,7 +184,7 @@ class CoinchargeBTCPayShopware extends Plugin
         ];
 
         /**
-         * @var EntityRepositoryInterface $paymentRepository 
+         * @var EntityRepositoryInterface $paymentRepository
          */
         $paymentRepository = $this->container->get('payment_method.repository');
         $paymentRepository->create([$examplePaymentData], $context);
@@ -193,7 +193,7 @@ class CoinchargeBTCPayShopware extends Plugin
     private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
     {
         /**
-         * @var EntityRepositoryInterface $paymentRepository 
+         * @var EntityRepositoryInterface $paymentRepository
          */
         $paymentRepository = $this->container->get('payment_method.repository');
 
@@ -215,7 +215,7 @@ class CoinchargeBTCPayShopware extends Plugin
     private function getPaymentMethodId($paymentMethod): ?string
     {
         /**
-         * @var EntityRepositoryInterface $paymentRepository 
+         * @var EntityRepositoryInterface $paymentRepository
          */
         $paymentRepository = $this->container->get('payment_method.repository');
 
