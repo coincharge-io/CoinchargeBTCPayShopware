@@ -58,7 +58,7 @@ class ConfigurationController extends AbstractController
             $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
         }
-        if (!$this->webhookService->registerWebhook($request, null)) {
+        if (!$this->webhookService->register($request, null)) {
             $this->configurationService->setSetting('integrationStatus', false);
             return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
         }

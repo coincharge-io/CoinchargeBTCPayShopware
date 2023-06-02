@@ -43,9 +43,9 @@ class WebhookService implements WebhookServiceInterface
         $this->logger = $logger;
     }
 
-    public function registerWebhook(Request $request, ?string $salesChannelId): bool
+    public function register(Request $request, ?string $salesChannelId): bool
     {
-        if ($this->isWebhookEnabled()) {
+        if ($this->isEnabled()) {
             $this->logger->info('Webhook exists');
             return true;
         }
@@ -69,7 +69,7 @@ class WebhookService implements WebhookServiceInterface
 
         return true;
     }
-    public function isWebhookEnabled(): bool
+    public function isEnabled(): bool
     {
 
         if (empty($this->configurationService->getSetting('btcpayWebhookId'))) {
@@ -89,7 +89,7 @@ class WebhookService implements WebhookServiceInterface
         return true;
     }
 
-    public function executeWebhook(Request $request, Context $context): Response
+    public function process(Request $request, Context $context): Response
     {
         $signature = $request->headers->get(self::REQUIRED_HEADER);
         $body = $request->request->all();
