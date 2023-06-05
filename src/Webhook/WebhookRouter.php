@@ -13,23 +13,23 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Webhook;
 
+use Coincharge\Shopware\Webhook\Factory\WebhookFactory;
+use Shopware\Core\Framework\Context;
+
 class WebhookRouter
 {
-    private $webhooks;
+    private $webhookFactory;
 
-    public function __construct()
+    public function __construct(WebhookFactory $webhookFactory)
     {
-        $this->webhooks = [
-          'btcpay_server' => new BTCPayWebhookService(),
-          'coinsnap' => new CoinsnapWebhookService()
-        ];
+        $this->webhookFactory = $webhookFactory;
     }
-    public function route(Request $request)
+    public function route(Request $request, Context $context)
     {
         $provider = $this->getProviderFromRequest($request);
-        if (isset($this->webhooks[$provider])) {
-            $webhook = $this->webhooks[$provider];
-            return $this->process($webhook);
+        if (isset($provider)) {
+            $webhook = $this->webhookFactory->create($provider);
+            return $webhook->process($request, $context);
         }
         throw new \RuntimeException('No webhook defined for the payment provider.');
     }

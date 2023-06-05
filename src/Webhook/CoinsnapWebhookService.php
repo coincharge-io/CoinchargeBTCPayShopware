@@ -110,25 +110,36 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         switch ($body['event']) {
             case 'Pending': // The invoice is paid in full.
                 $this->transactionStateHandler->process($responseBody['metadata']['transactionId'], $context);
-                $this->logger->info('Invoice payment received fully, waiting for settlement.');
-                break;
-            case 'Expired':
                 $this->orderRepository->upsert(
                     [
                         [
                             'id' => $orderId,
                             'customFields' => [
-                                'invoiceId' => $body['invoiceId'],
-                                'btcpayOrderStatus' => 'invoiceExpired',
-                                'paidAfterExpiration' => true,
-                                'overpaid'  => false
+                                'coinsnapInvoiceId' => $body['invoiceId'],
+                                'coinsnapOrderStatus' => 'pending',
+                            ],
+                        ],
+                    ],
+                    $context
+                );
+                $this->logger->info('Invoice settled, waiting for payment to settle.');
+                break;
+            case 'Expired':
+                //TODO: Check if invoice was partially paid
+                $this->orderRepository->upsert(
+                    [
+                        [
+                            'id' => $orderId,
+                            'customFields' => [
+                                'coinsnapInvoiceId' => $body['invoiceId'],
+                                'coinsnapOrderStatus' => 'expired',
                             ],
                         ],
                     ],
                     $context
                 );
                 $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
-                $this->logger->info('Invoice expired but was paid partially, please check.');
+                $this->logger->info('Invoice expired.');
                 break;
             case 'Paid':
                 $this->orderRepository->upsert(
@@ -136,17 +147,15 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                         [
                             'id' => $orderId,
                             'customFields' => [
-                                'invoiceId' => $body['invoiceId'],
-                                'btcpayOrderStatus' => 'paid',
-                                'paidAfterExpiration' => false,
-                                'overpaid' => true
+                                'coinsnapInvoiceId' => $body['invoiceId'],
+                                'coinsnapOrderStatus' => 'paid',
                             ],
                         ],
                     ],
                     $context
                 );
                 $this->transactionStateHandler->paid($responseBody['metadata']['transactionId'], $context);
-                $this->logger->info('Invoice payment settled but was overpaid.');
+                $this->logger->info('Invoice payment settled.');
                 break;
         }
         return new Response();

@@ -13,13 +13,12 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Configuration;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Webhook\WebhookServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -32,7 +31,7 @@ use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMet
 
 class ConfigurationController extends AbstractController
 {
-    private BTCPayServerClientInterface $client;
+    private ClientInterface $client;
     private ConfigurationService $configurationService;
     private WebhookServiceInterface $webhookService;
     private $paymentRepository;

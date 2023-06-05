@@ -37,6 +37,6 @@ class WebhookController extends AbstractController
      */
     public function endpoint(Request $request, Context $context): Response
     {
-        return $this->webhookService->executeWebhook($request, $context);
+        return $this->webhookService->process($request, $context);
     }
 }
