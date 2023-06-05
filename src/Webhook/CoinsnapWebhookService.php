@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Webhook;
 
-use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,14 +26,14 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 class CoinsnapWebhookService implements WebhookServiceInterface
 {
     public const REQUIRED_HEADER = 'x-coinsnap-sig';
-    private BTCPayServerClientInterface $client;
+    private ClientInterface $client;
     private ConfigurationService $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private $orderService;
     private EntityRepository $orderRepository;
     private LoggerInterface $logger;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
@@ -56,8 +56,8 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         $body = $this->client->sendPostRequest(
             $uri,
             [
-            'url' => $webhookUrl
-      ]
+                'url' => $webhookUrl
+            ]
         );
         if (empty($body)) {
             $this->logger->error("Webhook couldn't be created");
@@ -99,7 +99,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
             $this->logger->error('Invalid signature');
             return new Response();
         }
-        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId'];
+        $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/invoices/' . $body['invoiceId'];
         $responseBody = $this->client->sendGetRequest($uri);
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
@@ -115,16 +115,16 @@ class CoinsnapWebhookService implements WebhookServiceInterface
             case 'Expired':
                 $this->orderRepository->upsert(
                     [
-                    [
-                      'id' => $orderId,
-                      'customFields' => [
-                        'invoiceId' => $body['invoiceId'],
-                        'btcpayOrderStatus' => 'invoiceExpired',
-                        'paidAfterExpiration' => true,
-                        'overpaid'  => false
-                      ],
+                        [
+                            'id' => $orderId,
+                            'customFields' => [
+                                'invoiceId' => $body['invoiceId'],
+                                'btcpayOrderStatus' => 'invoiceExpired',
+                                'paidAfterExpiration' => true,
+                                'overpaid'  => false
+                            ],
+                        ],
                     ],
-          ],
                     $context
                 );
                 $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
@@ -133,16 +133,16 @@ class CoinsnapWebhookService implements WebhookServiceInterface
             case 'Paid':
                 $this->orderRepository->upsert(
                     [
-                    [
-                      'id' => $orderId,
-                      'customFields' => [
-                        'invoiceId' => $body['invoiceId'],
-                        'btcpayOrderStatus' => 'paid',
-                        'paidAfterExpiration' => false,
-                        'overpaid' => true
-                      ],
+                        [
+                            'id' => $orderId,
+                            'customFields' => [
+                                'invoiceId' => $body['invoiceId'],
+                                'btcpayOrderStatus' => 'paid',
+                                'paidAfterExpiration' => false,
+                                'overpaid' => true
+                            ],
+                        ],
                     ],
-          ],
                     $context
                 );
                 $this->transactionStateHandler->paid($responseBody['metadata']['transactionId'], $context);

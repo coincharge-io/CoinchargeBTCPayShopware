@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Webhook;
 
-use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,14 +26,14 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 class WebhookService implements WebhookServiceInterface
 {
     public const REQUIRED_HEADER = 'btcpay-sig';
-    private BTCPayServerClientInterface $client;
+    private ClientInterface $client;
     private ConfigurationService $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private $orderService;
     private EntityRepository $orderRepository;
     private LoggerInterface $logger;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;

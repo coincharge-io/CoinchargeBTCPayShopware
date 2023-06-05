@@ -38,7 +38,7 @@ class CoinchargeBTCPayShopware extends Plugin
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
         $criteria = new Criteria();
-        $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
+        $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer', 'coinsnap']));
 
         $customFieldIds = $customFieldSetRepository->search($criteria, $context->getContext())->first();
         if (!$customFieldIds) {
@@ -102,6 +102,43 @@ class CoinchargeBTCPayShopware extends Plugin
                         'relations' => [[
                             'entityName' => 'order'
                         ]],
+                    ],
+                    [
+                        'name' => 'coinsnap',
+                        'config' => [
+                            'label' => [
+                                'de-DE' => 'Coinsnap Information',
+                                'en-GB' => 'Coinsnap Information',
+                                '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Coinsnap Information' //Fallback language
+                            ]
+                        ],
+                        'customFields' => [
+                            [
+                                'name' => 'coinsnapInvoiceId',
+                                'type' => CustomFieldTypes::TEXT,
+                                'config' => [
+                                    'label' => [
+                                        'de-DE' => 'Rechnungs-ID',
+                                        'en-GB' => 'Invoice ID',
+                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
+                                    ]
+                                ]
+                            ],
+                            [
+                                'name' => 'coinsnapOrderStatus',
+                                'type' => CustomFieldTypes::TEXT,
+                                'config' => [
+                                    'label' => [
+                                        'de-DE' => 'Auftragsstatus',
+                                        'en-GB' => 'Order Status',
+                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
+                                    ]
+                                ]
+                            ],
+                        ],
+                        'relations' => [[
+                            'entityName' => 'order'
+                        ]],
                     ]
                 ],
                 $context->getContext()
@@ -136,7 +173,7 @@ class CoinchargeBTCPayShopware extends Plugin
             }, $idSearchResult->getIds());
             $systemConfigRepository->delete($ids, Context::createDefaultContext());
             $criteria = new Criteria();
-            $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer']));
+            $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer, coinsnap']));
 
             $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
             $customFieldSetRepository->delete(array_values($customFieldIds->getData()), $context->getContext());
