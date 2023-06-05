@@ -16,18 +16,17 @@ use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
-use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-
 
 class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    private BTCPayServerClientInterface $client;
+    private ClientInterface $client;
     private ConfigurationService  $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private LoggerInterface $logger;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
