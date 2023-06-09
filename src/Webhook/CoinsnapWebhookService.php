@@ -79,11 +79,11 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         $response = $this->client->sendGetRequest($uri);
 
         if (empty($response)) {
-            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " doesn't exist.");
+            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " doesn't exist.");
             return false;
         }
         if ($response['enabled'] == false) {
-            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " isn't enabled.");
+            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " isn't enabled.");
             return false;
         }
         return true;
@@ -108,7 +108,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
 
         switch ($body['event']) {
-            case 'Pending': // The invoice is paid in full.
+            case 'Processing': // The invoice is paid in full.
                 $this->transactionStateHandler->process($responseBody['metadata']['transactionId'], $context);
                 $this->orderRepository->upsert(
                     [
@@ -116,7 +116,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                             'id' => $orderId,
                             'customFields' => [
                                 'coinsnapInvoiceId' => $body['invoiceId'],
-                                'coinsnapOrderStatus' => 'pending',
+                                'coinsnapOrderStatus' => 'processing',
                             ],
                         ],
                     ],
@@ -141,14 +141,14 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                 $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
                 $this->logger->info('Invoice expired.');
                 break;
-            case 'Paid':
+            case 'Settled':
                 $this->orderRepository->upsert(
                     [
                         [
                             'id' => $orderId,
                             'customFields' => [
                                 'coinsnapInvoiceId' => $body['invoiceId'],
-                                'coinsnapOrderStatus' => 'paid',
+                                'coinsnapOrderStatus' => 'settled',
                             ],
                         ],
                     ],

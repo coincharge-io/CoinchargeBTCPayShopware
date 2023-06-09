@@ -18,7 +18,7 @@ class CoinsnapLightningPaymentMethod
 {
   public function getName(): string
   {
-    return 'Coinsnap - Lightning';
+    return 'Coinsnap-Lightning';
   }
 
   public function getPosition(): int

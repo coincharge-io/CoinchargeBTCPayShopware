@@ -36,7 +36,7 @@ class BTCPayConfigurationController extends ConfigurationController
   private WebhookServiceInterface $webhookService;
   private $paymentRepository;
 
-  public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
+  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
   {
     $this->client = $client;
     $this->configurationService = $configurationService;
@@ -52,7 +52,6 @@ class BTCPayConfigurationController extends ConfigurationController
     $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
     $response = $this->client->sendGetRequest($uri);
-
     if (!is_array($response)) {
       $this->configurationService->setSetting('integrationStatus', false);
       return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);

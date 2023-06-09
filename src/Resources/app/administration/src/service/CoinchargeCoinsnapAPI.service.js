@@ -9,23 +9,20 @@
 const ApiService = Shopware.Classes.ApiService;
 
 export default class CoinchargeCoinsnapApiService extends ApiService {
-    constructor(httpClient, loginService, apiEndpoint = 'coincharge') {
-        super(httpClient, loginService, apiEndpoint);
-    }
-    verifyApiKey() {
-        const apiRoute = `/_action/${this.getApiBasePath()}/coinsnap-verify`;
-        const headers = this.getBasicHeaders()
+	constructor(httpClient, loginService, apiEndpoint = "coincharge") {
+		super(httpClient, loginService, apiEndpoint);
+	}
+	verifyApiKey() {
+		const apiRoute = `/_action/${this.getApiBasePath()}/coinsnap_verify`;
+		const headers = this.getBasicHeaders();
 
-        return this.httpClient.get(
-            apiRoute, { headers }
-        ).then(
-            (response) => {
-                return ApiService.handleResponse(response);
-            }
-        ).catch(
-            (error) => {
-                throw error;
-            }
-        );
-    }
+		return this.httpClient
+			.get(apiRoute, { headers })
+			.then((response) => {
+				return ApiService.handleResponse(response);
+			})
+			.catch((error) => {
+				throw error;
+			});
+	}
 }

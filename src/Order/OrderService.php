@@ -20,7 +20,7 @@ class OrderService
     private ClientInterface $client;
     private ConfigurationService $configurationService;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;

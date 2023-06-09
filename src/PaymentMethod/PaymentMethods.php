@@ -20,9 +20,9 @@ use Coincharge\Shopware\PaymentMethod\CoinsnapLightningPaymentMethod;
 class PaymentMethods
 {
     public const PAYMENT_METHODS = [
+        CoinsnapBitcoinPaymentMethod::class,
+        CoinsnapLightningPaymentMethod::class,
         BitcoinPaymentMethod::class,
         LightningPaymentMethod::class,
-        CoinsnapBitcoinPaymentMethod::class,
-        CoinsnapLightningPaymentMethod::class
     ];
 }

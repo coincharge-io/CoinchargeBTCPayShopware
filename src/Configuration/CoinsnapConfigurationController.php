@@ -34,9 +34,8 @@ class CoinsnapConfigurationController extends ConfigurationController
   private ClientInterface $client;
   private ConfigurationService $configurationService;
   private WebhookServiceInterface $webhookService;
-  private $paymentRepository;
 
-  public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
+  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
   {
     $this->client = $client;
     $this->configurationService = $configurationService;
@@ -45,7 +44,7 @@ class CoinsnapConfigurationController extends ConfigurationController
   }
 
   /**
-   * @Route("/api/_action/coincharge/coinsnap-verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
+   * @Route("/api/_action/coincharge/coinsnap_verify", name="api.action.coincharge.coinsnap_verify", methods={"GET"})
    */
   public function verifyApiKey(Request $request, Context $context)
   {

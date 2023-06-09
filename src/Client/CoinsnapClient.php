@@ -16,7 +16,7 @@ use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 
-class CoinsnapClient extends AbstractClient implements BTCPayServerClientInterface
+class CoinsnapClient extends AbstractClient implements ClientInterface
 {
   protected ConfigurationService $configurationService;
   protected LoggerInterface $logger;
@@ -29,12 +29,20 @@ class CoinsnapClient extends AbstractClient implements BTCPayServerClientInterfa
 
     $client = new Client(
       [
-        'base_uri' => 'https://app.coinsnap.io',
+        'base_uri' => 'https://e668-93-87-234-37.ngrok-free.app',
         'headers' => [
           'X-Api-Key' => $authorizationHeader
         ]
       ]
     );
+    // $client = new Client(
+    //   [
+    //     'base_uri' => 'https://app.coinsnap.io',
+    //     'headers' => [
+    //       'X-Api-Key' => $authorizationHeader
+    //     ]
+    //   ]
+    // );
     parent::__construct($client, $logger);
   }
   public function sendPostRequest(string $resourceUri, array $data, array $headers = []): array
@@ -46,7 +54,7 @@ class CoinsnapClient extends AbstractClient implements BTCPayServerClientInterfa
     ];
     return $this->post($resourceUri, $options);
   }
-  public function sendGetRequest(string $resourceUri,  array $headers = []): array
+  public function sendGetRequest(string $resourceUri, array $headers = []): array
   {
     $options = [
       'headers' => $headers
