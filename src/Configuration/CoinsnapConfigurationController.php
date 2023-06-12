@@ -58,6 +58,7 @@ class CoinsnapConfigurationController extends ConfigurationController
       $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
       return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
     }
+
     $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
     return new JsonResponse(['success' => true]);
   }

@@ -1,13 +1,19 @@
 {
-    "coincharge-btcpay-generate-credentials": {
-        "button": "Generate credentials",
-        "missing_server": "You need to provide BTCPay Server url",
-        "info": "You will be redirected to the provided BTCPayServer url to generate required credentials"
-    },
-    "coincharge-btcpay-test-connection": {
-        "button": "Test connection",
-        "success": "The plugin is connected to the server",
-        "error": "Something went wrong. Check if credentials are valid and try again.",
-        "missing_credentials": "You need to generate credentials first."
-    }
+  "coincharge-btcpay-generate-credentials": {
+    "button": "Generate credentials",
+    "missing_server": "You need to provide BTCPay Server url",
+    "info": "You will be redirected to the provided BTCPayServer url to generate required credentials"
+  },
+  "coincharge-btcpay-test-connection": {
+    "button": "Test connection",
+    "success": "The plugin is connected to the server",
+    "error": "Something went wrong. Check if credentials are valid and try again.",
+    "missing_credentials": "You need to generate credentials first."
+  },
+  "coincharge-coinsnap-test-connection": {
+    "button": "Test connection",
+    "success": "The plugin is connected to the server",
+    "error": "Something went wrong. Check if credentials are valid and try again.",
+    "missing_credentials": "You need to generate credentials first."
+  }
 }

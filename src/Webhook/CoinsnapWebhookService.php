@@ -94,7 +94,8 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         $signature = $request->headers->get(self::REQUIRED_HEADER);
         $body = $request->request->all();
 
-        $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('btcpayWebhookSecret'));
+        $expectedHeader = hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
+
         if ($signature !== $expectedHeader) {
             $this->logger->error('Invalid signature');
             return new Response();
@@ -106,8 +107,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
 
 
-
-        switch ($body['event']) {
+        switch ($body['type']) {
             case 'Processing': // The invoice is paid in full.
                 $this->transactionStateHandler->process($responseBody['metadata']['transactionId'], $context);
                 $this->orderRepository->upsert(
@@ -138,7 +138,8 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                     ],
                     $context
                 );
-                $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
+                //TODO: Check if paid partially
+                //$this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
                 $this->logger->info('Invoice expired.');
                 break;
             case 'Settled':

@@ -24,18 +24,23 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
+use Coincharge\Shopware\Webhook\CoinsnapWebhookService;
+use Coincharge\Shopware\Webhook\BTCPayWebhookService;
+
 class WebhookFactory
 {
-  private ClientInterface $client;
+  private ClientInterface $coinsnapClient;
+  private ClientInterface $btcpayClient;
   private ConfigurationService $configurationService;
   private OrderTransactionStateHandler $transactionStateHandler;
   private $orderService;
   private EntityRepository $orderRepository;
   private LoggerInterface $logger;
 
-  public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
+  public function __construct(ClientInterface $coinsnapClient, ClientInterface $btcpayClient, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
   {
-    $this->client = $client;
+    $this->coinsnapClient = $coinsnapClient;
+    $this->btcpayClient = $btcpayClient;
     $this->configurationService = $configurationService;
     $this->transactionStateHandler = $transactionStateHandler;
     $this->orderService = $orderService;
@@ -46,9 +51,9 @@ class WebhookFactory
   public function create(string $provider): WebhookServiceInterface
   {
     if ($provider === 'coinsnap') {
-      return new CoinsnapWebhookService($client, $configurationService, $transactionStateHandler, $orderService, $orderRepository, $logger);
+      return new CoinsnapWebhookService($this->coinsnapClient, $this->configurationService, $this->transactionStateHandler, $this->orderService, $this->orderRepository, $this->logger);
     } elseif ($provider === 'btcpay_server') {
-      return new BTCPayWebhookService($client, $configurationService, $transactionStateHandler, $orderService, $orderRepository, $logger);
+      return new BTCPayWebhookService($this->btcpayClient, $this->configurationService, $this->transactionStateHandler, $this->orderService, $this->orderRepository, $this->logger);
     }
     throw new \RuntimeException('Unsupported webhook provider.');
   }

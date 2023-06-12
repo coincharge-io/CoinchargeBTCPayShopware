@@ -15,6 +15,7 @@ namespace Coincharge\Shopware\Webhook;
 
 use Coincharge\Shopware\Webhook\Factory\WebhookFactory;
 use Shopware\Core\Framework\Context;
+use Symfony\Component\HttpFoundation\Request;
 
 class WebhookRouter
 {

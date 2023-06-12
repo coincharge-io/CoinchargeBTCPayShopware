@@ -26,17 +26,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class WebhookController extends AbstractController
 {
-    private WebhookServiceInterface $webhookService;
+    private $webhookRouter;
 
-    public function __construct(WebhookServiceInterface $webhookService)
+    public function __construct($webhookRouter)
     {
-        $this->webhookService = $webhookService;
+        $this->webhookRouter = $webhookRouter;
     }
     /**
      * @Route("/api/_action/coincharge/webhook-endpoint", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
     public function endpoint(Request $request, Context $context): Response
     {
-        return $this->webhookService->process($request, $context);
+        //return $this->webhookService->process($request, $context);
+        return $this->webhookRouter->route($request, $context);
     }
 }
