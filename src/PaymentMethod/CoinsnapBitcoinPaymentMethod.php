@@ -31,15 +31,15 @@ class CoinsnapBitcoinPaymentMethod
     return [
       'de-DE' => [
         'description' => 'Zahle mit Bitcoin - Coinsnap',
-        'name' => 'Bitcoin',
+        'name' => 'Coinsnap-Bitcoin',
       ],
       'en-GB' => [
         'description' => 'Pay with Bitcoin - Coinsnap',
-        'name' => 'Bitcoin',
+        'name' => 'Coinsnap-Bitcoin',
       ],
       '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
         'description' => 'Pay with Bitcoin - Coinsnap',
-        'name' => 'Bitcoin',
+        'name' => 'Coinsnap-Bitcoin',
       ], //Fallback language
     ];
   }

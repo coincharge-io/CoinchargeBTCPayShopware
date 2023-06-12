@@ -31,15 +31,15 @@ class CoinsnapLightningPaymentMethod
     return [
       'de-DE' => [
         'description' => 'Zahle mit Lightning - Coinsnap',
-        'name' => 'Lightning',
+        'name' => 'Coinsnap-Lightning',
       ],
       'en-GB' => [
         'description' => 'Pay with Lightning - Coinsnap',
-        'name' => 'Lightning',
+        'name' => 'Coinsnap-Lightning',
       ],
       '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
         'description' => 'Pay with Lightning - Coinsnap',
-        'name' => 'Lightning',
+        'name' => 'Coinsnap-Lightning',
       ], //Fallback language
     ];
   }

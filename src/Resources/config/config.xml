@@ -3,7 +3,7 @@
     <card>
         <title>Coisnap</title>
         <input-field type="checkbox">
-            <name>coisnapIntegrationStatus</name>
+            <name>coinsnapIntegrationStatus</name>
             <label>Connected to the Coinsnap</label>
             <disabled>true</disabled>
             <helpText>It shows whether or not the plugin is connected to Coinsnap</helpText>

@@ -35,12 +35,11 @@ class CoinsnapConfigurationController extends ConfigurationController
   private ConfigurationService $configurationService;
   private WebhookServiceInterface $webhookService;
 
-  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
+  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService)
   {
     $this->client = $client;
     $this->configurationService = $configurationService;
     $this->webhookService = $webhookService;
-    $this->paymentRepository = $paymentRepository;
   }
 
   /**
@@ -48,10 +47,9 @@ class CoinsnapConfigurationController extends ConfigurationController
    */
   public function verifyApiKey(Request $request, Context $context)
   {
-    $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/invoices';
+    $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId');
 
     $response = $this->client->sendGetRequest($uri);
-
     if (!is_array($response)) {
       $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
       return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);

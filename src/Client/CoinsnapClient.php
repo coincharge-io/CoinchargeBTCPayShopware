@@ -29,7 +29,7 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
 
     $client = new Client(
       [
-        'base_uri' => 'https://e668-93-87-234-37.ngrok-free.app',
+        'base_uri' => 'https://e3a2-93-87-234-130.ngrok-free.app',
         'headers' => [
           'X-Api-Key' => $authorizationHeader
         ]

@@ -52,7 +52,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
         $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
 
-        $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coisnapWebsiteId') . '/webhooks';
+        $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/webhooks';
         $body = $this->client->sendPostRequest(
             $uri,
             [
