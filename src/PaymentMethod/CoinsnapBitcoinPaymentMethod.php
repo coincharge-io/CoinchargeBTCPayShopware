@@ -49,4 +49,8 @@ class CoinsnapBitcoinPaymentMethod
   {
     return CoinsnapBitcoinPaymentMethodHandler::class;
   }
+  public function isActive()
+  {
+    return true;
+  }
 }

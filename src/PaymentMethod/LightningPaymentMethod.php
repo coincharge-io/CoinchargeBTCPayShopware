@@ -48,4 +48,8 @@ class LightningPaymentMethod
     {
         return LightningPaymentMethodHandler::class;
     }
+    public function isActive()
+    {
+        return false;
+    }
 }

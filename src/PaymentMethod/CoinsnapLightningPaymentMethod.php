@@ -48,4 +48,8 @@ class CoinsnapLightningPaymentMethod
   {
     return CoinsnapLightningPaymentMethodHandler::class;
   }
+  public function isActive()
+  {
+    return true;
+  }
 }

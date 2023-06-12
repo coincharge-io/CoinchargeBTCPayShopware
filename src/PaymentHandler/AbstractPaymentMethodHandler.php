@@ -23,6 +23,7 @@ use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\BClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Coincharge\Shopware\Client\ClientInterface;
 
 abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
 {
@@ -49,7 +50,7 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
         try {
-            $redirectUrl = $this->sendReturnUrlToBTCPay($transaction, $salesChannelContext);
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
         } catch (\Exception $e) {
             throw new AsyncPaymentProcessException(
                 $transaction->getOrderTransaction()->getId(),
@@ -63,5 +64,5 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
-    abstract public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
+    abstract public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
 }

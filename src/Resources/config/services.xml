@@ -5,20 +5,6 @@
         <service id="Coincharge\Shopware\Configuration\ConfigurationService">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
-        <service id="Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-            <tag name="shopware.payment.method.async" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-            <tag name="shopware.payment.method.async" />
-        </service>
         <service id="Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinPaymentMethodHandler">
             <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
@@ -28,6 +14,20 @@
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler">
             <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+            <tag name="shopware.payment.method.async" />
+        </service>
+        <service id="Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler">
+            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
+            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+            <tag name="shopware.payment.method.async" />
+        </service>
+        <service id="Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler">
+            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>

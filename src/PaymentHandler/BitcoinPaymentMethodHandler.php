@@ -34,7 +34,7 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
         $this->logger = $logger;
         parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
-    public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
             $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();

@@ -49,4 +49,9 @@ class BitcoinPaymentMethod
     {
         return BitcoinPaymentMethodHandler::class;
     }
+
+    public function isActive()
+    {
+        return false;
+    }
 }
