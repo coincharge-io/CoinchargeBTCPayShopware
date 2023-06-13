@@ -17,24 +17,11 @@ Component.register("coincharge-coinsnap-button", {
 	data() {
 		return {
 			isLoading: false,
-			config: {
-				"CoinchargeBTCPayShopware.config.btcpayServerUrl": "",
-			},
 		};
 	},
 	methods: {
 		testConnection() {
 			this.isLoading = true;
-
-			// if (!this.credentialsExist()) {
-			// 	this.isLoading = false;
-			// 	return this.createNotificationWarning({
-			// 		title: "Coinsnap",
-			// 		message: this.$tc(
-			// 			"coincharge-coinsnap-test-connection.missing_credentials",
-			// 		),
-			// 	});
-			// }
 			this.coinchargeCoinsnapApiService
 				.verifyApiKey()
 				.then((ApiResponse) => {
@@ -61,21 +48,6 @@ Component.register("coincharge-coinsnap-button", {
 						message: this.$tc("coincharge-coinsnap-test-connection.error"),
 					});
 				});
-		},
-		credentialsExist() {
-			if (
-				document.getElementById(
-					"CoinchargeBTCPayShopware.config.btcpayServerUrl",
-				).value === "" ||
-				document.getElementById("CoinchargeBTCPayShopware.config.btcpayApiKey")
-					.value === "" ||
-				document.getElementById(
-					"CoinchargeBTCPayShopware.config.btcpayServerStoreId",
-				).value === ""
-			) {
-				return false;
-			}
-			return true;
 		},
 	},
 });

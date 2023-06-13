@@ -126,20 +126,23 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                 break;
             case 'Expired':
                 //TODO: Check if invoice was partially paid
+                $status = $body['underpaid'] ? 'partially_paid' : 'expired';
                 $this->orderRepository->upsert(
                     [
                         [
                             'id' => $orderId,
                             'customFields' => [
                                 'coinsnapInvoiceId' => $body['invoiceId'],
-                                'coinsnapOrderStatus' => 'expired',
+                                'coinsnapOrderStatus' => $status,
                             ],
                         ],
                     ],
                     $context
                 );
                 //TODO: Check if paid partially
-                //$this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
+                if ($body['underpaid']) {
+                    $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
+                }
                 $this->logger->info('Invoice expired.');
                 break;
             case 'Settled':

@@ -2,20 +2,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/master/src/Core/System/SystemConfig/Schema/config.xsd">
     <card>
         <title>Coinsnap</title>
-        <input-field type="checkbox">
-            <name>coinsnapIntegrationStatus</name>
-            <label>Connected to the Coinsnap</label>
-            <disabled>true</disabled>
-            <helpText>It shows whether or not the plugin is connected to Coinsnap</helpText>
-            <helpText lang="de-DE"> Es zeigt an, ob das Plugin mit Ihrem Coinsnap verbunden ist oder nicht</helpText>
-        </input-field>
-        <component name="coincharge-coinsnap-button">
-            <name>buttons</name>
-        </component>
-    </card>
-    <card>
-        <title>Credentials</title>
-        <title lang="de-DE">Berechtigungsnachweise</title>
         <input-field>
             <name>coinsnapApiKey</name>
             <label>Coinsnap API Key</label>
@@ -34,6 +20,16 @@
             <disabled>true</disabled>
             <label>Webhook secret</label>
         </input-field>
+        <input-field type="checkbox">
+            <name>coinsnapIntegrationStatus</name>
+            <label>Connected to the Coinsnap</label>
+            <disabled>true</disabled>
+            <helpText>It shows whether or not the plugin is connected to Coinsnap</helpText>
+            <helpText lang="de-DE"> Es zeigt an, ob das Plugin mit Ihrem Coinsnap verbunden ist oder nicht</helpText>
+        </input-field>
+        <component name="coincharge-coinsnap-button">
+            <name>buttons</name>
+        </component>
     </card>
     <card>
         <title>BTCPay Server</title>

@@ -20,7 +20,7 @@ Application.addServiceProvider("coinchargeBtcpayApiService", (container) => {
 	const initContainer = Application.getContainer("init");
 	return new CoinchargeBtcpayApiService(
 		initContainer.httpClient,
-		container.loginService,
+		container.loginService
 	);
 });
 
@@ -28,7 +28,7 @@ Application.addServiceProvider("coinchargeCoinsnapApiService", (container) => {
 	const initContainer = Application.getContainer("init");
 	return new CoinchargeCoinsnapApiService(
 		initContainer.httpClient,
-		container.loginService,
+		container.loginService
 	);
 });
 
