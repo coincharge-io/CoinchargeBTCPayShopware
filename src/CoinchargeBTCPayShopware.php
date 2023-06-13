@@ -172,10 +172,10 @@ class CoinchargeBTCPayShopware extends Plugin
                 return ['id' => $id];
             }, $idSearchResult->getIds());
             $systemConfigRepository->delete($ids, Context::createDefaultContext());
-            $criteria = new Criteria();
-            $criteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer, coinsnap']));
+            $customFieldCriteria = new Criteria();
+            $customFieldCriteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer', 'coinsnap']));
 
-            $customFieldIds = $customFieldSetRepository->searchIds($criteria, $context->getContext());
+            $customFieldIds = $customFieldSetRepository->searchIds($customFieldCriteria, $context->getContext());
             $customFieldSetRepository->delete(array_values($customFieldIds->getData()), $context->getContext());
         }
     }
