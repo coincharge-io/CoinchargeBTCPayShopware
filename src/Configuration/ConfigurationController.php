@@ -47,4 +47,19 @@ class ConfigurationController extends AbstractController
     public function verifyApiKey(Request $request, Context $context)
     {
     }
+    protected function updatePaymentMethodStatus(Context $context, string $paymentMethod, bool $status, $paymentRepository)
+    {
+        $paymentMethodClass = new $paymentMethod();
+        $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethodClass->getPaymentHandler()));
+        $paymentMethodId = $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+        if (!$paymentMethodId) {
+            return;
+        }
+
+        $paymentMethod = [
+            'id' => $paymentMethodId,
+            'active' => $status,
+        ];
+        $paymentRepository->update([$paymentMethod], $context);
+    }
 }

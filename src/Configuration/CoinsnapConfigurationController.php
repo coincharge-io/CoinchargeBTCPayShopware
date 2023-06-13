@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMethod};
+use Coincharge\Shopware\PaymentMethod\{CoinsnapLightningPaymentMethod, CoinsnapBitcoinPaymentMethod};
 
 /**
  * @Route(defaults={"_routeScope"={"api"}})
@@ -34,12 +34,14 @@ class CoinsnapConfigurationController extends ConfigurationController
   private ClientInterface $client;
   private ConfigurationService $configurationService;
   private WebhookServiceInterface $webhookService;
+  private $paymentRepository;
 
-  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService)
+  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
   {
     $this->client = $client;
     $this->configurationService = $configurationService;
     $this->webhookService = $webhookService;
+    $this->paymentRepository = $paymentRepository;
   }
 
   /**
@@ -58,7 +60,8 @@ class CoinsnapConfigurationController extends ConfigurationController
       $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
       return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
     }
-
+    $this->updatePaymentMethodStatus($context, CoinsnapLightningPaymentMethod::class, true, $this->paymentRepository);
+    $this->updatePaymentMethodStatus($context, CoinsnapBitcoinPaymentMethod::class, true, $this->paymentRepository);
     $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
     return new JsonResponse(['success' => true]);
   }

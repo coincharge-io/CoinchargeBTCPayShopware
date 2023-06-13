@@ -212,7 +212,6 @@ class CoinchargeBTCPayShopware extends Plugin
         $examplePaymentData = [
             'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
             'pluginId' => $pluginId,
-            'active' => $paymentMethod->isActive(),
             'position' => $paymentMethod->getPosition(),
             'media' => [
                 'id' => $this->ensureMedia($context, $paymentMethod->getName()),

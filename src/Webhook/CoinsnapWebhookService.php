@@ -77,7 +77,6 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         }
         $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/webhooks/' . $this->configurationService->getSetting('coinsnapWebhookId');
         $response = $this->client->sendGetRequest($uri);
-
         if (empty($response)) {
             $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " doesn't exist.");
             return false;

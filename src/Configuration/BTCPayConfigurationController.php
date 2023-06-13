@@ -89,25 +89,25 @@ class BTCPayConfigurationController extends ConfigurationController
       if (array_key_exists($key, $paymentMethods)) {
         $configName = 'btcpayStorePaymentMethod' . $paymentMethods[$key];
         $this->configurationService->setSetting($configName, $val['enabled']);
-        $this->updatePaymentMethodStatus($context, $paymentHandlers[$key], $val['enabled']);
+        $this->updatePaymentMethodStatus($context, $paymentHandlers[$key], $val['enabled'], $this->paymentRepository);
       }
     }
   }
-  private function updatePaymentMethodStatus(Context $context, string $paymentMethod, bool $status)
-  {
-    $paymentMethodClass = new $paymentMethod();
-    $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethodClass->getPaymentHandler()));
-    $paymentMethodId = $this->paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
-    if (!$paymentMethodId) {
-      return;
-    }
-
-    $paymentMethod = [
-      'id' => $paymentMethodId,
-      'active' => $status,
-    ];
-    $this->paymentRepository->update([$paymentMethod], $context);
-  }
+  // private function updatePaymentMethodStatus(Context $context, string $paymentMethod, bool $status)
+  // {
+  //   $paymentMethodClass = new $paymentMethod();
+  //   $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethodClass->getPaymentHandler()));
+  //   $paymentMethodId = $this->paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+  //   if (!$paymentMethodId) {
+  //     return;
+  //   }
+  //
+  //   $paymentMethod = [
+  //     'id' => $paymentMethodId,
+  //     'active' => $status,
+  //   ];
+  //   $this->paymentRepository->update([$paymentMethod], $context);
+  // }
   private function disableBTCPaymentMethodsBeforeTest()
   {
     $this->configurationService->setSetting('BTC', false);
