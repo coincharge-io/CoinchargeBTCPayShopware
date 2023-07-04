@@ -16,6 +16,8 @@ use Coincharge\Shopware\PaymentMethod\BitcoinPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\LightningPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\CoinsnapBitcoinPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\CoinsnapLightningPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\MoneroPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\LitecoinPaymentMethod;
 
 class PaymentMethods
 {
@@ -24,5 +26,7 @@ class PaymentMethods
         CoinsnapLightningPaymentMethod::class,
         BitcoinPaymentMethod::class,
         LightningPaymentMethod::class,
+        MoneroPaymentMethod::class,
+        LitecoinPaymentMethod::class,
     ];
 }

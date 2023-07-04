@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMethod};
+use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMethod, LitecoinPaymentMethod, MoneroPaymentMethod};
 
 /**
  * @Route(defaults={"_routeScope"={"api"}})
@@ -80,8 +80,8 @@ class BTCPayConfigurationController extends ConfigurationController
 
   private function checkEnabledPaymentMethodsBTCPayStore(Context $context)
   {
-    $paymentMethods = ['BTC' => 'BTC', 'BTC-LightningNetwork' => 'Lightning'];
-    $paymentHandlers = ['BTC' => BitcoinPaymentMethod::class, 'BTC-LightningNetwork' => LightningPaymentMethod::class];
+    $paymentMethods = ['BTC' => 'BTC', 'BTC-LightningNetwork' => 'Lightning', 'LTC' => 'Litecoin', 'XMR' => 'Monero'];
+    $paymentHandlers = ['BTC' => BitcoinPaymentMethod::class, 'BTC-LightningNetwork' => LightningPaymentMethod::class, 'LTC' => LitecoinPaymentMethod::class, 'XMR' => MoneroPaymentMethod::class];
     $this->disableBTCPaymentMethodsBeforeTest();
     $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/payment-methods';
     $response = $this->client->sendGetRequest($uri);
@@ -112,5 +112,7 @@ class BTCPayConfigurationController extends ConfigurationController
   {
     $this->configurationService->setSetting('BTC', false);
     $this->configurationService->setSetting('Lightning', false);
+    $this->configurationService->setSetting('LTC', false);
+    $this->configurationService->setSetting('XMR', false);
   }
 }

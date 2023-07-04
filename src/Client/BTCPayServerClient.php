@@ -53,7 +53,7 @@ class BTCPayServerClient extends AbstractClient implements ClientInterface
         ];
         return $this->get($resourceUri, $options);
     }
-    public function createAuthHeader(): string
+    public function createAuthHeader(): ?string
     {
         return 'token ' . $this->configurationService->getSetting('btcpayApiKey');
     }

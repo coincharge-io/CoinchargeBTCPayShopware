@@ -29,20 +29,12 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
 
     $client = new Client(
       [
-        'base_uri' => 'https://00e6-93-87-234-3.ngrok-free.app',
+        'base_uri' => 'https://app.coinsnap.io',
         'headers' => [
           'X-Api-Key' => $authorizationHeader
         ]
       ]
     );
-    // $client = new Client(
-    //   [
-    //     'base_uri' => 'https://app.coinsnap.io',
-    //     'headers' => [
-    //       'X-Api-Key' => $authorizationHeader
-    //     ]
-    //   ]
-    // );
     parent::__construct($client, $logger);
   }
   public function sendPostRequest(string $resourceUri, array $data, array $headers = []): array
@@ -61,7 +53,7 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
     ];
     return $this->get($resourceUri, $options);
   }
-  public function createAuthHeader(): string
+  public function createAuthHeader(): ?string
   {
     return $this->configurationService->getSetting('coinsnapApiKey');
   }

@@ -18,5 +18,5 @@ interface ClientInterface
 
     public function sendGetRequest(string $resourceUri, array $headers = []): array;
 
-    public function createAuthHeader(): string;
+    public function createAuthHeader(): ?string;
 }
