@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentMethod;
 
-use Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler;
+use Coincharge\Shopware\PaymentHandler\MoneroPaymentMethodHandler;
 
 class MoneroPaymentMethod
 {

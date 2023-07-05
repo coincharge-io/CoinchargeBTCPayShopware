@@ -112,7 +112,7 @@ class BTCPayConfigurationController extends ConfigurationController
   {
     $this->configurationService->setSetting('BTC', false);
     $this->configurationService->setSetting('Lightning', false);
-    $this->configurationService->setSetting('LTC', false);
-    $this->configurationService->setSetting('XMR', false);
+    $this->configurationService->setSetting('Litecoin', false);
+    $this->configurationService->setSetting('Monero', false);
   }
 }

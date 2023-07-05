@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentMethod;
 
-use Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler;
+use Coincharge\Shopware\PaymentHandler\LitecoinPaymentMethodHandler;
 
 class LitecoinPaymentMethod
 {
@@ -23,7 +23,7 @@ class LitecoinPaymentMethod
 
   public function getPosition(): int
   {
-    return -1;
+    return 5;
   }
 
   public function getTranslations(): array
