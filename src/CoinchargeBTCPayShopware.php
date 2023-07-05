@@ -196,16 +196,13 @@ class CoinchargeBTCPayShopware extends Plugin
     }
     public function update(UpdateContext $updateContext): void
     {
-                $currentVersion = $updateContext->getUpdatePluginVersion();
+        $currentVersion = $updateContext->getUpdatePluginVersion();
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsAnyFilter('name', ['coinsnap']));
 
-        $customFieldIds = $customFieldSetRepository->search($criteria, $context->getContext())->first();
-        if (\version_compare($currentVersion, '1.2.0', '<')) {
-            $this->updateTo120($updateContext);
-        }
+        $customFieldIds = $customFieldSetRepository->search($criteria, $updateContext->getContext())->first();
         if (\version_compare($currentVersion, '1.1.0', '<')) {
             $customFieldSetRepository->upsert(
                 [
@@ -247,13 +244,12 @@ class CoinchargeBTCPayShopware extends Plugin
                         ]],
                     ]
                 ],
-                $context->getContext()
+                $updateContext->getContext()
             );
         }
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-            $this->addPaymentMethod(new $paymentMethod(), $context->getContext());
+            $this->addPaymentMethod(new $paymentMethod(), $updateContext->getContext());
         }
-
     }
 
     private function addPaymentMethod($paymentMethod, Context $context): void
