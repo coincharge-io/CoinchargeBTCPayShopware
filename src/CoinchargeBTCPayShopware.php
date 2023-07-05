@@ -203,7 +203,7 @@ class CoinchargeBTCPayShopware extends Plugin
         $criteria->addFilter(new EqualsAnyFilter('name', ['coinsnap']));
 
         $customFieldIds = $customFieldSetRepository->search($criteria, $updateContext->getContext())->first();
-        if (\version_compare($currentVersion, '1.1.0', '<')) {
+        if (!$customFieldIds) {
             $customFieldSetRepository->upsert(
                 [
                     [
