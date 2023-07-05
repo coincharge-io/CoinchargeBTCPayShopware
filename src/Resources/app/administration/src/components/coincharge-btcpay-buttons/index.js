@@ -27,13 +27,13 @@ Component.register("coincharge-btcpay-buttons", {
 			const systemConfig = ApiService.getByName("systemConfigApiService");
 
 			const btcpayServerUrl = document.getElementById(
-				"CoinchargeBTCPayShopware.config.btcpayServerUrl",
+				"CoinchargeBTCPayShopware.config.btcpayServerUrl"
 			).value;
 			if (!btcpayServerUrl) {
 				return this.createNotificationWarning({
 					title: "BTCPay Server",
 					message: this.$tc(
-						"coincharge-btcpay-generate-credentials.missing_server",
+						"coincharge-btcpay-generate-credentials.missing_server"
 					),
 				});
 			}
@@ -56,13 +56,15 @@ Component.register("coincharge-btcpay-buttons", {
 				"CoinchargeBTCPayShopware.config.integrationStatus": false,
 				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodBTC": false,
 				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLightning": false,
+				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodMonero": false,
+				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLitecoin": false,
 			});
 			return window.open(
 				filteredUrl +
-					"/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=" +
-					url,
+				"/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=" +
+				url,
 				"_blank",
-				"noopener",
+				"noopener"
 			);
 		},
 		removeTrailingSlash(serverUrl) {
@@ -75,7 +77,7 @@ Component.register("coincharge-btcpay-buttons", {
 				return this.createNotificationWarning({
 					title: "BTCPay Server",
 					message: this.$tc(
-						"coincharge-btcpay-test-connection.missing_credentials",
+						"coincharge-btcpay-test-connection.missing_credentials"
 					),
 				});
 			}
@@ -109,12 +111,12 @@ Component.register("coincharge-btcpay-buttons", {
 		credentialsExist() {
 			if (
 				document.getElementById(
-					"CoinchargeBTCPayShopware.config.btcpayServerUrl",
+					"CoinchargeBTCPayShopware.config.btcpayServerUrl"
 				).value === "" ||
 				document.getElementById("CoinchargeBTCPayShopware.config.btcpayApiKey")
 					.value === "" ||
 				document.getElementById(
-					"CoinchargeBTCPayShopware.config.btcpayServerStoreId",
+					"CoinchargeBTCPayShopware.config.btcpayServerStoreId"
 				).value === ""
 			) {
 				return false;
