@@ -44,7 +44,6 @@ class CoinsnapBitcoinPaymentMethod
     ];
   }
 
-
   public function getPaymentHandler(): string
   {
     return CoinsnapBitcoinPaymentMethodHandler::class;
