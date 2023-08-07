@@ -52,7 +52,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
         $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
 
-        $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/webhooks';
+        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks';
         $body = $this->client->sendPostRequest(
             $uri,
             [
@@ -75,7 +75,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         if (empty($this->configurationService->getSetting('coinsnapWebhookId'))) {
             return false;
         }
-        $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/webhooks/' . $this->configurationService->getSetting('coinsnapWebhookId');
+        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks/' . $this->configurationService->getSetting('coinsnapWebhookId');
         $response = $this->client->sendGetRequest($uri);
         if (empty($response)) {
             $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " doesn't exist.");
@@ -93,13 +93,13 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         $signature = $request->headers->get(self::REQUIRED_HEADER);
         $body = $request->request->all();
 
-        $expectedHeader = hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
+        $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
 
         if ($signature !== $expectedHeader) {
             $this->logger->error('Invalid signature');
             return new Response();
         }
-        $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/invoices/' . $body['invoiceId'];
+        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices/' . $body['invoiceId'];
         $responseBody = $this->client->sendGetRequest($uri);
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));

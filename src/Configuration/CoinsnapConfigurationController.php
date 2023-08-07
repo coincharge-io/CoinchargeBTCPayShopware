@@ -49,7 +49,7 @@ class CoinsnapConfigurationController extends ConfigurationController
    */
   public function verifyApiKey(Request $request, Context $context)
   {
-    $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId');
+    $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId');
 
     $response = $this->client->sendGetRequest($uri);
     if (!is_array($response)) {

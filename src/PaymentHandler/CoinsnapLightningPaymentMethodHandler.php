@@ -42,7 +42,7 @@ class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
         $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
         return $accountUrl;
       }
-      $uri = '/api/v1/websites/' . $this->configurationService->getSetting('coinsnapWebsiteId') . '/invoices';
+      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices';
       $response = $this->client->sendPostRequest(
         $uri,
         [

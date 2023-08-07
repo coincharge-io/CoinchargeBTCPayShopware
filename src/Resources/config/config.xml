@@ -7,8 +7,8 @@
             <label>Coinsnap API Key</label>
         </input-field>
         <input-field>
-            <name>coinsnapWebsiteId</name>
-            <label>Coinsnap Website Id</label>
+            <name>coinsnapStoreId</name>
+            <label>Coinsnap Store Id</label>
         </input-field>
         <input-field>
             <name>coinsnapWebhookId</name>
