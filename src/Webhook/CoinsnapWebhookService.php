@@ -45,29 +45,33 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
     public function register(Request $request, ?string $salesChannelId): bool
     {
-        if ($this->isEnabled()) {
-            $this->logger->info('Webhook exists');
+        try {
+            if ($this->isEnabled()) {
+                $this->logger->info('Webhook exists');
+                return true;
+            }
+
+            $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
+
+            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks';
+            $body = $this->client->sendPostRequest(
+                $uri,
+                [
+                    'url' => $webhookUrl
+                ]
+            );
+            if (empty($body)) {
+                $this->logger->error("Webhook couldn't be created");
+                return false;
+            }
+
+            $this->configurationService->setSetting('coinsnapWebhookSecret', $body['secret']);
+            $this->configurationService->setSetting('coinsnapWebhookId', $body['id']);
+
             return true;
-        }
-
-        $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
-
-        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks';
-        $body = $this->client->sendPostRequest(
-            $uri,
-            [
-                'url' => $webhookUrl
-            ]
-        );
-        if (empty($body)) {
-            $this->logger->error("Webhook couldn't be created");
+        } catch (\Exception $e) {
             return false;
         }
-
-        $this->configurationService->setSetting('coinsnapWebhookSecret', $body['secret']);
-        $this->configurationService->setSetting('coinsnapWebhookId', $body['id']);
-
-        return true;
     }
     public function isEnabled(): bool
     {

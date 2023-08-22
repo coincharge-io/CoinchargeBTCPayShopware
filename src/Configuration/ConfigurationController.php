@@ -31,19 +31,6 @@ use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMet
 
 class ConfigurationController extends AbstractController
 {
-    // private ClientInterface $client;
-    // private ConfigurationService $configurationService;
-    // private WebhookServiceInterface $webhookService;
-    // private $paymentRepository;
-    //
-    // public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
-    // {
-    //     $this->client = $client;
-    //     $this->configurationService = $configurationService;
-    //     $this->webhookService = $webhookService;
-    //     $this->paymentRepository = $paymentRepository;
-    // }
-
     public function verifyApiKey(Request $request, Context $context)
     {
     }

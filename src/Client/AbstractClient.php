@@ -54,17 +54,6 @@ class AbstractClient
             );
             return \json_decode($body, true) ?? [];
         } catch (RequestException $e) {
-            // if ($e->hasResponse()) {
-            //     // Handle specific HTTP error codes
-            //
-            //     $this->logger->error($e->getResponse()->getReasonPhrase());
-            // } else {
-            //     // Handle connection or request-related errors
-            //     $errorMessage = $e->getMessage();
-            //
-            //     // Log the error
-            //     $this->logger->error("Request Error: $errorMessage");
-            // }
             if ($e->hasResponse()) {
                 $response = $e->getResponse();
                 $statusCode = $response->getStatusCode();
@@ -81,19 +70,5 @@ class AbstractClient
             $this->logger->error('Guzzle request failed: Unknown error');
             throw new \Exception('Unknown error');
         }
-    }         // } catch (\GuzzleHttp\Exception\RequestException  $e) {
-
-    //     if ($e->hasResponse()) {
-    //         $response = $e->getResponse();
-    //         $this->logger->error($response->getReasonPhrase());
-    //         throw new \Exception($response->getReasonPhrase());
-    //     }
-    //     $response = $e->getHandlerContext();
-    //     if (isset($response['error'])) {
-    //         $this->logger->error($response['error']);
-    //         throw new \Exception($response['error']);
-    //     }
-    //     $this->logger->error('Unknown error');
-    //     throw new \Exception('Unknown error');
-    // }
+    }
 }

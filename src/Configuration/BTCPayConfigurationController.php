@@ -49,20 +49,24 @@ class BTCPayConfigurationController extends ConfigurationController
    */
   public function verifyApiKey(Request $request, Context $context)
   {
-    $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+    try {
+      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
-    $response = $this->client->sendGetRequest($uri);
-    if (!is_array($response)) {
-      $this->configurationService->setSetting('integrationStatus', false);
-      return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
+      $response = $this->client->sendGetRequest($uri);
+      if (!is_array($response)) {
+        $this->configurationService->setSetting('integrationStatus', false);
+        return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
+      }
+      if (!$this->webhookService->register($request, null)) {
+        $this->configurationService->setSetting('integrationStatus', false);
+        return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
+      }
+      $this->configurationService->setSetting('integrationStatus', true);
+      $this->checkEnabledPaymentMethodsBTCPayStore($context);
+      return new JsonResponse(['success' => true]);
+    } catch (\Exception $e) {
+      return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
     }
-    if (!$this->webhookService->register($request, null)) {
-      $this->configurationService->setSetting('integrationStatus', false);
-      return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
-    }
-    $this->configurationService->setSetting('integrationStatus', true);
-    $this->checkEnabledPaymentMethodsBTCPayStore($context);
-    return new JsonResponse(['success' => true]);
   }
   /**
    * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
@@ -93,21 +97,6 @@ class BTCPayConfigurationController extends ConfigurationController
       }
     }
   }
-  // private function updatePaymentMethodStatus(Context $context, string $paymentMethod, bool $status)
-  // {
-  //   $paymentMethodClass = new $paymentMethod();
-  //   $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethodClass->getPaymentHandler()));
-  //   $paymentMethodId = $this->paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
-  //   if (!$paymentMethodId) {
-  //     return;
-  //   }
-  //
-  //   $paymentMethod = [
-  //     'id' => $paymentMethodId,
-  //     'active' => $status,
-  //   ];
-  //   $this->paymentRepository->update([$paymentMethod], $context);
-  // }
   private function disableBTCPaymentMethodsBeforeTest()
   {
     $this->configurationService->setSetting('BTC', false);
