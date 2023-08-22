@@ -49,20 +49,23 @@ class CoinsnapConfigurationController extends ConfigurationController
    */
   public function verifyApiKey(Request $request, Context $context)
   {
-    $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId');
+    try {
+      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId');
 
-    $response = $this->client->sendGetRequest($uri);
-    if (!is_array($response)) {
-      $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
-      return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
+      $response = $this->client->sendGetRequest($uri);
+      if (!is_array($response)) {
+        $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
+        return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
+      }
+      if (!$this->webhookService->register($request, null)) {
+        $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
+        return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
+      }
+      $this->updatePaymentMethodStatus($context, CoinsnapLightningPaymentMethod::class, true, $this->paymentRepository);
+      $this->updatePaymentMethodStatus($context, CoinsnapBitcoinPaymentMethod::class, true, $this->paymentRepository);
+      $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
+      return new JsonResponse(['success' => true]);
+    } catch (\Exception $e) {
     }
-    if (!$this->webhookService->register($request, null)) {
-      $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
-      return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
-    }
-    $this->updatePaymentMethodStatus($context, CoinsnapLightningPaymentMethod::class, true, $this->paymentRepository);
-    $this->updatePaymentMethodStatus($context, CoinsnapBitcoinPaymentMethod::class, true, $this->paymentRepository);
-    $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
-    return new JsonResponse(['success' => true]);
   }
 }
