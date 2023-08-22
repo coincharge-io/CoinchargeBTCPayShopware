@@ -17,11 +17,34 @@ Component.register("coincharge-coinsnap-button", {
 	data() {
 		return {
 			isLoading: false,
+			config: {
+				"CoinchargeBTCPayShopware.config.coinsnapStoreId": "",
+				"CoinchargeBTCPayShopware.config.coinsnapApiKey": "",
+			},
 		};
 	},
 	methods: {
 		testConnection() {
 			this.isLoading = true;
+			const systemConfig = ApiService.getByName("systemConfigApiService");
+			const coinsnapStoreId = document.getElementById(
+				"CoinchargeBTCPayShopware.config.coinsnapStoreId"
+			).value;
+			const coinsnapApiKey = document.getElementById(
+				"CoinchargeBTCPayShopware.config.coinsnapApiKey"
+			).value;
+			systemConfig.saveValues({
+				"CoinchargeBTCPayShopware.config.coinsnapApiKey": coinsnapApiKey,
+				"CoinchargeBTCPayShopware.config.coinsnapStoreId": coinsnapStoreId,
+			});
+			if (coinsnapApiKey == "" || coinsnapStoreId == "") {
+				return this.createNotificationWarning({
+					title: "BTCPay Server",
+					message: this.$tc(
+						"coincharge-coinsnap-test-connection.missing_credentials"
+					),
+				});
+			}
 			this.coinchargeCoinsnapApiService
 				.verifyApiKey()
 				.then((ApiResponse) => {
