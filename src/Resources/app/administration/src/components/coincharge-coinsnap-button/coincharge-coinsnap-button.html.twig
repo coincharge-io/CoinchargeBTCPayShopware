@@ -1,3 +1,4 @@
-<sw-container>
-	<sw-button-process class="sw-button-coincharge" :process-success="isLoading" :is-loading="isLoading" @click="testConnection">{{ $tc('coincharge-coinsnap-test-connection.button') }}</sw-button-process>
+<sw-container columns="repeat(2, auto)" gap="0px 10px">
+	<sw-button v-tooltip.top="{ message:$tc('coincharge-coinsnap-test-connection.save')}" class="sw-button-coincharge" @click="saveCredentials">{{ $tc('coincharge-coinsnap-test-connection.save') }}</sw-button>
+	<sw-button-process class="sw-button-coincharge" :process-success="isLoading" :disabled="isDisabled" :is-loading="isLoading" @click="testConnection">{{ $tc('coincharge-coinsnap-test-connection.button') }}</sw-button-process>
 </sw-container>

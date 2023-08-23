@@ -11,9 +11,10 @@
     "missing_credentials": "Sie müssen zunächst einen Berechtigungsnachweis erstellen."
   },
   "coincharge-coinsnap-test-connection": {
+    "save": "Anmeldeinformationen speichern",
     "button": "Verbindung testen",
     "success": "Das Plugin ist mit dem Server verbunden",
     "error": "Ein Fehler ist aufgetreten. Prüfen Sie, ob die Anmeldedaten gültig sind und versuchen Sie es erneut.",
-    "missing_credentials": "Sie müssen zuerst den API-Schlüssel und die Speicher-ID angeben"
+    "missing_credentials": "Sie müssen zuerst den API-Schlüssel speichern und die ID speichern."
   }
 }
