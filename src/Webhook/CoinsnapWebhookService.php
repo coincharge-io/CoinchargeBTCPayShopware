@@ -75,21 +75,25 @@ class CoinsnapWebhookService implements WebhookServiceInterface
     }
     public function isEnabled(): bool
     {
+        try {
 
-        if (empty($this->configurationService->getSetting('coinsnapWebhookId'))) {
+            if (empty($this->configurationService->getSetting('coinsnapWebhookId'))) {
+                return false;
+            }
+            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks/' . $this->configurationService->getSetting('coinsnapWebhookId');
+            $response = $this->client->sendGetRequest($uri);
+            if (empty($response)) {
+                $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " doesn't exist.");
+                return false;
+            }
+            if ($response['enabled'] == false) {
+                $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " isn't enabled.");
+                return false;
+            }
+            return true;
+        } catch (\Exception $e) {
             return false;
         }
-        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks/' . $this->configurationService->getSetting('coinsnapWebhookId');
-        $response = $this->client->sendGetRequest($uri);
-        if (empty($response)) {
-            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " doesn't exist.");
-            return false;
-        }
-        if ($response['enabled'] == false) {
-            $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " isn't enabled.");
-            return false;
-        }
-        return true;
     }
 
     public function process(Request $request, Context $context): Response
