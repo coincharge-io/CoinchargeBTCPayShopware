@@ -45,48 +45,55 @@ class BTCPayWebhookService implements WebhookServiceInterface
 
   public function register(Request $request, ?string $salesChannelId): bool
   {
-    if ($this->isEnabled()) {
-      $this->logger->info('Webhook exists');
+    try {
+      if ($this->isEnabled()) {
+        $this->logger->info('Webhook exists');
+        return true;
+      }
+
+      $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
+
+      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks';
+      $body = $this->client->sendPostRequest(
+        $uri,
+        [
+          'url' => $webhookUrl
+        ]
+      );
+      if (empty($body)) {
+        $this->logger->error("Webhook couldn't be created");
+        return false;
+      }
+
+      $this->configurationService->setSetting('btcpayWebhookSecret', $body['secret']);
+      $this->configurationService->setSetting('btcpayWebhookId', $body['id']);
+
       return true;
-    }
-
-    $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
-
-    $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks';
-    $body = $this->client->sendPostRequest(
-      $uri,
-      [
-        'url' => $webhookUrl
-      ]
-    );
-    if (empty($body)) {
-      $this->logger->error("Webhook couldn't be created");
+    } catch (\Exception $e) {
       return false;
     }
-
-    $this->configurationService->setSetting('btcpayWebhookSecret', $body['secret']);
-    $this->configurationService->setSetting('btcpayWebhookId', $body['id']);
-
-    return true;
   }
   public function isEnabled(): bool
   {
+    try {
+      if (empty($this->configurationService->getSetting('btcpayWebhookId'))) {
+        return false;
+      }
+      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks/' . $this->configurationService->getSetting('btcpayWebhookId');
+      $response = $this->client->sendGetRequest($uri);
 
-    if (empty($this->configurationService->getSetting('btcpayWebhookId'))) {
+      if (empty($response)) {
+        $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " doesn't exist.");
+        return false;
+      }
+      if ($response['enabled'] == false) {
+        $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " isn't enabled.");
+        return false;
+      }
+      return true;
+    } catch (\Exception $e) {
       return false;
     }
-    $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/webhooks/' . $this->configurationService->getSetting('btcpayWebhookId');
-    $response = $this->client->sendGetRequest($uri);
-
-    if (empty($response)) {
-      $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " doesn't exist.");
-      return false;
-    }
-    if ($response['enabled'] == false) {
-      $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('btcpayWebhookId') . " isn't enabled.");
-      return false;
-    }
-    return true;
   }
 
   public function process(Request $request, Context $context): Response

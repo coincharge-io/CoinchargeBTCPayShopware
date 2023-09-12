@@ -13,12 +13,7 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Configuration;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Coincharge\Shopware\Client\ClientInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
-use Coincharge\Shopware\Webhook\WebhookServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
