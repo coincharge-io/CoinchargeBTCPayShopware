@@ -15,6 +15,7 @@ namespace Coincharge\Shopware\Client;
 use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use GuzzleHttp\Exception\RequestException;
 
 class AbstractClient
 {
@@ -39,31 +40,35 @@ class AbstractClient
 
     private function request(string $method, string $uri, array $options = []): array
     {
+
         try {
             $response = $this->client->request($method, $uri, $options);
             $body = $response->getBody()->getContents();
-        } catch (\GuzzleHttp\Exception\RequestException  $e) {
+            $this->logger->debug(
+                '{method} {uri} with following response: {response}',
+                [
+                    'method' => \mb_strtoupper($method),
+                    'uri' => $uri,
+                    'response' => $body,
+                ]
+            );
+            return \json_decode($body, true) ?? [];
+        } catch (RequestException $e) {
             if ($e->hasResponse()) {
                 $response = $e->getResponse();
-                $this->logger->error($response->getReasonPhrase());
-                throw new \Exception($response->getReasonPhrase());
+                $statusCode = $response->getStatusCode();
+                $reasonPhrase = $response->getReasonPhrase();
+
+                $this->logger->error('Guzzle request failed: {status} {reason}', [
+                    'status' => $statusCode,
+                    'reason' => $reasonPhrase,
+                ]);
+
+                throw new \Exception($reasonPhrase, $statusCode);
             }
-            $response = $e->getHandlerContext();
-            if (isset($response['error'])) {
-                $this->logger->error($response['error']);
-                throw new \Exception($response['error']);
-            }
-            $this->logger->error('Unknown error');
+
+            $this->logger->error('Guzzle request failed: Unknown error');
             throw new \Exception('Unknown error');
         }
-        $this->logger->debug(
-            '{method} {uri} with following response: {response}',
-            [
-                'method' => \mb_strtoupper($method),
-                'uri' => $uri,
-                'response' => $body,
-            ]
-        );
-        return \json_decode($body, true) ?? [];
     }
 }

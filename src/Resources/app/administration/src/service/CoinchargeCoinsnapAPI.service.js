@@ -8,12 +8,12 @@
 
 const ApiService = Shopware.Classes.ApiService;
 
-export default class CoinchargeBtcpayApiService extends ApiService {
+export default class CoinchargeCoinsnapApiService extends ApiService {
   constructor(httpClient, loginService, apiEndpoint = "coincharge") {
     super(httpClient, loginService, apiEndpoint);
   }
   verifyApiKey() {
-    const apiRoute = `/_action/${this.getApiBasePath()}/verify`;
+    const apiRoute = `/_action/${this.getApiBasePath()}/coinsnap_verify`;
     const headers = this.getBasicHeaders();
 
     return this.httpClient
@@ -22,19 +22,7 @@ export default class CoinchargeBtcpayApiService extends ApiService {
         return ApiService.handleResponse(response);
       })
       .catch((error) => {
-        throw error;
-      });
-  }
-  generateWebhook() {
-    const apiRoute = `/_action/${this.getApiBasePath()}/webhook`;
-
-    return this.httpClient
-      .post(apiRoute, {}, { headers: this.getBasicHeaders() })
-      .then((response) => {
-        return ApiService.handleResponse(response);
-      })
-      .catch((error) => {
-        throw error;
+        throw error.message;
       });
   }
 }

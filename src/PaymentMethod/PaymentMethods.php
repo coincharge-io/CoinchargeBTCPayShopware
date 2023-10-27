@@ -14,11 +14,19 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentMethod\BitcoinPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\LightningPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\CoinsnapBitcoinPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\CoinsnapLightningPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\MoneroPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\LitecoinPaymentMethod;
 
 class PaymentMethods
 {
     public const PAYMENT_METHODS = [
+        CoinsnapBitcoinPaymentMethod::class,
+        CoinsnapLightningPaymentMethod::class,
         BitcoinPaymentMethod::class,
-        LightningPaymentMethod::class
+        LightningPaymentMethod::class,
+        MoneroPaymentMethod::class,
+        LitecoinPaymentMethod::class,
     ];
 }

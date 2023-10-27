@@ -1,8 +1,14 @@
-.sw-field--checkbox .sw-field__checkbox input[type=checkbox]:checked:disabled~.sw-field__checkbox-state {
-    background: #189eff;
-    border-color: #189eff;
+.sw-field--checkbox
+  .sw-field__checkbox
+  input[type="checkbox"]:checked:disabled
+  ~ .sw-field__checkbox-state {
+  background: #189eff;
+  border-color: #189eff;
 }
 
-.sw-field--switch .sw-field--switch__input input[type=checkbox]:checked:disabled~.sw-field__switch-state {
-    background: #189eff;
+.sw-field--switch
+  .sw-field--switch__input
+  input[type="checkbox"]:checked:disabled
+  ~ .sw-field__switch-state {
+  background: #189eff;
 }

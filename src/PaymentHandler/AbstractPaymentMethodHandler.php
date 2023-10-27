@@ -21,26 +21,26 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
-use Coincharge\Shopware\Client\BTCPayServerClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Coincharge\Shopware\Client\ClientInterface;
 
 abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
 {
-    private BTCPayServerClientInterface $client;
+    private ClientInterface $client;
     private ConfigurationService  $configurationService;
     private OrderTransactionStateHandler $transactionStateHandler;
     private LoggerInterface $logger;
     public string $baseSuccessUrl;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
-	$this->logger = $logger; 
-	$appUrl = $_SERVER['APP_URL'];
-	$url=  "$appUrl/checkout/finish?orderId=";
-	$this->baseSuccessUrl = $url;
+        $this->logger = $logger;
+        $appUrl = $_SERVER['APP_URL'];
+        $url =  "$appUrl/checkout/finish?orderId=";
+        $this->baseSuccessUrl = $url;
     }
 
     /**
@@ -49,14 +49,13 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
         try {
-            $redirectUrl = $this->sendReturnUrlToBTCPay($transaction, $salesChannelContext);
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
         } catch (\Exception $e) {
             throw new AsyncPaymentProcessException(
                 $transaction->getOrderTransaction()->getId(),
                 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
             );
         }
-	var_dump($redirectUrl);
         return new RedirectResponse($redirectUrl);
     }
 
@@ -64,5 +63,5 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
-    abstract public function sendReturnUrlToBTCPay(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
+    abstract public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
 }

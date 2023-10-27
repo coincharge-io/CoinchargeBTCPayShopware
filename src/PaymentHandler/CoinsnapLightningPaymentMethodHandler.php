@@ -19,7 +19,7 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 
-class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
+class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     private ClientInterface $client;
     private ConfigurationService  $configurationService;
@@ -42,24 +42,22 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                 $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
                 return $accountUrl;
             }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
-                    'metadata' =>
-                    [
-                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId()
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC']
-                    ]
-                ]
+                'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                'currency' => $context->getCurrency()->getIsoCode(),
+                'referralCode' => 'DEV17612c35cd8c54d3fad381615',
+                'metadata' =>
+                [
+                  'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                  'transactionId' => $transaction->getOrderTransaction()->getId()
+                ],
+                'orderId' => $transaction->getOrderTransaction()->getOrderId(),
+                'redirectUrl' => $accountUrl,
+                'paymentMethods' => ['Lightning']
+        ]
             );
 
             return $response['checkoutLink'];

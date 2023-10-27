@@ -12,15 +12,15 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Order;
 
-use Coincharge\Shopware\Client\BTCPayServerClientInterface;
+use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 
 class OrderService
 {
-    private BTCPayServerClientInterface $client;
+    private ClientInterface $client;
     private ConfigurationService $configurationService;
 
-    public function __construct(BTCPayServerClientInterface $client, ConfigurationService $configurationService)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;

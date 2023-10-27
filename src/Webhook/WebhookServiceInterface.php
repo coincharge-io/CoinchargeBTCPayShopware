@@ -16,12 +16,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Shopware\Core\Framework\Context;
 
-
 interface WebhookServiceInterface
 {
-    public function registerWebhook(Request $request, ?string $salesChannelId): bool;
+    public function register(Request $request, ?string $salesChannelId): bool;
 
-    public function isWebhookEnabled(): bool;
+    public function isEnabled(): bool;
 
-    public function executeWebhook(Request $request, Context $context): Response;
+    public function process(Request $request, Context $context): Response;
 }
