@@ -1,43 +1,44 @@
 {
-    "name": "coincharge/btcpay_shopware",
-    "description": "Accept Bitcoin and Lightning payment in Shopware with BTCPay server and Coincharge's Bitcoin extension.",
-    "version": "1.0.2",
-    "type": "shopware-platform-plugin",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Coincharge"
-        }
-    ],
-    "require": {
-        "shopware/core": "^6.4"
-    },
-    "extra": {
-        "shopware-plugin-class": "Coincharge\\Shopware\\CoinchargeBTCPayShopware",
-        "label": {
-            "de-DE": "BTCPay Bitcoin Zahlung",
-            "en-GB": "BTCPay Bitcoin Payment"
-        },
-        "description": {
-            "de-DE": "Akzeptiere Bitcoin und Lightning Zahlung in Shopware mit dem BTCPay Server und der Bitcoin Erweiterung von Coincharge.",
-            "en-GB": "Accept Bitcoin and Lightning payment in Shopware with BTCPay server and Coincharge's Bitcoin extension."
-        },
-        "supportLink": {
-            "en-GB": "https://coincharge.io/en/shopware/",
-            "de-DE": "https://coincharge.io/shopware"
-        }
-    },
-    "autoload": {
-        "psr-4": {
-            "Coincharge\\Shopware\\": "src/"
-        }
-    },
-    "require-dev": {
-        "phpstan/phpstan": "^1.8"
-    },
-    "config": {
-        "allow-plugins": {
-            "symfony/runtime": true
-        }
+  "name": "coincharge/btcpay_shopware",
+  "description": "Accept Bitcoin and Lightning payment in Shopware with BTCPay server and Coincharge's Bitcoin extension.",
+  "version": "1.0.2",
+  "type": "shopware-platform-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Coincharge"
     }
+  ],
+  "require": {
+    "shopware/core": "6.4.*",
+    "guzzlehttp/guzzle": "^7.4"
+  },
+  "extra": {
+    "shopware-plugin-class": "Coincharge\\Shopware\\CoinchargeBTCPayShopware",
+    "label": {
+      "de-DE": "BTCPay Bitcoin Zahlung",
+      "en-GB": "BTCPay Bitcoin Payment"
+    },
+    "description": {
+      "de-DE": "Akzeptiere Bitcoin und Lightning Zahlung in Shopware mit dem BTCPay Server und der Bitcoin Erweiterung von Coincharge.",
+      "en-GB": "Accept Bitcoin and Lightning payment in Shopware with BTCPay server and Coincharge's Bitcoin extension."
+    },
+    "supportLink": {
+      "en-GB": "https://coincharge.io/en/shopware/",
+      "de-DE": "https://coincharge.io/shopware"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Coincharge\\Shopware\\": "src/"
+    }
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.8"
+  },
+  "config": {
+    "allow-plugins": {
+      "symfony/runtime": true
+    }
+  }
 }
