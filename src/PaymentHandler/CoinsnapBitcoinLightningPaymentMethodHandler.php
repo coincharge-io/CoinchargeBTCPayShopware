@@ -46,18 +46,17 @@ class CoinsnapBitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
-                    'referralCode' => 'DEV17612c35cd8c54d3fad381615',
-                    'metadata' =>
-                    [
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId()
-                    ],
-                    'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                    'redirectUrl' => $accountUrl,
-                    'enabledPaymentMethods' => ['BTC']
-                ]
+                'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                'currency' => $context->getCurrency()->getIsoCode(),
+                'referralCode' => 'DEV17612c35cd8c54d3fad381615',
+                'metadata' =>
+                [
+                  'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                  'transactionId' => $transaction->getOrderTransaction()->getId()
+                ],
+                'orderId' => $transaction->getOrderTransaction()->getOrderId(),
+                'redirectUrl' => $accountUrl,
+        ]
             );
 
             return $response['checkoutLink'];
