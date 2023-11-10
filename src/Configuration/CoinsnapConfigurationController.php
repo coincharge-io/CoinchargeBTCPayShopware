@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
-use Coincharge\Shopware\PaymentMethod\{CoinsnapLightningPaymentMethod, CoinsnapBitcoinPaymentMethod};
+use Coincharge\Shopware\PaymentMethod\{CoinsnapLightningPaymentMethod, CoinsnapBitcoinPaymentMethod, CoinsnapBitcoinLightningPaymentMethod};
 
 /**
  * @Route(defaults={"_routeScope"={"api"}})
@@ -58,6 +58,7 @@ class CoinsnapConfigurationController extends ConfigurationController
             }
             $this->updatePaymentMethodStatus($context, CoinsnapLightningPaymentMethod::class, true, $this->paymentRepository);
             $this->updatePaymentMethodStatus($context, CoinsnapBitcoinPaymentMethod::class, true, $this->paymentRepository);
+            $this->updatePaymentMethodStatus($context, CoinsnapBitcoinLightningPaymentMethod::class, true, $this->paymentRepository);
             $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
             return new JsonResponse(['success' => true]);
         } catch (\Exception $e) {
