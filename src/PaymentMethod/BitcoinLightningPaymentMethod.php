@@ -47,6 +47,6 @@ class BitcoinLightningPaymentMethod
 
     public function getPaymentHandler(): string
     {
-        return BitcoinPaymentMethodHandler::class;
+        return BitcoinLightningPaymentMethodHandler::class;
     }
 }

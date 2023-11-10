@@ -21,50 +21,51 @@ use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStat
 
 class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-  private ClientInterface $client;
-  private ConfigurationService  $configurationService;
-  private OrderTransactionStateHandler $transactionStateHandler;
-  private LoggerInterface $logger;
+    private ClientInterface $client;
+    private ConfigurationService  $configurationService;
+    private OrderTransactionStateHandler $transactionStateHandler;
+    private LoggerInterface $logger;
 
-  public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-  {
-    $this->client = $client;
-    $this->configurationService = $configurationService;
-    $this->transactionStateHandler = $transactionStateHandler;
-    $this->logger = $logger;
-    parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
-  }
-  public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
-  {
-    try {
-      $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
-      if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-        $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
-        return $accountUrl;
-      }
-      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-      $response = $this->client->sendPostRequest(
-        $uri,
-        [
-          'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-          'currency' => $context->getCurrency()->getIsoCode(),
-          'metadata' =>
-          [
-            'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-            'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-            'transactionId' => $transaction->getOrderTransaction()->getId()
-          ],
-          'checkout' => [
-            'redirectURL' => $accountUrl,
-            'redirectAutomatically' => true,
-          ]
-        ]
-      );
-
-      return $response['checkoutLink'];
-    } catch (\Exception $e) {
-      $this->logger->error($e->getMessage());
-      throw new \Exception($e->getMessage());
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
+    {
+        $this->client = $client;
+        $this->configurationService = $configurationService;
+        $this->transactionStateHandler = $transactionStateHandler;
+        $this->logger = $logger;
+        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
-  }
+    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+    {
+        try {
+            $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
+            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
+                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+                return $accountUrl;
+            }
+            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+            $response = $this->client->sendPostRequest(
+                $uri,
+                [
+                'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                'currency' => $context->getCurrency()->getIsoCode(),
+                'metadata' =>
+                [
+                  'orderId' => $transaction->getOrderTransaction()->getOrderId(),
+                  'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                  'transactionId' => $transaction->getOrderTransaction()->getId()
+                ],
+                'checkout' => [
+                  'redirectURL' => $accountUrl,
+                  'redirectAutomatically' => true,
+                  'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
+                ]
+        ]
+            );
+
+            return $response['checkoutLink'];
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            throw new \Exception($e->getMessage());
+        }
+    }
 }

@@ -28,77 +28,85 @@ use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMet
 
 class BTCPayConfigurationController extends ConfigurationController
 {
-  private ClientInterface $client;
-  private ConfigurationService $configurationService;
-  private WebhookServiceInterface $webhookService;
-  private $paymentRepository;
+    private ClientInterface $client;
+    private ConfigurationService $configurationService;
+    private WebhookServiceInterface $webhookService;
+    private $paymentRepository;
 
-  public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
-  {
-    $this->client = $client;
-    $this->configurationService = $configurationService;
-    $this->webhookService = $webhookService;
-    $this->paymentRepository = $paymentRepository;
-  }
-
-  /**
-   * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
-   */
-  public function verifyApiKey(Request $request, Context $context)
-  {
-    try {
-      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-
-      $response = $this->client->sendGetRequest($uri);
-      if (!is_array($response)) {
-        $this->configurationService->setSetting('integrationStatus', false);
-        return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
-      }
-      if (!$this->webhookService->register($request, null)) {
-        $this->configurationService->setSetting('integrationStatus', false);
-        return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
-      }
-      $this->configurationService->setSetting('integrationStatus', true);
-      $this->checkEnabledPaymentMethodsBTCPayStore($context);
-      return new JsonResponse(['success' => true]);
-    } catch (\Exception $e) {
-      return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, WebhookServiceInterface $webhookService, $paymentRepository)
+    {
+        $this->client = $client;
+        $this->configurationService = $configurationService;
+        $this->webhookService = $webhookService;
+        $this->paymentRepository = $paymentRepository;
     }
-  }
-  /**
-   * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
-   */
-  public function updateCredentials(Request $request): RedirectResponse
-  {
 
-    $body = $request->request->all();
-    $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
-    $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
-    $redirectUrl =  $request->server->get('APP_URL') . '/admin#/sw/extension/config/CoinchargeBTCPayShopware';
+    /**
+     * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
+     */
+    public function verifyApiKey(Request $request, Context $context)
+    {
+        try {
+            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
 
-    return new RedirectResponse($redirectUrl);
-  }
-
-  private function checkEnabledPaymentMethodsBTCPayStore(Context $context)
-  {
-    $paymentMethods = ['BTC' => 'BTC', 'BTC-LightningNetwork' => 'Lightning', 'LTC' => 'Litecoin', 'XMR' => 'Monero'];
-    $paymentHandlers = ['BTC' => BitcoinPaymentMethod::class, 'BTC-LightningNetwork' => LightningPaymentMethod::class, 'LTC' => LitecoinPaymentMethod::class, 'XMR' => MoneroPaymentMethod::class];
-    $this->disableBTCPaymentMethodsBeforeTest();
-    $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/payment-methods';
-    $response = $this->client->sendGetRequest($uri);
-    foreach ($response as $key => $val) {
-      if (array_key_exists($key, $paymentMethods)) {
-        $configName = 'btcpayStorePaymentMethod' . $paymentMethods[$key];
-        $this->configurationService->setSetting($configName, $val['enabled']);
-        $this->updatePaymentMethodStatus($context, $paymentHandlers[$key], $val['enabled'], $this->paymentRepository);
-      }
+            $response = $this->client->sendGetRequest($uri);
+            if (!is_array($response)) {
+                $this->configurationService->setSetting('integrationStatus', false);
+                return new JsonResponse(['success' => false, 'message' => 'Check server url and API key.']);
+            }
+            if (!$this->webhookService->register($request, null)) {
+                $this->configurationService->setSetting('integrationStatus', false);
+                return new JsonResponse(['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."]);
+            }
+            $this->configurationService->setSetting('integrationStatus', true);
+            $this->checkEnabledPaymentMethodsBTCPayStore($context);
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
+        }
     }
-  }
-  private function disableBTCPaymentMethodsBeforeTest()
-  {
-    $this->configurationService->setSetting('BTC', false);
-    $this->configurationService->setSetting('Lightning', false);
-    $this->configurationService->setSetting('Litecoin', false);
-    $this->configurationService->setSetting('Monero', false);
-  }
+    /**
+     * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
+     */
+    public function updateCredentials(Request $request): RedirectResponse
+    {
+
+        $body = $request->request->all();
+        $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
+        $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
+        $redirectUrl =  $request->server->get('APP_URL') . '/admin#/sw/extension/config/CoinchargeBTCPayShopware';
+
+        return new RedirectResponse($redirectUrl);
+    }
+
+    private function checkEnabledPaymentMethodsBTCPayStore(Context $context)
+    {
+        $paymentMethods = ['BTC' => 'BTC', 'BTC-LightningNetwork' => 'Lightning', 'LTC' => 'Litecoin', 'XMR' => 'Monero'];
+        $paymentHandlers = ['BTC' => BitcoinPaymentMethod::class, 'BTC-LightningNetwork' => LightningPaymentMethod::class, 'LTC' => LitecoinPaymentMethod::class, 'XMR' => MoneroPaymentMethod::class];
+        $this->disableBTCPaymentMethodsBeforeTest();
+        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/payment-methods';
+        $response = $this->client->sendGetRequest($uri);
+        foreach ($response as $key => $val) {
+            if (array_key_exists($key, $paymentMethods)) {
+                $configName = 'btcpayStorePaymentMethod' . $paymentMethods[$key];
+                $this->configurationService->setSetting($configName, $val['enabled']);
+                $this->updatePaymentMethodStatus($context, $paymentHandlers[$key], $val['enabled'], $this->paymentRepository);
+            }
+        }
+        $this->enableIntegratedPaymentPage($context);
+    }
+    private function disableBTCPaymentMethodsBeforeTest()
+    {
+        $this->configurationService->setSetting('BTC', false);
+        $this->configurationService->setSetting('Lightning', false);
+        $this->configurationService->setSetting('Litecoin', false);
+        $this->configurationService->setSetting('Monero', false);
+    }
+    private function enableIntegratedPaymentPage(Context $context)
+    {
+        if ($this->configurationService->getSetting('BTC') || $this->configurationService->getSetting('Lightning')) {
+
+            $this->updatePaymentMethodStatus($context, BitcoinLightningPaymentMethod::class, true, $this->paymentRepository);
+        }
+    }
 }
