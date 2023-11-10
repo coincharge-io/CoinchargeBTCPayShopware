@@ -19,7 +19,7 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 
-class CoinsnapBitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
+class CoinsnapBitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     private ClientInterface $client;
     private ConfigurationService  $configurationService;
