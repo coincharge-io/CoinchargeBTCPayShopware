@@ -46,20 +46,20 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
-                'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                'currency' => $context->getCurrency()->getIsoCode(),
-                'metadata' =>
-                [
-                  'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                  'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                  'transactionId' => $transaction->getOrderTransaction()->getId()
-                ],
-                'checkout' => [
-                  'redirectURL' => $accountUrl,
-                  'redirectAutomatically' => true,
-                  'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
+                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                    'currency' => $context->getCurrency()->getIsoCode(),
+                    'metadata' =>
+                    [
+                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
+                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                        'transactionId' => $transaction->getOrderTransaction()->getId()
+                    ],
+                    'checkout' => [
+                        'redirectURL' => $accountUrl,
+                        'redirectAutomatically' => true,
+                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
+                    ]
                 ]
-        ]
             );
 
             return $response['checkoutLink'];

@@ -18,7 +18,7 @@ class BitcoinLightningPaymentMethod
 {
     public function getName(): string
     {
-        return 'Bitcoin_Lightning';
+        return 'Bitcoin-Lightning';
     }
 
     public function getPosition(): int
@@ -31,15 +31,15 @@ class BitcoinLightningPaymentMethod
         return [
             'de-DE' => [
                 'description' => 'Zahle mit Bitcoin/Lightning',
-                'name' => 'Bitcoin/Lightning',
+                'name' => 'Bitcoin-Lightning',
             ],
             'en-GB' => [
                 'description' => 'Pay with Bitcoin/Lightning',
-                'name' => 'Bitcoin/Lightning',
+                'name' => 'Bitcoin-Lightning',
             ],
             '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
                 'description' => 'Pay with Bitcoin/Lightning',
-                'name' => 'Bitcoin/Lightning',
+                'name' => 'Bitcoin-Lightning',
             ], //Fallback language
         ];
     }
