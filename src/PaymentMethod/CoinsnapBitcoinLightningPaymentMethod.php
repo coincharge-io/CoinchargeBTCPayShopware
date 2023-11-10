@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentMethod;
 
-use Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinPaymentMethodHandler;
+use Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinLightningPaymentMethodHandler;
 
 class CoinsnapBitcoinLightningPaymentMethod
 {
@@ -46,6 +46,6 @@ class CoinsnapBitcoinLightningPaymentMethod
 
     public function getPaymentHandler(): string
     {
-        return CoinsnapBitcoinPaymentMethodHandler::class;
+        return CoinsnapBitcoinLightningPaymentMethodHandler::class;
     }
 }
