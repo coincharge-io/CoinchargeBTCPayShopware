@@ -18,7 +18,7 @@ class BitcoinLightningPaymentMethod
 {
     public function getName(): string
     {
-        return 'Bitcoin-Lightning';
+        return 'Bitcoin+Lightning';
     }
 
     public function getPosition(): int
