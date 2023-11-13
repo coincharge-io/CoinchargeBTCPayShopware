@@ -1,6 +1,6 @@
 ![Image of shopwarebtcpay](https://shopware.coincharge.io/media/e1/41/ca/1664280813/shopware-btcpay-plugin.png)
 
-🚀 #Thank you for your interest in [CoinchargeBTCPayShopware]! We've moved our development efforts to a new repository. You can now find the latest updates at [https://github.com/Coinsnap/Coinsnap-for-Shopware].
+# Thank you for your interest in [CoinchargeBTCPayShopware]! We've moved our development efforts to a new repository. You can now find the latest updates at [https://github.com/Coinsnap/Coinsnap-for-Shopware].
 
 # Bitcoin payments for Shopware
 
