@@ -3,12 +3,12 @@
     <card>
         <title>Coinsnap</title>
         <input-field>
-            <name>coinsnapApiKey</name>
-            <label>Coinsnap API Key</label>
-        </input-field>
-        <input-field>
             <name>coinsnapStoreId</name>
             <label>Coinsnap Store Id</label>
+        </input-field>
+        <input-field>
+            <name>coinsnapApiKey</name>
+            <label>Coinsnap API Key</label>
         </input-field>
         <input-field>
             <name>coinsnapWebhookId</name>
