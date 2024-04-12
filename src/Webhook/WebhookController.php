@@ -19,11 +19,7 @@ use Shopware\Core\Framework\Context;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @Route(defaults={"_routeScope"={"api"}})
- */
-
-
+#[Route(defaults: ['_routeScope' => ['api']])]
 class WebhookController extends AbstractController
 {
     private $webhookRouter;

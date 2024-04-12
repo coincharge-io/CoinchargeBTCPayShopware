@@ -21,10 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
 use Coincharge\Shopware\PaymentMethod\{CoinsnapLightningPaymentMethod, CoinsnapBitcoinPaymentMethod, CoinsnapBitcoinLightningPaymentMethod};
 
-/**
- * @Route(defaults={"_routeScope"={"api"}})
- */
-
+#[Route(defaults: ['_routeScope' => ['api']])]
 class CoinsnapConfigurationController extends ConfigurationController
 {
     private ClientInterface $client;
@@ -40,10 +37,7 @@ class CoinsnapConfigurationController extends ConfigurationController
         $this->paymentRepository = $paymentRepository;
     }
 
-    /**
-     * @RouteScope(scopes={"api"})
-     * @Route("/api/_action/coincharge/coinsnap_verify", name="api.action.coincharge.coinsnap_verify", methods={"GET"})
-     */
+    #[Route(path: '/api/_action/coincharge/coinsnap_verify', name: 'api.action.coincharge.coinsnap_verify', methods: ['GET'])]
     public function verifyApiKey(Request $request, Context $context)
     {
         try {
