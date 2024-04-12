@@ -42,6 +42,7 @@ class BTCPayConfigurationController extends ConfigurationController
     }
 
     /**
+     * @RouteScope(scopes={"api"})
      * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
      */
     public function verifyApiKey(Request $request, Context $context)
@@ -66,6 +67,7 @@ class BTCPayConfigurationController extends ConfigurationController
         }
     }
     /**
+     * @RouteScope(scopes={"api"})
      * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
     public function updateCredentials(Request $request): RedirectResponse

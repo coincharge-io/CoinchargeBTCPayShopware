@@ -33,6 +33,7 @@ class WebhookController extends AbstractController
         $this->webhookRouter = $webhookRouter;
     }
     /**
+     * @RouteScope(scopes={"api"})
      * @Route("/api/_action/coincharge/webhook-endpoint", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
      */
     public function endpoint(Request $request, Context $context): Response
