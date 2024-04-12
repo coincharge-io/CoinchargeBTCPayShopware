@@ -1,4 +1,4 @@
-![Image of shopwarebtcpay](https://shopware.coincharge.io/media/e1/41/ca/1664280813/shopware-btcpay-plugin.png)
+![Image of shopwarebtcpay](https://coinsnap.io/wp-content/uploads/2023/11/shopware-coinsnap-btcpay.png)
 
 # Bitcoin payments for Shopware
 

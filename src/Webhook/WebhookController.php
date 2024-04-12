@@ -19,11 +19,7 @@ use Shopware\Core\Framework\Context;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @Route(defaults={"_routeScope"={"api"}})
- */
-
-
+#[Route(defaults: ['_routeScope' => ['api']])]
 class WebhookController extends AbstractController
 {
     private $webhookRouter;
@@ -32,9 +28,7 @@ class WebhookController extends AbstractController
     {
         $this->webhookRouter = $webhookRouter;
     }
-    /**
-     * @Route("/api/_action/coincharge/webhook-endpoint", name="api.action.coincharge.webhook.endpoint", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
-     */
+    #[Route(path: '/api/_action/coincharge/webhook-endpoint', name: 'api.action.coincharge.webhook.endpoint', methods: ['POST'], defaults: ['XmlHttpRequest' => 'true', 'auth_required' => 'false', 'csrf_protected' => 'false'])]
     public function endpoint(Request $request, Context $context): Response
     {
         return $this->webhookRouter->route($request, $context);
