@@ -22,10 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
 use Coincharge\Shopware\PaymentMethod\{LightningPaymentMethod, BitcoinPaymentMethod, LitecoinPaymentMethod, MoneroPaymentMethod, BitcoinLightningPaymentMethod};
 
-/**
- * @Route(defaults={"_routeScope"={"api"}})
- */
-
+#[Route(defaults: ['_routeScope' => ['api']])]
 class BTCPayConfigurationController extends ConfigurationController
 {
     private ClientInterface $client;
@@ -41,10 +38,7 @@ class BTCPayConfigurationController extends ConfigurationController
         $this->paymentRepository = $paymentRepository;
     }
 
-    /**
-     * @RouteScope(scopes={"api"})
-     * @Route("/api/_action/coincharge/verify", name="api.action.coincharge.verify.webhook", methods={"GET"})
-     */
+    #[Route(path: '/api/_action/coincharge/verify', name: 'api.action.coincharge.verify.webhook', methods: ['GET'])]
     public function verifyApiKey(Request $request, Context $context)
     {
         try {
@@ -66,10 +60,7 @@ class BTCPayConfigurationController extends ConfigurationController
             return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
         }
     }
-    /**
-     * @RouteScope(scopes={"api"})
-     * @Route("/api/_action/coincharge/credentials", name="api.action.coincharge.update.credentials", defaults={"csrf_protected"=false, "XmlHttpRequest"=true, "auth_required"=false}, methods={"POST"})
-     */
+    #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => 'true', 'auth_required' => 'false', 'csrf_protected' => 'false'])]
     public function updateCredentials(Request $request): RedirectResponse
     {
 
