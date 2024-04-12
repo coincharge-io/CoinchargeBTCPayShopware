@@ -23,6 +23,7 @@ use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Coincharge\Shopware\Client\ClientInterface;
+use Shopware\Core\Checkout\Payment\PaymentException;
 
 abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
 {
@@ -51,7 +52,7 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
         try {
             $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
         } catch (\Exception $e) {
-            throw new AsyncPaymentProcessException(
+            throw PaymentException::asyncProcessInterrupted(
                 $transaction->getOrderTransaction()->getId(),
                 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
             );
