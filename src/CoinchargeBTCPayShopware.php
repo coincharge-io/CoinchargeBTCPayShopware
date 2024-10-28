@@ -198,12 +198,11 @@ class CoinchargeBTCPayShopware extends Plugin
     {
       $currentVersion = $updateContext->getCurrentPluginVersion();
 
-      if (version_compare($currentVersion, '1.1.1', '=') && version_compare($currentVersion, '1.1.2', '<')) {
-
+      // This checks if the current version is exactly 1.1.1
+      if (version_compare($currentVersion, '1.1.1', '=')) {
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
           $this->setPaymentMethodIsActive(new $paymentMethod(), false, $updateContext->getContext());
         }
-
       }
       $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
