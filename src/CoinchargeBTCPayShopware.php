@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware;
 
+use Coincharge\Shopware\PaymentMethod\BitcoinCryptoPaymentMethod;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -200,9 +201,7 @@ class CoinchargeBTCPayShopware extends Plugin
 
       // This checks if the current version is exactly 1.1.1
       if (version_compare($currentVersion, '1.1.1', '=')) {
-        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-          $this->setPaymentMethodIsActive(new $paymentMethod(), false, $updateContext->getContext());
-        }
+        $this->addPaymentMethod(new BitcoinCryptoPaymentMethod(), $updateContext->getContext());
       }
       $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
