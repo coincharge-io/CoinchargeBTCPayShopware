@@ -196,8 +196,16 @@ class CoinchargeBTCPayShopware extends Plugin
     }
     public function update(UpdateContext $updateContext): void
     {
-        $currentVersion = $updateContext->getUpdatePluginVersion();
-        $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+      $currentVersion = $updateContext->getCurrentPluginVersion();
+
+      if (version_compare($currentVersion, '1.1.1', '=') && version_compare($currentVersion, '1.1.2', '<')) {
+
+        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+          $this->setPaymentMethodIsActive(new $paymentMethod(), false, $updateContext->getContext());
+        }
+
+      }
+      $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsAnyFilter('name', ['coinsnap']));
@@ -247,9 +255,9 @@ class CoinchargeBTCPayShopware extends Plugin
                 $updateContext->getContext()
             );
         }
-        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-            $this->addPaymentMethod(new $paymentMethod(), $updateContext->getContext());
-        }
+//        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+//            $this->addPaymentMethod(new $paymentMethod(), $updateContext->getContext());
+//        }
         parent::update($updateContext);
     }
 
