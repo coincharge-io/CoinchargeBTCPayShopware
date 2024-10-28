@@ -384,3 +384,4 @@ class CoinchargeBTCPayShopware extends Plugin
         return $mediaFolderRepository->searchIds($criteria, $context)->firstId();
     }
 }
+
