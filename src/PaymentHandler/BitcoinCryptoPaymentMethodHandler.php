@@ -57,7 +57,6 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY', 'XMR', 'LTC']
                     ]
                 ]
             );
