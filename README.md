@@ -1,3 +1,10 @@
+# Important: Use the Main Branch
+:warning: **Always download and install from the main branch.**
+This approach ensures:
+- You have the latest stable version of the plugin.
+- You can easily update the plugin by downloading the latest main branch and uploading it to Shopware.
+- Avoids the need for a full reinstallation each time you update.
+
 ![Image of shopwarebtcpay](https://coinsnap.io/wp-content/uploads/2023/11/shopware-coinsnap-btcpay.png)
 
 # Bitcoin payments for Shopware
