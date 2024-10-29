@@ -45,105 +45,105 @@ class CoinchargeBTCPayShopware extends Plugin
         $customFieldIds = $customFieldSetRepository->search($criteria, $context->getContext())->first();
         if (!$customFieldIds) {
             $customFieldSetRepository->upsert(
+              [
                 [
+                  'name' => 'btcpayServer',
+                  'config' => [
+                    'label' => [
+                      'de-DE' => 'BTCPayServer Information',
+                      'en-GB' => 'BTCPayServer Information',
+                      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'BTCPayServer Information' //Fallback language
+                    ]
+                  ],
+                  'customFields' => [
                     [
-                        'name' => 'btcpayServer',
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'BTCPayServer Information',
-                                'en-GB' => 'BTCPayServer Information',
-                                '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'BTCPayServer Information' //Fallback language
-                            ]
-                        ],
-                        'customFields' => [
-                            [
-                                'name' => 'invoiceId',
-                                'type' => CustomFieldTypes::TEXT,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Rechnungs-ID',
-                                        'en-GB' => 'Invoice ID',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'btcpayOrderStatus',
-                                'type' => CustomFieldTypes::TEXT,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Auftragsstatus',
-                                        'en-GB' => 'Order Status',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'paidAfterExpiration',
-                                'type' => CustomFieldTypes::BOOL,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
-                                        'en-GB' => 'Paid After Invoice Expiration',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Paid After Invoice Expiration'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'overpaid',
-                                'type' => CustomFieldTypes::BOOL,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Überbezahlt',
-                                        'en-GB' => 'Overpaid',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Overpaid'
-                                    ]
-                                ]
-                            ],
-                        ],
-                        'relations' => [[
-                            'entityName' => 'order'
-                        ]],
+                      'name' => 'invoiceId',
+                      'type' => CustomFieldTypes::TEXT,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Rechnungs-ID',
+                          'en-GB' => 'Invoice ID',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
+                        ]
+                      ]
                     ],
                     [
-                        'name' => 'coinsnap',
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'Coinsnap Information',
-                                'en-GB' => 'Coinsnap Information',
-                                '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Coinsnap Information' //Fallback language
-                            ]
-                        ],
-                        'customFields' => [
-                            [
-                                'name' => 'coinsnapInvoiceId',
-                                'type' => CustomFieldTypes::TEXT,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Rechnungs-ID',
-                                        'en-GB' => 'Invoice ID',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'coinsnapOrderStatus',
-                                'type' => CustomFieldTypes::TEXT,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Auftragsstatus',
-                                        'en-GB' => 'Order Status',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
-                                    ]
-                                ]
-                            ],
-                        ],
-                        'relations' => [[
-                            'entityName' => 'order'
-                        ]],
-                    ]
+                      'name' => 'btcpayOrderStatus',
+                      'type' => CustomFieldTypes::TEXT,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Auftragsstatus',
+                          'en-GB' => 'Order Status',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
+                        ]
+                      ]
+                    ],
+                    [
+                      'name' => 'paidAfterExpiration',
+                      'type' => CustomFieldTypes::BOOL,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Bezahlt nach Ablauf der Rechnung',
+                          'en-GB' => 'Paid After Invoice Expiration',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Paid After Invoice Expiration'
+                        ]
+                      ]
+                    ],
+                    [
+                      'name' => 'overpaid',
+                      'type' => CustomFieldTypes::BOOL,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Überbezahlt',
+                          'en-GB' => 'Overpaid',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Overpaid'
+                        ]
+                      ]
+                    ],
+                  ],
+                  'relations' => [[
+                    'entityName' => 'order'
+                  ]],
                 ],
-                $context->getContext()
+                [
+                  'name' => 'coinsnap',
+                  'config' => [
+                    'label' => [
+                      'de-DE' => 'Coinsnap Information',
+                      'en-GB' => 'Coinsnap Information',
+                      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Coinsnap Information' //Fallback language
+                    ]
+                  ],
+                  'customFields' => [
+                    [
+                      'name' => 'coinsnapInvoiceId',
+                      'type' => CustomFieldTypes::TEXT,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Rechnungs-ID',
+                          'en-GB' => 'Invoice ID',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
+                        ]
+                      ]
+                    ],
+                    [
+                      'name' => 'coinsnapOrderStatus',
+                      'type' => CustomFieldTypes::TEXT,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Auftragsstatus',
+                          'en-GB' => 'Order Status',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
+                        ]
+                      ]
+                    ],
+                  ],
+                  'relations' => [[
+                    'entityName' => 'order'
+                  ]],
+                ]
+              ],
+              $context->getContext()
             );
         }
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
@@ -164,9 +164,9 @@ class CoinchargeBTCPayShopware extends Plugin
 
             $systemConfigRepository = $this->container->get('system_config.repository');
             $criteria = (new Criteria())
-                ->addFilter(
-                    new ContainsFilter('configurationKey', 'CoinchargeBTCPayShopware.config')
-                );
+              ->addFilter(
+                new ContainsFilter('configurationKey', 'CoinchargeBTCPayShopware.config')
+              );
             $idSearchResult = $systemConfigRepository->searchIds($criteria, Context::createDefaultContext());
 
             //Formatting IDs array and deleting config keys
@@ -195,20 +195,19 @@ class CoinchargeBTCPayShopware extends Plugin
         }
         parent::deactivate($context);
     }
+
     public function update(UpdateContext $updateContext): void
     {
-      $currentVersion = $updateContext->getCurrentPluginVersion();
+        $currentVersion = $updateContext->getCurrentPluginVersion();
+        $targetVersion = $updateContext->getUpdatePluginVersion();
 
-      // This checks if the current version is exactly 1.1.1
-      if (version_compare($currentVersion, '1.1.1', '=')) {
-        $this->addPaymentMethod(new BitcoinCryptoPaymentMethod(), $updateContext->getContext());
-      }
+        // Check if updating FROM 1.1.1 TO 1.1.2
+        if (version_compare($currentVersion, '1.1.1', '=') &&
+          version_compare($targetVersion, '1.1.2', '=')) {
+            $this->addPaymentMethod(new BitcoinCryptoPaymentMethod(), $updateContext->getContext());
+        }
 
-//      foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-//        $this->setPaymentMethodIsActive(new $paymentMethod(), false, $updateContext->getContext());
-//      }
-
-      $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+        $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsAnyFilter('name', ['coinsnap']));
@@ -216,46 +215,46 @@ class CoinchargeBTCPayShopware extends Plugin
         $customFieldIds = $customFieldSetRepository->search($criteria, $updateContext->getContext())->first();
         if (!$customFieldIds) {
             $customFieldSetRepository->upsert(
+              [
                 [
-                    [
-                        'name' => 'coinsnap',
-                        'config' => [
-                            'label' => [
-                                'de-DE' => 'Coinsnap Information',
-                                'en-GB' => 'Coinsnap Information',
-                                '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Coinsnap Information' //Fallback language
-                            ]
-                        ],
-                        'customFields' => [
-                            [
-                                'name' => 'coinsnapInvoiceId',
-                                'type' => CustomFieldTypes::TEXT,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Rechnungs-ID',
-                                        'en-GB' => 'Invoice ID',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'coinsnapOrderStatus',
-                                'type' => CustomFieldTypes::TEXT,
-                                'config' => [
-                                    'label' => [
-                                        'de-DE' => 'Auftragsstatus',
-                                        'en-GB' => 'Order Status',
-                                        '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
-                                    ]
-                                ]
-                            ],
-                        ],
-                        'relations' => [[
-                            'entityName' => 'order'
-                        ]],
+                  'name' => 'coinsnap',
+                  'config' => [
+                    'label' => [
+                      'de-DE' => 'Coinsnap Information',
+                      'en-GB' => 'Coinsnap Information',
+                      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Coinsnap Information' //Fallback language
                     ]
-                ],
-                $updateContext->getContext()
+                  ],
+                  'customFields' => [
+                    [
+                      'name' => 'coinsnapInvoiceId',
+                      'type' => CustomFieldTypes::TEXT,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Rechnungs-ID',
+                          'en-GB' => 'Invoice ID',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Invoice ID'
+                        ]
+                      ]
+                    ],
+                    [
+                      'name' => 'coinsnapOrderStatus',
+                      'type' => CustomFieldTypes::TEXT,
+                      'config' => [
+                        'label' => [
+                          'de-DE' => 'Auftragsstatus',
+                          'en-GB' => 'Order Status',
+                          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => 'Order Status'
+                        ]
+                      ]
+                    ],
+                  ],
+                  'relations' => [[
+                    'entityName' => 'order'
+                  ]],
+                ]
+              ],
+              $updateContext->getContext()
             );
         }
         parent::update($updateContext);
@@ -277,14 +276,14 @@ class CoinchargeBTCPayShopware extends Plugin
         $pluginId = $pluginIdProvider->getPluginIdByBaseClass(get_class($this), $context);
 
         $examplePaymentData = [
-            'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
-            'pluginId' => $pluginId,
-            'position' => $paymentMethod->getPosition(),
-            'media' => [
-                'id' => $this->ensureMedia($context, $paymentMethod->getName()),
-                'mediaFolderId' => $this->getMediaDefaultFolderId($context),
-            ],
-            'translations' => $paymentMethod->getTranslations()
+          'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
+          'pluginId' => $pluginId,
+          'position' => $paymentMethod->getPosition(),
+          'media' => [
+            'id' => $this->ensureMedia($context, $paymentMethod->getName()),
+            'mediaFolderId' => $this->getMediaDefaultFolderId($context),
+          ],
+          'translations' => $paymentMethod->getTranslations()
         ];
 
         /**
@@ -309,8 +308,8 @@ class CoinchargeBTCPayShopware extends Plugin
         }
 
         $paymentMethod = [
-            'id' => $paymentMethodId,
-            'active' => $active,
+          'id' => $paymentMethodId,
+          'active' => $active,
         ];
 
         $paymentRepository->update([$paymentMethod], $context);
@@ -336,6 +335,7 @@ class CoinchargeBTCPayShopware extends Plugin
 
         return $mediaRepository->search($criteria, $context)->first();
     }
+
     private function ensureMedia(Context $context, string $logoName): string
     {
         $filePath = realpath(__DIR__ . '/Resources/icons/' . strtolower($logoName) . '.svg');
@@ -348,31 +348,32 @@ class CoinchargeBTCPayShopware extends Plugin
         }
 
         $mediaFile = new MediaFile(
-            $filePath,
-            mime_content_type($filePath),
-            pathinfo($filePath, PATHINFO_EXTENSION),
-            filesize($filePath)
+          $filePath,
+          mime_content_type($filePath),
+          pathinfo($filePath, PATHINFO_EXTENSION),
+          filesize($filePath)
         );
         $mediaId = Uuid::randomHex();
         $mediaRepository->create(
+          [
             [
-                [
-                    'id' => $mediaId,
-                ],
+              'id' => $mediaId,
             ],
-            $context
+          ],
+          $context
         );
         $fileSaver = $this->container->get(FileSaver::class);
         $savedFileName = \sprintf("btcpay_shopware_%s", strtolower($logoName));
         $fileSaver->persistFileToMedia(
-            $mediaFile,
-            $savedFileName,
-            $mediaId,
-            $context
+          $mediaFile,
+          $savedFileName,
+          $mediaId,
+          $context
         );
 
         return $mediaId;
     }
+
     private function getMediaDefaultFolderId(Context $context): ?string
     {
         $mediaFolderRepository = $this->container->get('media_folder.repository');
