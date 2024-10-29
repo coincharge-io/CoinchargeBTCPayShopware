@@ -1,4 +1,7 @@
-# 1.1.1
+# 1.1.2
+- Add support for Bitcoin and Crypto payment methods
+
+- # 1.1.1
 - Add support for new Shopware version
 
 # 1.1.0

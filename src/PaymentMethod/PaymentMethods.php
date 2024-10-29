@@ -32,5 +32,6 @@ class PaymentMethods
         BitcoinLightningPaymentMethod::class,
         MoneroPaymentMethod::class,
         LitecoinPaymentMethod::class,
+        BitcoinCryptoPaymentMethod::class,
     ];
 }

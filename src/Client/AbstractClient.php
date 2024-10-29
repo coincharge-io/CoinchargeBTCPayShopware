@@ -38,37 +38,65 @@ class AbstractClient
         return $this->request(Request::METHOD_POST, $uri, $options);
     }
 
-    private function request(string $method, string $uri, array $options = []): array
-    {
+  private function request(string $method, string $uri, array $options = []): array
+  {
+    try {
+      $response = $this->client->request($method, $uri, $options);
+      $body = $response->getBody()->getContents();
 
-        try {
-            $response = $this->client->request($method, $uri, $options);
-            $body = $response->getBody()->getContents();
-            $this->logger->debug(
-                '{method} {uri} with following response: {response}',
-                [
-                    'method' => \mb_strtoupper($method),
-                    'uri' => $uri,
-                    'response' => $body,
-                ]
-            );
-            return \json_decode($body, true) ?? [];
-        } catch (RequestException $e) {
-            if ($e->hasResponse()) {
-                $response = $e->getResponse();
-                $statusCode = $response->getStatusCode();
-                $reasonPhrase = $response->getReasonPhrase();
+      $this->logger->debug(
+        '{method} {uri} with following response: {response}',
+        [
+          'method' => \mb_strtoupper($method),
+          'uri' => $uri,
+          'response' => $body,
+        ]
+      );
 
-                $this->logger->error('Guzzle request failed: {status} {reason}', [
-                    'status' => $statusCode,
-                    'reason' => $reasonPhrase,
-                ]);
+      return \json_decode($body, true) ?? [];
 
-                throw new \Exception($reasonPhrase, $statusCode);
-            }
+    } catch (RequestException $e) {
+      if ($e->hasResponse()) {
+        $response = $e->getResponse();
+        $statusCode = $response->getStatusCode();
+        $reasonPhrase = $response->getReasonPhrase();
+        $responseBody = $response->getBody()->getContents();
 
-            $this->logger->error('Guzzle request failed: Unknown error');
-            throw new \Exception('Unknown error');
+        // Log more detailed error information
+        $this->logger->error('Guzzle request failed: {status} {reason}', [
+          'status' => $statusCode,
+          'reason' => $reasonPhrase,
+          'uri' => $uri,
+          'method' => $method,
+          'request_options' => $options,
+          'response_body' => $responseBody,
+        ]);
+
+        // For 422 errors, try to extract validation errors
+        if ($statusCode === 422) {
+          $errorData = \json_decode($responseBody, true);
+          $errorMessage = 'Validation failed: ';
+
+          if (is_array($errorData)) {
+            $errorMessage .= json_encode($errorData);
+          } else {
+            $errorMessage .= $responseBody;
+          }
+
+          throw new \Exception($errorMessage, $statusCode);
         }
+
+        throw new \Exception($reasonPhrase, $statusCode);
+      }
+
+      $this->logger->error('Guzzle request failed: Unknown error', [
+        'uri' => $uri,
+        'method' => $method,
+        'request_options' => $options,
+        'error' => $e->getMessage(),
+      ]);
+
+      throw new \Exception('Unknown error: ' . $e->getMessage());
     }
+  }
 }
