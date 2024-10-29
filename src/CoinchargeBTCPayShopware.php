@@ -203,10 +203,10 @@ class CoinchargeBTCPayShopware extends Plugin
       if (version_compare($currentVersion, '1.1.1', '=')) {
         $this->addPaymentMethod(new BitcoinCryptoPaymentMethod(), $updateContext->getContext());
       }
-      
-      foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-        $this->setPaymentMethodIsActive(new $paymentMethod(), false, $updateContext->getContext());
-      }
+
+//      foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+//        $this->setPaymentMethodIsActive(new $paymentMethod(), false, $updateContext->getContext());
+//      }
 
       $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
