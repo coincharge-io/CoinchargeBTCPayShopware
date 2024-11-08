@@ -78,12 +78,12 @@
         </service>
 
         <service id="Coincharge\Shopware\Util\Log\LoggerFactory">
-            <argument type="string">%kernel.logs_dir%/%%s_%kernel.environment%.log</argument>
+            <argument type="string">%kernel.logs_dir%/btcpay_shopware.log</argument>
             <argument>%shopware.logger.file_rotation_count%</argument>
         </service>
+
         <service id="Coincharge\Shopware\Util\Logger" class="Monolog\Logger">
-            <factory service="Coincharge\Shopware\Util\Log\LoggerFactory" method="createRotating"/>
-            <argument type="string">btcpay_shopware</argument>
+            <factory service="Coincharge\Shopware\Util\Log\LoggerFactory" method="createLogger"/>
         </service>
 
         <service id="Coincharge\Shopware\Order\OrderService">

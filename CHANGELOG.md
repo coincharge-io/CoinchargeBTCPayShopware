@@ -1,3 +1,9 @@
+# 1.1.4
+- Updated logger
+
+# 1.1.3
+- Fixed arguments for Route registration
+
 # 1.1.2
 - Add support for Bitcoin and Crypto payment methods
 
