@@ -65,7 +65,7 @@ class BTCPayConfigurationController extends ConfigurationController
             return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
         }
     }
-    #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => 'true', 'auth_required' => 'false', 'csrf_protected' => 'false'])]
+    #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
     public function updateCredentials(Request $request): RedirectResponse
     {
 
