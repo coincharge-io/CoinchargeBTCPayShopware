@@ -49,6 +49,7 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
      */
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
+        $this->logger->info('test');
         try {
             $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
         } catch (\Exception $e) {
