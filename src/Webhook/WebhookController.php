@@ -28,7 +28,7 @@ class WebhookController extends AbstractController
     {
         $this->webhookRouter = $webhookRouter;
     }
-    #[Route(path: '/api/_action/coincharge/webhook-endpoint', name: 'api.action.coincharge.webhook.endpoint', methods: ['POST'], defaults: ['XmlHttpRequest' => 'true', 'auth_required' => 'false', 'csrf_protected' => 'false'])]
+    #[Route(path: '/api/_action/coincharge/webhook-endpoint', name: 'api.action.coincharge.webhook.endpoint', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
     public function endpoint(Request $request, Context $context): Response
     {
         return $this->webhookRouter->route($request, $context);
