@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) 2022 Coincharge
+ * Copyright (c) 2026 Coincharge
  * This file is open source and available under the MIT license.
  * See the LICENSE file for more info.
  *
@@ -57,7 +57,7 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
+                        'paymentMethods' => ['BTC-CHAIN', 'BTC-LN', 'BTC-LNURL']
                     ]
                 ]
             );
