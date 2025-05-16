@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) 2022 Coincharge
+ * Copyright (c) 2025 Coincharge
  * This file is open source and available under the MIT license.
  * See the LICENSE file for more info.
  *
@@ -119,23 +119,27 @@ class BTCPayWebhookService implements WebhookServiceInterface
         if ($body['afterExpiration']) {
           $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
           $this->logger->info('Invoice (partial) payment incoming (unconfirmed) after invoice was already expired.');
-          $this->orderRepository->upsert(
-            [
-              [
-                'id' => $orderId,
-                'customFields' => [
-                  'invoiceId' => $body['invoiceId'],
-                  'btcpayOrderStatus' => 'paidPartially',
-                  'paidAfterExpiration' => true,
-                  'overpaid'      => false
-                ],
-              ],
-            ],
-            $context
-          );
         } else {
           $this->logger->info('Invoice (partial) payment incoming (unconfirmed). Waiting for settlement.');
         }
+
+        $this->orderRepository->upsert(
+          [
+            [
+              'id' => $orderId,
+              'customFields' => [
+                'invoiceId' => $body['invoiceId'],
+                'btcpayOrderStatus' => 'processing',
+                'paidAfterExpiration' => $body['afterExpiration'] ?? false,
+                'overpaid' => $body['overPaid'] ?? false,
+                'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
+                'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
+              ],
+            ],
+          ],
+          $context
+        );
+        break;
 
         break;
       case 'InvoicePaymentSettled':
@@ -156,7 +160,9 @@ class BTCPayWebhookService implements WebhookServiceInterface
                     'invoiceId' => $body['invoiceId'],
                     'btcpayOrderStatus' => 'settled',
                     'paidAfterExpiration' => true,
-                    'overpaid'      =>  false
+                    'overpaid'      =>  false,
+                    'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
+                    'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
                   ],
                 ],
               ],
@@ -172,7 +178,9 @@ class BTCPayWebhookService implements WebhookServiceInterface
                     'invoiceId' => $body['invoiceId'],
                     'btcpayOrderStatus' => 'paidPartially',
                     'paidAfterExpiration' => true,
-                    'overpaid'      => false
+                    'overpaid'      => false,
+                    'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
+                    'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
                   ],
                 ],
               ],
@@ -230,7 +238,9 @@ class BTCPayWebhookService implements WebhookServiceInterface
                   'invoiceId' => $body['invoiceId'],
                   'btcpayOrderStatus' => 'invoiceExpired',
                   'paidAfterExpiration' => true,
-                  'overpaid'  => false
+                  'overpaid'  => false,
+                  'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
+                  'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
                 ],
               ],
             ],
@@ -247,7 +257,9 @@ class BTCPayWebhookService implements WebhookServiceInterface
                   'invoiceId' => $body['invoiceId'],
                   'btcpayOrderStatus' => 'invoiceExpired',
                   'paidAfterExpiration' => false,
-                  'overpaid'  => false
+                  'overpaid'  => false,
+                  'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
+                  'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
                 ],
               ],
             ],
