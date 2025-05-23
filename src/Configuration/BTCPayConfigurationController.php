@@ -20,12 +20,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Shopware\Core\Framework\Context;
-use Coincharge\Shopware\PaymentMethod\{BitcoinCryptoPaymentMethod,
-  LightningPaymentMethod,
-  BitcoinPaymentMethod,
-  LitecoinPaymentMethod,
-  MoneroPaymentMethod,
-  BitcoinLightningPaymentMethod};
+use Coincharge\Shopware\PaymentMethod\{
+    BitcoinCryptoPaymentMethod,
+    LightningPaymentMethod,
+    BitcoinPaymentMethod,
+    LitecoinPaymentMethod,
+    MoneroPaymentMethod,
+    BitcoinLightningPaymentMethod
+};
 
 #[Route(defaults: ['_routeScope' => ['api']])]
 class BTCPayConfigurationController extends ConfigurationController
@@ -79,7 +81,7 @@ class BTCPayConfigurationController extends ConfigurationController
 
     private function checkEnabledPaymentMethodsBTCPayStore(Context $context)
     {
-        $paymentMethods = ['BTC' => 'BTC', 'BTC-LightningNetwork' => 'Lightning', 'LTC' => 'Litecoin', 'XMR' => 'Monero'];
+        $paymentMethods = ['BTC-CHAIN' => 'BTC', 'BTC-LN' => 'Lightning', 'LTC-CHAIN' => 'Litecoin', 'XMR-CHAIN' => 'Monero'];
         $paymentHandlers = ['BTC' => BitcoinPaymentMethod::class, 'BTC-LightningNetwork' => LightningPaymentMethod::class, 'LTC' => LitecoinPaymentMethod::class, 'XMR' => MoneroPaymentMethod::class];
         $this->disableBTCPaymentMethodsBeforeTest();
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/payment-methods';
@@ -92,7 +94,7 @@ class BTCPayConfigurationController extends ConfigurationController
             }
         }
         $this->updatePaymentMethodStatus($context, BitcoinCryptoPaymentMethod::class, true, $this->paymentRepository);
-//        $this->enableIntegratedPaymentPage($context);
+        //        $this->enableIntegratedPaymentPage($context);
     }
     private function disableBTCPaymentMethodsBeforeTest()
     {
