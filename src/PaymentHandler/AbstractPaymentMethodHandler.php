@@ -12,6 +12,25 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
+// Provide forward compatibility with Shopware 6.6 where payment handler classes moved.
+if (!class_exists(\Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler::class)
+    && class_exists(\Shopware\Core\Checkout\Payment\Handler\AbstractPaymentHandler::class)
+) {
+    class_alias(
+        \Shopware\Core\Checkout\Payment\Handler\AbstractPaymentHandler::class,
+        \Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler::class
+    );
+}
+
+if (!interface_exists(\Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface::class)
+    && interface_exists(\Shopware\Core\Checkout\Payment\Handler\AsyncPaymentHandlerInterface::class)
+) {
+    class_alias(
+        \Shopware\Core\Checkout\Payment\Handler\AsyncPaymentHandlerInterface::class,
+        \Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface::class
+    );
+}
+
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
