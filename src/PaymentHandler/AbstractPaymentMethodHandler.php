@@ -13,12 +13,10 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\PaymentHandler;
 
 use Shopware\Core\Checkout\Order\OrderEntity;
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
-use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Psr\Log\LoggerInterface;
@@ -28,6 +26,7 @@ use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Payment\PaymentException;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Struct\Struct;
 
 abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 {
@@ -50,31 +49,39 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
         $this->baseSuccessUrl = $url;
     }
 
-    /**
-     * @throws AsyncPaymentProcessException
-     */
-    public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
+    public function pay(Request $request, PaymentTransactionStruct $transaction, Context $context, ?Struct $validateStruct): ?RedirectResponse
     {
-        try {
-            $orderTransaction = $transaction->getOrderTransaction();
-            $orderId = $orderTransaction->getOrderId();
-            $order = $this->loadOrder($orderId, $salesChannelContext->getContext(), $orderTransaction->getId());
+        $orderTransaction = $transaction->getOrderTransaction();
 
-            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext, $order);
+        try {
+            $order = $this->loadOrder($orderTransaction->getOrderId(), $context, $orderTransaction->getId());
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $context, $order);
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
-                $transaction->getOrderTransaction()->getId(),
+                $orderTransaction->getId(),
                 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
             );
         }
+
         return new RedirectResponse($redirectUrl);
     }
 
-    //Webhook handles this part
-    public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
+    public function finalize(Request $request, PaymentTransactionStruct $transaction, Context $context): void
     {
     }
-    abstract protected function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context, OrderEntity $order): string;
+
+    abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context, OrderEntity $order): string;
+
+    protected function getCurrencyIso(OrderEntity $order): string
+    {
+        $currency = $order->getCurrency();
+
+        if ($currency !== null && method_exists($currency, 'getIsoCode')) {
+            return (string) $currency->getIsoCode();
+        }
+
+        return 'USD';
+    }
 
     private function loadOrder(?string $orderId, Context $context, string $orderTransactionId): OrderEntity
     {
@@ -85,7 +92,8 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
             );
         }
 
-        $criteria = new Criteria([$orderId]);
+        $criteria = (new Criteria([$orderId]))
+            ->addAssociation('currency');
         $order = $this->orderRepository->search($criteria, $context)->first();
 
         if (!$order instanceof OrderEntity) {

@@ -12,18 +12,18 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Checkout\Order\OrderEntity;
 
 class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    protected function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context, OrderEntity $order): string
+    protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context, OrderEntity $order): string
     {
         try {
             $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
             if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
                 return $accountUrl;
             }
             $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
@@ -31,7 +31,7 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                 $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
+                    'currency' => $this->getCurrencyIso($order),
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),
