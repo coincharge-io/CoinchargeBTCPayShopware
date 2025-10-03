@@ -1,10 +1,11 @@
 # 1.1.5
 
-- Add support for BTCPay version 2.0
+- Add compatibility with Shopware 6.7
 
 # 1.1.4
 
 - Updated logger
+- Add support for BTCPay version 2.0
 
 # 1.1.3
 
