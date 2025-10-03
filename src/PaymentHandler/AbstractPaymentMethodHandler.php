@@ -12,48 +12,33 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
-// Provide forward compatibility with Shopware 6.6 where payment handler classes moved.
-if (!class_exists(\Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler::class)
-    && class_exists(\Shopware\Core\Checkout\Payment\Handler\AbstractPaymentHandler::class)
-) {
-    class_alias(
-        \Shopware\Core\Checkout\Payment\Handler\AbstractPaymentHandler::class,
-        \Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler::class
-    );
-}
-
-if (!interface_exists(\Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface::class)
-    && interface_exists(\Shopware\Core\Checkout\Payment\Handler\AsyncPaymentHandlerInterface::class)
-) {
-    class_alias(
-        \Shopware\Core\Checkout\Payment\Handler\AsyncPaymentHandlerInterface::class,
-        \Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface::class
-    );
-}
-
+use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
-use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
-use Shopware\Core\Framework\Context;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Payment\PaymentException;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Struct\Struct;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 {
     protected ClientInterface $client;
+
     protected ConfigurationService $configurationService;
+
     protected OrderTransactionStateHandler $transactionStateHandler;
+
     protected LoggerInterface $logger;
+
     protected EntityRepository $orderRepository;
+
     public string $baseSuccessUrl;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
@@ -64,7 +49,7 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
         $this->logger = $logger;
         $this->orderRepository = $orderRepository;
         $appUrl = $_SERVER['APP_URL'];
-        $url =  "$appUrl/checkout/finish?orderId=";
+        $url = "$appUrl/checkout/finish?orderId=";
         $this->baseSuccessUrl = $url;
     }
 
@@ -78,16 +63,14 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
                 $orderTransaction->getId(),
-                'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
+                'An error occurred during the communication with external payment gateway'.PHP_EOL.$e->getMessage()
             );
         }
 
         return new RedirectResponse($redirectUrl);
     }
 
-    public function finalize(Request $request, PaymentTransactionStruct $transaction, Context $context): void
-    {
-    }
+    public function finalize(Request $request, PaymentTransactionStruct $transaction, Context $context): void {}
 
     abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context, OrderEntity $order): string;
 
@@ -115,7 +98,7 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
             ->addAssociation('currency');
         $order = $this->orderRepository->search($criteria, $context)->first();
 
-        if (!$order instanceof OrderEntity) {
+        if (! $order instanceof OrderEntity) {
             throw PaymentException::asyncProcessInterrupted(
                 $orderTransactionId,
                 sprintf('Unable to load order %s for payment processing.', $orderId)
