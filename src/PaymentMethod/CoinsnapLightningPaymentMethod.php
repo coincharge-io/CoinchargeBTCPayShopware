@@ -14,38 +14,25 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler;
 
-class CoinsnapLightningPaymentMethod
+final class CoinsnapLightningPaymentMethod extends AbstractPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Coinsnap-Lightning';
-  }
-
-  public function getPosition(): int
-  {
-    return -1;
-  }
-
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Lightning - Coinsnap',
-        'name' => 'Coinsnap-Lightning',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Lightning - Coinsnap',
-        'name' => 'Coinsnap-Lightning',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Lightning - Coinsnap',
-        'name' => 'Coinsnap-Lightning',
-      ], //Fallback language
-    ];
-  }
-
-  public function getPaymentHandler(): string
-  {
-    return CoinsnapLightningPaymentMethodHandler::class;
-  }
+    public function __construct()
+    {
+        parent::__construct(
+            'Coinsnap-Lightning',
+            'coincharge_btcpay_shopware_coinsnap_lightning',
+            -1,
+            CoinsnapLightningPaymentMethodHandler::class,
+            [
+                'de-DE' => [
+                    'description' => 'Zahle mit Lightning - Coinsnap',
+                    'name' => 'Coinsnap-Lightning',
+                ],
+                'en-GB' => [
+                    'description' => 'Pay with Lightning - Coinsnap',
+                    'name' => 'Coinsnap-Lightning',
+                ],
+            ]
+        );
+    }
 }

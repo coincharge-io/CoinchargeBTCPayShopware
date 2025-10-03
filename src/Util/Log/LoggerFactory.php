@@ -12,19 +12,19 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Util\Log;
 
-use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Logger;
 
-class LoggerFactory {
-    private $logPath;
-    private $rotationCount;
-
-    public function __construct(string $logPath, int $rotationCount) {
-        $this->logPath = $logPath;
-        $this->rotationCount = $rotationCount;
+class LoggerFactory
+{
+    public function __construct(
+        private readonly string $logPath,
+        private readonly int $rotationCount,
+    ) {
     }
 
-    public function createLogger(): Logger {
+    public function createLogger(): Logger
+    {
         $logger = new Logger('btcpay_logger');
         $handler = new RotatingFileHandler($this->logPath, $this->rotationCount);
         $logger->pushHandler($handler);

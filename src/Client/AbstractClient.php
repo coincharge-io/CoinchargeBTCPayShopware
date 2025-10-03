@@ -13,9 +13,10 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Client;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
+use JsonException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use GuzzleHttp\Exception\RequestException;
 
 class AbstractClient
 {
@@ -42,7 +43,7 @@ class AbstractClient
   {
     try {
       $response = $this->client->request($method, $uri, $options);
-      $body = $response->getBody()->getContents();
+      $body = (string) $response->getBody();
 
       $this->logger->debug(
         '{method} {uri} with following response: {response}',
@@ -53,7 +54,29 @@ class AbstractClient
         ]
       );
 
-      return \json_decode($body, true) ?? [];
+      if ($body === '') {
+        $this->logger->warning('Empty response body received from payment provider', [
+          'method' => $method,
+          'uri' => $uri,
+          'request_options' => $options,
+        ]);
+
+        return [];
+      }
+
+      try {
+        return \json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+      } catch (JsonException $decodeException) {
+        $this->logger->error('Failed to decode JSON response from payment provider', [
+          'method' => $method,
+          'uri' => $uri,
+          'request_options' => $options,
+          'response' => $body,
+          'error' => $decodeException->getMessage(),
+        ]);
+
+        throw new \RuntimeException('Malformed response received from payment provider.', 0, $decodeException);
+      }
 
     } catch (RequestException $e) {
       if ($e->hasResponse()) {
@@ -86,7 +109,8 @@ class AbstractClient
           throw new \Exception($errorMessage, $statusCode);
         }
 
-        throw new \Exception($reasonPhrase, $statusCode);
+        $message = $reasonPhrase ?: sprintf('HTTP %s error', $statusCode);
+        throw new \RuntimeException($message, $statusCode, $e);
       }
 
       $this->logger->error('Guzzle request failed: Unknown error', [
@@ -96,7 +120,7 @@ class AbstractClient
         'error' => $e->getMessage(),
       ]);
 
-      throw new \Exception('Unknown error: ' . $e->getMessage());
+      throw new \RuntimeException('Unknown error: ' . $e->getMessage(), 0, $e);
     }
   }
 }

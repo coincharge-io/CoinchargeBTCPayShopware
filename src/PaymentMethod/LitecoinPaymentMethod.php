@@ -14,38 +14,25 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentHandler\LitecoinPaymentMethodHandler;
 
-class LitecoinPaymentMethod
+final class LitecoinPaymentMethod extends AbstractPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Litecoin';
-  }
-
-  public function getPosition(): int
-  {
-    return 5;
-  }
-
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Litecoin',
-        'name' => 'Litecoin',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Litecoin',
-        'name' => 'Litecoin',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Litecoin',
-        'name' => 'Litecoin',
-      ], //Fallback language
-    ];
-  }
-
-  public function getPaymentHandler(): string
-  {
-    return LitecoinPaymentMethodHandler::class;
-  }
+    public function __construct()
+    {
+        parent::__construct(
+            'Litecoin',
+            'coincharge_btcpay_shopware_btcpay_litecoin',
+            5,
+            LitecoinPaymentMethodHandler::class,
+            [
+                'de-DE' => [
+                    'description' => 'Zahle mit Litecoin',
+                    'name' => 'Litecoin',
+                ],
+                'en-GB' => [
+                    'description' => 'Pay with Litecoin',
+                    'name' => 'Litecoin',
+                ],
+            ]
+        );
+    }
 }

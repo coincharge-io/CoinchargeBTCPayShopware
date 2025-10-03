@@ -13,15 +13,16 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Webhook;
 
 use Coincharge\Shopware\Client\ClientInterface;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Shopware\Core\Framework\Context;
 use Coincharge\Shopware\Configuration\ConfigurationService;
+use JsonException;
+use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CoinsnapWebhookService implements WebhookServiceInterface
 {
@@ -99,20 +100,55 @@ class CoinsnapWebhookService implements WebhookServiceInterface
     public function process(Request $request, Context $context): Response
     {
         $signature = $request->headers->get(self::REQUIRED_HEADER);
-        $body = $request->request->all();
+        try {
+            $body = $this->decodePayload($request);
+        } catch (\RuntimeException $decodeException) {
+            $this->logger->error('Failed to decode Coinsnap webhook payload', [
+                'error' => $decodeException->getMessage(),
+            ]);
+
+            return new Response('', Response::HTTP_BAD_REQUEST);
+        }
 
         $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
 
-        if ($signature !== $expectedHeader) {
+        if (!\is_string($signature) || !hash_equals($expectedHeader, $signature)) {
             $this->logger->error('Invalid signature');
-            return new Response();
+            return new Response('', Response::HTTP_FORBIDDEN);
         }
+
+        if (!isset($body['invoiceId'], $body['type'])) {
+            $this->logger->error('Coinsnap webhook payload missing required fields', [
+                'payload' => $body,
+            ]);
+
+            return new Response('', Response::HTTP_BAD_REQUEST);
+        }
+
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices/' . $body['invoiceId'];
         $responseBody = $this->client->sendGetRequest($uri);
+
+        if (!isset($responseBody['metadata']['orderNumber'], $responseBody['metadata']['transactionId'])) {
+            $this->logger->error('Coinsnap invoice metadata missing expected identifiers', [
+                'invoiceId' => $body['invoiceId'],
+                'response' => $responseBody,
+            ]);
+
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
+
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
 
+        if ($orderId === null) {
+            $this->logger->warning('Coinsnap webhook received for unknown order number', [
+                'orderNumber' => $responseBody['metadata']['orderNumber'],
+                'invoiceId' => $body['invoiceId'],
+            ]);
+
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
 
         switch ($body['type']) {
             case 'Processing': // The invoice is paid in full.
@@ -133,7 +169,8 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                 break;
             case 'Expired':
                 //TODO: Check if invoice was partially paid
-                $status = $body['underpaid'] ? 'partially_paid' : 'expired';
+                $underpaid = $body['underpaid'] ?? false;
+                $status = $underpaid ? 'partially_paid' : 'expired';
                 $this->orderRepository->upsert(
                     [
                         [
@@ -147,7 +184,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                     $context
                 );
                 //TODO: Check if paid partially
-                if ($body['underpaid']) {
+                if ($underpaid) {
                     $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
                 }
                 $this->logger->info('Invoice expired.');
@@ -170,5 +207,20 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                 break;
         }
         return new Response();
+    }
+
+    private function decodePayload(Request $request): array
+    {
+        $content = $request->getContent();
+
+        if ($content === '') {
+            throw new \RuntimeException('Empty request body.');
+        }
+
+        try {
+            return \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new \RuntimeException('Invalid JSON payload.', 0, $e);
+        }
     }
 }

@@ -14,39 +14,25 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler;
 
-class BitcoinPaymentMethod
+final class BitcoinPaymentMethod extends AbstractPaymentMethod
 {
-    public function getName(): string
+    public function __construct()
     {
-        return 'Bitcoin';
-    }
-
-    public function getPosition(): int
-    {
-        return -2;
-    }
-
-    public function getTranslations(): array
-    {
-        return [
-            'de-DE' => [
-                'description' => 'Zahle mit Bitcoin',
-                'name' => 'Bitcoin',
-            ],
-            'en-GB' => [
-                'description' => 'Pay with Bitcoin',
-                'name' => 'Bitcoin',
-            ],
-            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-                'description' => 'Pay with Bitcoin',
-                'name' => 'Bitcoin',
-            ], //Fallback language
-        ];
-    }
-
-
-    public function getPaymentHandler(): string
-    {
-        return BitcoinPaymentMethodHandler::class;
+        parent::__construct(
+            'Bitcoin',
+            'coincharge_btcpay_shopware_btcpay_bitcoin',
+            -2,
+            BitcoinPaymentMethodHandler::class,
+            [
+                'de-DE' => [
+                    'description' => 'Zahle mit Bitcoin',
+                    'name' => 'Bitcoin',
+                ],
+                'en-GB' => [
+                    'description' => 'Pay with Bitcoin',
+                    'name' => 'Bitcoin',
+                ],
+            ]
+        );
     }
 }

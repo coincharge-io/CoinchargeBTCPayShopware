@@ -12,10 +12,12 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
+use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
+use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,21 +26,25 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Payment\PaymentException;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 
-abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
+abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 {
-    private ClientInterface $client;
-    private ConfigurationService  $configurationService;
-    private OrderTransactionStateHandler $transactionStateHandler;
-    private LoggerInterface $logger;
+    protected ClientInterface $client;
+    protected ConfigurationService $configurationService;
+    protected OrderTransactionStateHandler $transactionStateHandler;
+    protected LoggerInterface $logger;
+    protected EntityRepository $orderRepository;
     public string $baseSuccessUrl;
 
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
+    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger, EntityRepository $orderRepository)
     {
         $this->client = $client;
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
+        $this->orderRepository = $orderRepository;
         $appUrl = $_SERVER['APP_URL'];
         $url =  "$appUrl/checkout/finish?orderId=";
         $this->baseSuccessUrl = $url;
@@ -49,9 +55,12 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
      */
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
-        $this->logger->info('test');
         try {
-            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
+            $orderTransaction = $transaction->getOrderTransaction();
+            $orderId = $orderTransaction->getOrderId();
+            $order = $this->loadOrder($orderId, $salesChannelContext->getContext(), $orderTransaction->getId());
+
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext, $order);
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
                 $transaction->getOrderTransaction()->getId(),
@@ -65,5 +74,27 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
     }
-    abstract public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
+    abstract protected function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context, OrderEntity $order): string;
+
+    private function loadOrder(?string $orderId, Context $context, string $orderTransactionId): OrderEntity
+    {
+        if ($orderId === null) {
+            throw PaymentException::asyncProcessInterrupted(
+                $orderTransactionId,
+                'The order transaction does not contain an order identifier.'
+            );
+        }
+
+        $criteria = new Criteria([$orderId]);
+        $order = $this->orderRepository->search($criteria, $context)->first();
+
+        if (!$order instanceof OrderEntity) {
+            throw PaymentException::asyncProcessInterrupted(
+                $orderTransactionId,
+                sprintf('Unable to load order %s for payment processing.', $orderId)
+            );
+        }
+
+        return $order;
+    }
 }

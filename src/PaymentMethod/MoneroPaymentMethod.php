@@ -14,38 +14,25 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentHandler\MoneroPaymentMethodHandler;
 
-class MoneroPaymentMethod
+final class MoneroPaymentMethod extends AbstractPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Monero';
-  }
-
-  public function getPosition(): int
-  {
-    return -1;
-  }
-
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Monero',
-        'name' => 'Monero',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Monero',
-        'name' => 'Monero',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Monero',
-        'name' => 'Monero',
-      ], //Fallback language
-    ];
-  }
-
-  public function getPaymentHandler(): string
-  {
-    return MoneroPaymentMethodHandler::class;
-  }
+    public function __construct()
+    {
+        parent::__construct(
+            'Monero',
+            'coincharge_btcpay_shopware_btcpay_monero',
+            -1,
+            MoneroPaymentMethodHandler::class,
+            [
+                'de-DE' => [
+                    'description' => 'Zahle mit Monero',
+                    'name' => 'Monero',
+                ],
+                'en-GB' => [
+                    'description' => 'Pay with Monero',
+                    'name' => 'Monero',
+                ],
+            ]
+        );
+    }
 }

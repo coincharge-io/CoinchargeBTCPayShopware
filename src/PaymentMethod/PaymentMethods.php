@@ -20,6 +20,7 @@ use Coincharge\Shopware\PaymentMethod\CoinsnapLightningPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\CoinsnapBitcoinLightningPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\MoneroPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\LitecoinPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\BitcoinCryptoPaymentMethod;
 
 class PaymentMethods
 {

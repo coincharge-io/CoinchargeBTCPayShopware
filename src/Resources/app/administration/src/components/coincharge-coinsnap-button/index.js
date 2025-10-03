@@ -10,105 +10,144 @@ const { Component, Mixin, ApiService } = Shopware;
 import template from "./coincharge-coinsnap-button.html.twig";
 import "./coincharge-coinsnap-button.scss";
 
+const CONFIG_PREFIX = "CoinchargeBTCPayShopware.config.";
+const CONFIG_KEYS = {
+	storeId: `${CONFIG_PREFIX}coinsnapStoreId`,
+	apiKey: `${CONFIG_PREFIX}coinsnapApiKey`,
+	integrationStatus: `${CONFIG_PREFIX}coinsnapIntegrationStatus`,
+};
+
 Component.register("coincharge-coinsnap-button", {
-	template: template,
-	inject: [["coinchargeCoinsnapApiService"]],
+	template,
+	inject: ["coinchargeCoinsnapApiService"],
 	mixins: [Mixin.getByName("notification")],
 	data() {
 		return {
 			isLoading: false,
-			coinsnapStoreId: "",
-			coinsnapApiKey: "",
+			systemConfigService: ApiService.getByName("systemConfigApiService"),
+			formVersion: 0,
+			fieldListeners: [],
 		};
 	},
+
 	mounted() {
-		const systemConfig = ApiService.getByName("systemConfigApiService");
-		systemConfig
-			.getValues("CoinchargeBTCPayShopware.config")
-			.then((r) => {
-				this.coinsnapApiKey =
-					r["CoinchargeBTCPayShopware.config.coinsnapApiKey"];
-				this.coinsnapStoreId =
-					r["CoinchargeBTCPayShopware.config.coinsnapStoreId"];
-			})
-			.catch((e) => console.log(e));
+		this.registerFieldListeners();
+	},
+
+	beforeDestroy() {
+		this.fieldListeners.forEach(({ element, handler }) => {
+			if (element) {
+				element.removeEventListener("input", handler);
+			}
+		});
 	},
 	computed: {
 		isDisabled() {
-			if (!this.coinsnapStoreId || !this.coinsnapApiKey) {
-				return true;
-			}
+			return this.isLoading || !this.hasCredentials;
+		},
+
+		hasCredentials() {
+			// access to formVersion ensures Vue tracks updates from input listeners
+			void this.formVersion;
+
+			return [CONFIG_KEYS.storeId, CONFIG_KEYS.apiKey].every(
+				(key) => this.getFieldValue(key) !== ""
+			);
 		},
 	},
 	methods: {
-		testConnection() {
-			this.isLoading = true;
-			if (!this.credentialsExist()) {
-				this.isLoading = false;
-				return this.createNotificationWarning({
-					title: "BTCPay Server",
+		registerFieldListeners() {
+			let registered = 0;
+
+			[CONFIG_KEYS.storeId, CONFIG_KEYS.apiKey].forEach((key) => {
+				const element = document.getElementById(key);
+
+				if (!element) {
+					return;
+				}
+
+				const handler = () => {
+					this.formVersion += 1;
+				};
+
+				element.addEventListener("input", handler);
+				this.fieldListeners.push({ element, handler });
+				registered += 1;
+			});
+
+			if (registered === 0) {
+				this.$nextTick(() => this.registerFieldListeners());
+			}
+		},
+
+		async testConnection() {
+			if (!this.hasCredentials) {
+				await this.systemConfigService.saveValues({
+					[CONFIG_KEYS.integrationStatus]: false,
+				});
+
+				this.createNotificationWarning({
+					title: "Coinsnap",
 					message: this.$tc(
 						"coincharge-coinsnap-test-connection.missing_credentials"
 					),
 				});
+
+				return;
 			}
-			this.coinchargeCoinsnapApiService
-				.verifyApiKey()
-				.then((ApiResponse) => {
-					if (ApiResponse.success === false) {
-						this.createNotificationWarning({
-							title: "Coinsnap",
-							message: ApiResponse.message,
-						});
-						this.isLoading = false;
-						return;
-					}
-					this.createNotificationSuccess({
-						title: "Coinsnap",
-						message: this.$tc("coincharge-coinsnap-test-connection.success"),
+
+			this.isLoading = true;
+
+			try {
+				const response = await this.coinchargeCoinsnapApiService.verifyApiKey();
+
+				if (!response?.success) {
+					await this.systemConfigService.saveValues({
+						[CONFIG_KEYS.integrationStatus]: false,
 					});
 
-					this.isLoading = false;
-					window.location.reload();
-				})
-				.catch((e) => {
-					this.isLoading = false;
-					return this.createNotificationError({
+					this.createNotificationWarning({
 						title: "Coinsnap",
-						message: this.$tc("coincharge-coinsnap-test-connection.error"),
+						message: response?.message ?? this.$tc("coincharge-coinsnap-test-connection.error"),
 					});
+
+					return;
+				}
+
+				this.createNotificationSuccess({
+					title: "Coinsnap",
+					message: this.$tc("coincharge-coinsnap-test-connection.success"),
 				});
+
+				window.location.reload();
+			} catch (error) {
+				this.createNotificationError({
+					title: "Coinsnap",
+					message: this.$tc("coincharge-coinsnap-test-connection.error"),
+				});
+			} finally {
+				this.isLoading = false;
+			}
 		},
-		saveCredentials() {
-			const systemConfig = ApiService.getByName("systemConfigApiService");
-			const coinsnapStoreId = document.getElementById(
-				"CoinchargeBTCPayShopware.config.coinsnapStoreId"
-			).value;
-			const coinsnapApiKey = document.getElementById(
-				"CoinchargeBTCPayShopware.config.coinsnapApiKey"
-			).value;
-			systemConfig.saveValues({
-				"CoinchargeBTCPayShopware.config.coinsnapStoreId": coinsnapStoreId,
-				"CoinchargeBTCPayShopware.config.coinsnapApiKey": coinsnapApiKey,
-			});
+
+		async saveCredentials() {
+			const values = {
+				[CONFIG_KEYS.storeId]: this.getFieldValue(CONFIG_KEYS.storeId),
+				[CONFIG_KEYS.apiKey]: this.getFieldValue(CONFIG_KEYS.apiKey),
+			};
+
+			await this.systemConfigService.saveValues(values);
 			window.location.reload();
 		},
-		credentialsExist() {
-			const systemConfig = ApiService.getByName("systemConfigApiService");
-			if (
-				document.getElementById(
-					"CoinchargeBTCPayShopware.config.coinsnapStoreId"
-				).value == "" ||
-				document.getElementById(
-					"CoinchargeBTCPayShopware.config.coinsnapApiKey"
-				).value == ""
-			) {
-				systemConfig.saveValues({
-					"CoinchargeBTCPayShopware.config.coinsnapIntegrationStatus": false,
-				});
-				return false;
+
+		getFieldValue(fieldName) {
+			const element = document.getElementById(fieldName);
+
+			if (!element) {
+				return "";
 			}
-			return true;
+
+			return element.value.trim();
 		},
 	},
 });

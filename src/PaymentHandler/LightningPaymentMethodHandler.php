@@ -14,27 +14,11 @@ namespace Coincharge\Shopware\PaymentHandler;
 
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
-use Coincharge\Shopware\Client\ClientInterface;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Order\OrderEntity;
 
 class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    private ClientInterface $client;
-    private ConfigurationService  $configurationService;
-    private OrderTransactionStateHandler $transactionStateHandler;
-    private LoggerInterface $logger;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
-        $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
-        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
-    }
-    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+    protected function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context, OrderEntity $order): string
     {
         try {
             $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
@@ -51,7 +35,7 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                        'orderNumber' => $order->getOrderNumber(),
                         'transactionId' => $transaction->getOrderTransaction()->getId()
                     ],
                     'checkout' => [

@@ -17,23 +17,23 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 
 class OrderService
 {
-    private ClientInterface $client;
-    private ConfigurationService $configurationService;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
+    public function __construct(
+        private readonly ClientInterface $client,
+        private readonly ConfigurationService $configurationService,
+    ) {
     }
 
     public function invoiceIsFullyPaid(string $invoiceId): bool
     {
+        $storeId = $this->configurationService->getSetting('btcpayServerStoreId');
 
-        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $invoiceId;
-        $response = $this->client->sendGetRequest($uri);
-        if ($response['status'] !== 'Settled') {
+        if (!\is_string($storeId) || $storeId === '') {
             return false;
         }
-        return true;
+
+        $uri = '/api/v1/stores/' . $storeId . '/invoices/' . $invoiceId;
+        $response = $this->client->sendGetRequest($uri);
+
+        return ($response['status'] ?? null) === 'Settled';
     }
 }

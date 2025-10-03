@@ -19,20 +19,41 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 class CoinsnapClient extends AbstractClient implements ClientInterface
 {
   protected ConfigurationService $configurationService;
-  protected LoggerInterface $logger;
 
   public function __construct(ConfigurationService $configurationService, LoggerInterface $logger)
   {
     $this->configurationService = $configurationService;
 
+    $configuredBaseUri = (string) $this->configurationService->getSetting('coinsnapBaseUrl');
+    $configuredBaseUri = \trim($configuredBaseUri);
+    $baseUri = $configuredBaseUri !== '' ? $configuredBaseUri : 'https://app.coinsnap.io';
+
+    if ($configuredBaseUri === '') {
+      $logger->notice('Coinsnap base URL not configured, falling back to default endpoint.', [
+        'base_uri' => $baseUri,
+      ]);
+    }
+
+    if (\filter_var($baseUri, FILTER_VALIDATE_URL) === false) {
+      $logger->critical('Coinsnap base URL configuration is not a valid URL.', [
+        'base_uri' => $baseUri,
+      ]);
+      throw new \InvalidArgumentException('Invalid Coinsnap base URL configuration.');
+    }
+
     $authorizationHeader = $this->createAuthHeader();
+
+    if ($authorizationHeader === null) {
+      $logger->critical('Coinsnap API key is missing from configuration.');
+      throw new \InvalidArgumentException('Missing Coinsnap API key configuration.');
+    }
 
     $client = new Client(
       [
-        'base_uri' => 'https://app.coinsnap.io',
+        'base_uri' => $baseUri,
         'headers' => [
-          'X-Api-Key' => $authorizationHeader
-        ]
+          'X-Api-Key' => $authorizationHeader,
+        ],
       ]
     );
     parent::__construct($client, $logger);
@@ -55,6 +76,12 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
   }
   public function createAuthHeader(): ?string
   {
-    return $this->configurationService->getSetting('coinsnapApiKey');
+    $apiKey = $this->configurationService->getSetting('coinsnapApiKey');
+
+    if (!\is_string($apiKey) || \trim($apiKey) === '') {
+      return null;
+    }
+
+    return \trim($apiKey);
   }
 }

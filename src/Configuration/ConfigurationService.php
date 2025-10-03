@@ -30,16 +30,20 @@ class ConfigurationService
         $this->systemConfigService = $systemConfigService;
     }
 
-    public function getSetting(string $setting, ?string $salesChannelId = null)
+    public function getSetting(string $setting, ?string $salesChannelId = null): mixed
     {
         return $this->systemConfigService->get(self::DOMAIN . $setting, $salesChannelId);
     }
-    public function setSetting(string $setting, $value, ?string $salesChannelId = null)
+
+    public function setSetting(string $setting, mixed $value, ?string $salesChannelId = null): void
     {
-        return $this->systemConfigService->set(self::DOMAIN . $setting, $value, $salesChannelId);
+        $this->systemConfigService->set(self::DOMAIN . $setting, $value, $salesChannelId);
     }
-    public function getShopName(?string $salesChannelId)
+
+    public function getShopName(?string $salesChannelId): ?string
     {
-        return $this->systemConfigService->get("core.basicInformation.shopName", $salesChannelId);
+        $shopName = $this->systemConfigService->get('core.basicInformation.shopName', $salesChannelId);
+
+        return \is_string($shopName) ? $shopName : null;
     }
 }

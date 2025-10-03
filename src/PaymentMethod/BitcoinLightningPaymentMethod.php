@@ -14,39 +14,25 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentHandler\BitcoinLightningPaymentMethodHandler;
 
-class BitcoinLightningPaymentMethod
+final class BitcoinLightningPaymentMethod extends AbstractPaymentMethod
 {
-    public function getName(): string
+    public function __construct()
     {
-        return 'Bitcoin+Lightning';
-    }
-
-    public function getPosition(): int
-    {
-        return -3;
-    }
-
-    public function getTranslations(): array
-    {
-        return [
-            'de-DE' => [
-                'description' => 'Zahle mit Bitcoin/Lightning',
-                'name' => 'Bitcoin-Lightning',
-            ],
-            'en-GB' => [
-                'description' => 'Pay with Bitcoin/Lightning',
-                'name' => 'Bitcoin-Lightning',
-            ],
-            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-                'description' => 'Pay with Bitcoin/Lightning',
-                'name' => 'Bitcoin-Lightning',
-            ], //Fallback language
-        ];
-    }
-
-
-    public function getPaymentHandler(): string
-    {
-        return BitcoinLightningPaymentMethodHandler::class;
+        parent::__construct(
+            'Bitcoin+Lightning',
+            'coincharge_btcpay_shopware_btcpay_bitcoin_lightning',
+            -3,
+            BitcoinLightningPaymentMethodHandler::class,
+            [
+                'de-DE' => [
+                    'description' => 'Zahle mit Bitcoin/Lightning',
+                    'name' => 'Bitcoin-Lightning',
+                ],
+                'en-GB' => [
+                    'description' => 'Pay with Bitcoin/Lightning',
+                    'name' => 'Bitcoin-Lightning',
+                ],
+            ]
+        );
     }
 }

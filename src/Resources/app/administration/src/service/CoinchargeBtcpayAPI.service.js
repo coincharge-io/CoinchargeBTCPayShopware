@@ -18,23 +18,14 @@ export default class CoinchargeBtcpayApiService extends ApiService {
 
     return this.httpClient
       .get(apiRoute, { headers })
-      .then((response) => {
-        return ApiService.handleResponse(response);
-      })
-      .catch((error) => {
-        throw error;
-      });
+      .then((response) => ApiService.handleResponse(response));
   }
+
   generateWebhook() {
     const apiRoute = `/_action/${this.getApiBasePath()}/webhook`;
 
     return this.httpClient
       .post(apiRoute, {}, { headers: this.getBasicHeaders() })
-      .then((response) => {
-        return ApiService.handleResponse(response);
-      })
-      .catch((error) => {
-        throw error;
-      });
+      .then((response) => ApiService.handleResponse(response));
   }
 }

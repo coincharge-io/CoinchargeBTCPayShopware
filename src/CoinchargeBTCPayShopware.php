@@ -13,8 +13,9 @@ declare(strict_types=1);
 namespace Coincharge\Shopware;
 
 use Coincharge\Shopware\PaymentMethod\BitcoinCryptoPaymentMethod;
+use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
@@ -31,6 +32,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
+use Coincharge\Shopware\PaymentMethod\PaymentMethodInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 
 class CoinchargeBTCPayShopware extends Plugin
@@ -285,12 +287,13 @@ class CoinchargeBTCPayShopware extends Plugin
     parent::update($updateContext);
   }
 
-  private function addPaymentMethod($paymentMethod, Context $context): void
+  private function addPaymentMethod(PaymentMethodInterface $paymentMethod, Context $context): void
   {
-    $paymentMethodExists = $this->getPaymentMethodId($paymentMethod);
+    $paymentMethodExists = $this->getPaymentMethodId($paymentMethod, $context);
 
     // Payment method exists already, no need to continue here
     if ($paymentMethodExists) {
+      $this->ensurePaymentMethodTechnicalName($paymentMethodExists, $paymentMethod, $context);
       return;
     }
 
@@ -302,6 +305,8 @@ class CoinchargeBTCPayShopware extends Plugin
 
     $examplePaymentData = [
       'handlerIdentifier' => $paymentMethod->getPaymentHandler(),
+      'technicalName' => $paymentMethod->getTechnicalName(),
+      'name' => $paymentMethod->getName(),
       'pluginId' => $pluginId,
       'position' => $paymentMethod->getPosition(),
       'media' => [
@@ -311,21 +316,17 @@ class CoinchargeBTCPayShopware extends Plugin
       'translations' => $paymentMethod->getTranslations()
     ];
 
-    /**
-     * @var EntityRepositoryInterface $paymentRepository
-     */
+    /** @var EntityRepository $paymentRepository */
     $paymentRepository = $this->container->get('payment_method.repository');
     $paymentRepository->create([$examplePaymentData], $context);
   }
 
-  private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
+  private function setPaymentMethodIsActive(PaymentMethodInterface $paymentMethod, bool $active, Context $context): void
   {
-    /**
-     * @var EntityRepositoryInterface $paymentRepository
-     */
+    /** @var EntityRepository $paymentRepository */
     $paymentRepository = $this->container->get('payment_method.repository');
 
-    $paymentMethodId = $this->getPaymentMethodId($paymentMethod);
+    $paymentMethodId = $this->getPaymentMethodId($paymentMethod, $context);
 
     // Payment does not even exist, so nothing to (de-)activate here
     if (!$paymentMethodId) {
@@ -340,16 +341,35 @@ class CoinchargeBTCPayShopware extends Plugin
     $paymentRepository->update([$paymentMethod], $context);
   }
 
-  private function getPaymentMethodId($paymentMethod): ?string
+  private function getPaymentMethodId(PaymentMethodInterface $paymentMethod, Context $context): ?string
   {
-    /**
-     * @var EntityRepositoryInterface $paymentRepository
-     */
+    /** @var EntityRepository $paymentRepository */
     $paymentRepository = $this->container->get('payment_method.repository');
 
     // Fetch ID for update
     $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethod->getPaymentHandler()));
-    return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+    return $paymentRepository->searchIds($paymentCriteria, $context)->firstId();
+  }
+
+  private function ensurePaymentMethodTechnicalName(string $paymentMethodId, PaymentMethodInterface $paymentMethod, Context $context): void
+  {
+    /** @var EntityRepository $paymentRepository */
+    $paymentRepository = $this->container->get('payment_method.repository');
+
+    $criteria = new Criteria([$paymentMethodId]);
+    $criteria->setLimit(1);
+    $existingPaymentMethod = $paymentRepository->search($criteria, $context)->first();
+
+    if ($existingPaymentMethod instanceof PaymentMethodEntity && $existingPaymentMethod->getTechnicalName()) {
+      return;
+    }
+
+    $paymentRepository->update([
+      [
+        'id' => $paymentMethodId,
+        'technicalName' => $paymentMethod->getTechnicalName(),
+      ],
+    ], $context);
   }
 
   private function getMediaEntity(string $fileName, Context $context): ?MediaEntity
@@ -370,8 +390,8 @@ class CoinchargeBTCPayShopware extends Plugin
       return ''; // or return default icon ID if you want one
     }
 
-    $fileName = hash_file('md5', $filePath);
-    $media = $this->getMediaEntity($fileName, $context);
+    $savedFileName = \sprintf('btcpay_shopware_%s', strtolower($logoName));
+    $media = $this->getMediaEntity($savedFileName, $context);
     $mediaRepository = $this->container->get('media.repository');
 
     if ($media) {
@@ -385,16 +405,17 @@ class CoinchargeBTCPayShopware extends Plugin
       filesize($filePath)
     );
     $mediaId = Uuid::randomHex();
-    $mediaRepository->create(
-      [
-        [
-          'id' => $mediaId,
-        ],
-      ],
-      $context
-    );
+    $mediaFolderId = $this->getMediaDefaultFolderId($context);
+    $mediaData = ['id' => $mediaId];
+
+    if ($mediaFolderId) {
+      $mediaData['mediaFolderId'] = $mediaFolderId;
+    }
+
+    $mediaRepository->create([
+      $mediaData,
+    ], $context);
     $fileSaver = $this->container->get(FileSaver::class);
-    $savedFileName = \sprintf("btcpay_shopware_%s", strtolower($logoName));
     $fileSaver->persistFileToMedia(
       $mediaFile,
       $savedFileName,
@@ -418,4 +439,3 @@ class CoinchargeBTCPayShopware extends Plugin
     return $mediaFolderRepository->searchIds($criteria, $context)->firstId();
   }
 }
-

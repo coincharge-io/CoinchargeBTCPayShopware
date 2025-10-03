@@ -14,38 +14,25 @@ namespace Coincharge\Shopware\PaymentMethod;
 
 use Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinLightningPaymentMethodHandler;
 
-class CoinsnapBitcoinLightningPaymentMethod
+final class CoinsnapBitcoinLightningPaymentMethod extends AbstractPaymentMethod
 {
-    public function getName(): string
+    public function __construct()
     {
-        return 'Coinsnap-Bitcoin+Lightning';
-    }
-
-    public function getPosition(): int
-    {
-        return -2;
-    }
-
-    public function getTranslations(): array
-    {
-        return [
-          'de-DE' => [
-            'description' => 'Zahle mit Bitcoin/Lightning - Coinsnap',
-            'name' => 'Coinsnap-Bitcoin-Lightning',
-          ],
-          'en-GB' => [
-            'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
-            'name' => 'Coinsnap-Bitcoin-Lightning',
-          ],
-          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-            'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
-            'name' => 'Coinsnap-Bitcoin-Lightning',
-          ], //Fallback language
-        ];
-    }
-
-    public function getPaymentHandler(): string
-    {
-        return CoinsnapBitcoinLightningPaymentMethodHandler::class;
+        parent::__construct(
+            'Coinsnap-Bitcoin+Lightning',
+            'coincharge_btcpay_shopware_coinsnap_bitcoin_lightning',
+            -2,
+            CoinsnapBitcoinLightningPaymentMethodHandler::class,
+            [
+                'de-DE' => [
+                    'description' => 'Zahle mit Bitcoin/Lightning - Coinsnap',
+                    'name' => 'Coinsnap-Bitcoin-Lightning',
+                ],
+                'en-GB' => [
+                    'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
+                    'name' => 'Coinsnap-Bitcoin-Lightning',
+                ],
+            ]
+        );
     }
 }

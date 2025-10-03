@@ -13,15 +13,16 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Webhook;
 
 use Coincharge\Shopware\Client\ClientInterface;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Shopware\Core\Framework\Context;
 use Coincharge\Shopware\Configuration\ConfigurationService;
+use JsonException;
+use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class BTCPayWebhookService implements WebhookServiceInterface
 {
@@ -99,20 +100,57 @@ class BTCPayWebhookService implements WebhookServiceInterface
   public function process(Request $request, Context $context): Response
   {
     $signature = $request->headers->get(self::REQUIRED_HEADER);
-    $body = $request->request->all();
+    try {
+      $body = $this->decodePayload($request);
+    } catch (\RuntimeException $decodeException) {
+      $this->logger->error('Failed to decode BTCPay webhook payload', [
+        'error' => $decodeException->getMessage(),
+      ]);
+
+      return new Response('', Response::HTTP_BAD_REQUEST);
+    }
 
     $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('btcpayWebhookSecret'));
-    if ($signature !== $expectedHeader) {
+    if (!\is_string($signature) || !hash_equals($expectedHeader, $signature)) {
       $this->logger->error('Invalid signature');
-      return new Response();
+      return new Response('', Response::HTTP_FORBIDDEN);
     }
+    if (!isset($body['invoiceId'], $body['type'])) {
+      $this->logger->error('BTCPay webhook payload missing required fields', [
+        'payload' => $body,
+      ]);
+
+      return new Response('', Response::HTTP_BAD_REQUEST);
+    }
+
     $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId'];
     $responseBody = $this->client->sendGetRequest($uri);
+
+    if (!isset($responseBody['metadata']['orderNumber'], $responseBody['metadata']['transactionId'])) {
+      $this->logger->error('BTCPay invoice metadata missing expected identifiers', [
+        'invoiceId' => $body['invoiceId'],
+        'response' => $responseBody,
+      ]);
+
+      return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
     $criteria = new Criteria();
     $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
     $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
 
+    if ($orderId === null) {
+      $this->logger->warning('BTCPay webhook received for unknown order number', [
+        'orderNumber' => $responseBody['metadata']['orderNumber'],
+        'invoiceId' => $body['invoiceId'],
+      ]);
 
+      return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    $paymentMethod = $responseBody['paymentMethods'][0] ?? [];
+    $cryptoAmount = $paymentMethod['amount'] ?? null;
+    $exchangeRate = $paymentMethod['rate'] ?? null;
 
     switch ($body['type']) {
       case 'InvoiceReceivedPayment':
@@ -132,15 +170,13 @@ class BTCPayWebhookService implements WebhookServiceInterface
                 'btcpayOrderStatus' => 'processing',
                 'paidAfterExpiration' => $body['afterExpiration'] ?? false,
                 'overpaid' => $body['overPaid'] ?? false,
-                'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
-                'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
+                'cryptoAmount' => $cryptoAmount,
+                'exchangeRate' => $exchangeRate,
               ],
             ],
           ],
           $context
         );
-        break;
-
         break;
       case 'InvoicePaymentSettled':
         // We can't use $body->afterExpiration here as there is a bug affecting all version prior to
@@ -161,8 +197,8 @@ class BTCPayWebhookService implements WebhookServiceInterface
                     'btcpayOrderStatus' => 'settled',
                     'paidAfterExpiration' => true,
                     'overpaid'      =>  false,
-                    'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
-                    'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
+                    'cryptoAmount' => $cryptoAmount,
+                    'exchangeRate' => $exchangeRate,
                   ],
                 ],
               ],
@@ -179,8 +215,8 @@ class BTCPayWebhookService implements WebhookServiceInterface
                     'btcpayOrderStatus' => 'paidPartially',
                     'paidAfterExpiration' => true,
                     'overpaid'      => false,
-                    'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
-                    'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
+                    'cryptoAmount' => $cryptoAmount,
+                    'exchangeRate' => $exchangeRate,
                   ],
                 ],
               ],
@@ -239,8 +275,8 @@ class BTCPayWebhookService implements WebhookServiceInterface
                   'btcpayOrderStatus' => 'invoiceExpired',
                   'paidAfterExpiration' => true,
                   'overpaid'  => false,
-                  'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
-                  'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
+                  'cryptoAmount' => $cryptoAmount,
+                  'exchangeRate' => $exchangeRate,
                 ],
               ],
             ],
@@ -258,8 +294,8 @@ class BTCPayWebhookService implements WebhookServiceInterface
                   'btcpayOrderStatus' => 'invoiceExpired',
                   'paidAfterExpiration' => false,
                   'overpaid'  => false,
-                  'cryptoAmount' => $responseBody['paymentMethods'][0]['amount'],
-                  'exchangeRate' => $responseBody['paymentMethods'][0]['rate']
+                  'cryptoAmount' => $cryptoAmount,
+                  'exchangeRate' => $exchangeRate,
                 ],
               ],
             ],
@@ -311,5 +347,20 @@ class BTCPayWebhookService implements WebhookServiceInterface
         break;
     }
     return new Response();
+  }
+
+  private function decodePayload(Request $request): array
+  {
+    $content = $request->getContent();
+
+    if ($content === '') {
+      throw new \RuntimeException('Empty request body.');
+    }
+
+    try {
+      return \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException $e) {
+      throw new \RuntimeException('Invalid JSON payload.', 0, $e);
+    }
   }
 }

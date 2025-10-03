@@ -19,20 +19,37 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 class BTCPayServerClient extends AbstractClient implements ClientInterface
 {
     protected ConfigurationService $configurationService;
-    protected LoggerInterface $logger;
 
     public function __construct(ConfigurationService $configurationService, LoggerInterface $logger)
     {
         $this->configurationService = $configurationService;
 
+        $baseUri = (string) $this->configurationService->getSetting('btcpayServerUrl');
+        $baseUri = \trim($baseUri);
+        if ($baseUri === '') {
+            $logger->critical('BTCPay Server base URL is missing from configuration.');
+            throw new \InvalidArgumentException('Missing BTCPay Server base URL configuration.');
+        }
+
+        if (\filter_var($baseUri, FILTER_VALIDATE_URL) === false) {
+            $logger->critical('BTCPay Server base URL configuration is not a valid URL.', [
+                'base_uri' => $baseUri,
+            ]);
+            throw new \InvalidArgumentException('Invalid BTCPay Server base URL configuration.');
+        }
+
         $authorizationHeader = $this->createAuthHeader();
+        if ($authorizationHeader === null) {
+            $logger->critical('BTCPay Server API key is missing from configuration.');
+            throw new \InvalidArgumentException('Missing BTCPay Server API key configuration.');
+        }
 
         $client = new Client(
             [
-                'base_uri' => $this->configurationService->getSetting('btcpayServerUrl'),
+                'base_uri' => $baseUri,
                 'headers' => [
-                    'Authorization' => $authorizationHeader
-                ]
+                    'Authorization' => $authorizationHeader,
+                ],
             ]
         );
         parent::__construct($client, $logger);
@@ -55,6 +72,12 @@ class BTCPayServerClient extends AbstractClient implements ClientInterface
     }
     public function createAuthHeader(): ?string
     {
-        return 'token ' . $this->configurationService->getSetting('btcpayApiKey');
+        $apiKey = $this->configurationService->getSetting('btcpayApiKey');
+
+        if (!\is_string($apiKey) || \trim($apiKey) === '') {
+            return null;
+        }
+
+        return 'token ' . \trim($apiKey);
     }
 }

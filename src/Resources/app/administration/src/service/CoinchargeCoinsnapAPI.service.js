@@ -18,11 +18,6 @@ export default class CoinchargeCoinsnapApiService extends ApiService {
 
     return this.httpClient
       .get(apiRoute, { headers })
-      .then((response) => {
-        return ApiService.handleResponse(response);
-      })
-      .catch((error) => {
-        throw error.message;
-      });
+      .then((response) => ApiService.handleResponse(response));
   }
 }
