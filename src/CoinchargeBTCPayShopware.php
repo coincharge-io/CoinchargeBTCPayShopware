@@ -178,7 +178,13 @@ class CoinchargeBTCPayShopware extends Plugin
             $customFieldCriteria->addFilter(new EqualsAnyFilter('name', ['btcpayServer', 'coinsnap']));
 
             $customFieldIds = $customFieldSetRepository->searchIds($customFieldCriteria, $context->getContext());
-            $customFieldSetRepository->delete(array_values($customFieldIds->getData()), $context->getContext());
+            $customFieldIds = \array_map(static function (string $id): array {
+                return ['id' => $id];
+            }, $customFieldIds->getIds());
+
+            if ($customFieldIds) {
+                $customFieldSetRepository->delete($customFieldIds, $context->getContext());
+            }
         }
     }
 
@@ -341,6 +347,9 @@ class CoinchargeBTCPayShopware extends Plugin
     private function ensureMedia(Context $context, string $logoName): string
     {
         $filePath = realpath(__DIR__.'/Resources/icons/'.strtolower($logoName).'.svg');
+        if ($filePath === false) {
+            throw new \RuntimeException(sprintf('Missing media asset for payment method logo "%s"', $logoName));
+        }
         $fileName = hash_file('md5', $filePath);
         $media = $this->getMediaEntity($fileName, $context);
         $mediaRepository = $this->container->get('media.repository');

@@ -21,13 +21,13 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class CoinsnapBitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    private ClientInterface $client;
+    protected ClientInterface $client;
 
-    private ConfigurationService $configurationService;
+    protected ConfigurationService $configurationService;
 
-    private OrderTransactionStateHandler $transactionStateHandler;
+    protected OrderTransactionStateHandler $transactionStateHandler;
 
-    private LoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {

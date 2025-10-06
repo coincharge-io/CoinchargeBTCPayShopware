@@ -16,52 +16,63 @@ use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerType;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
-use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
 use Shopware\Core\Checkout\Payment\PaymentException;
-use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Struct\Struct;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 {
-    private ClientInterface $client;
+    protected ClientInterface $client;
 
-    private ConfigurationService $configurationService;
+    protected ConfigurationService $configurationService;
 
-    private OrderTransactionStateHandler $transactionStateHandler;
+    protected OrderTransactionStateHandler $transactionStateHandler;
 
-    private LoggerInterface $logger;
+    protected LoggerInterface $logger;
 
-    public string $baseSuccessUrl;
+    protected EntityRepository $orderRepository;
 
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
+    protected string $baseSuccessUrl;
+
+    public function __construct(
+        ClientInterface $client,
+        ConfigurationService $configurationService,
+        OrderTransactionStateHandler $transactionStateHandler,
+        LoggerInterface $logger,
+        EntityRepository $orderRepository
+    ) {
         $this->client = $client;
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
-        $appUrl = $_SERVER['APP_URL'];
-        $url = "$appUrl/checkout/finish?orderId=";
-        $this->baseSuccessUrl = $url;
+        $this->orderRepository = $orderRepository;
+
+        $appUrl = $_SERVER['APP_URL'] ?? '';
+        $this->baseSuccessUrl = rtrim($appUrl, '/').'/checkout/finish?orderId=';
     }
 
     public function supports(PaymentHandlerType $type, string $paymentMethodId, Context $context): bool
     {
-        // This payment handler does not support recurring payments nor refunds
+        // This handler currently does not support REFUND or RECURRING via Shopware API
         return false;
     }
 
-    /**
-     * @throws AsyncPaymentProcessException
-     */
-    public function pay(PaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
+    public function pay(Request $request, PaymentTransactionStruct $transaction, Context $context, ?Struct $validateStruct): ?RedirectResponse
     {
-        $this->logger->info('test');
         try {
-            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
+            $orderTransaction = $transaction->getOrderTransaction();
+            $orderId = $orderTransaction->getOrderId();
+            $order = $this->loadOrder($orderId, $context, $orderTransaction->getId());
+
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $context, $order);
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
                 $transaction->getOrderTransaction()->getId(),
@@ -72,8 +83,30 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
         return new RedirectResponse($redirectUrl);
     }
 
-    // Webhook handles this part
-    public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void {}
+    public function finalize(Request $request, PaymentTransactionStruct $transaction, Context $context): void {}
 
-    abstract public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
+    abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context, OrderEntity $order): string;
+
+    private function loadOrder(?string $orderId, Context $context, string $orderTransactionId): OrderEntity
+    {
+        if ($orderId === null) {
+            throw PaymentException::asyncProcessInterrupted(
+                $orderTransactionId,
+                'The order transaction does not contain an order identifier.'
+            );
+        }
+
+        $criteria = new Criteria([$orderId]);
+        $criteria->addAssociation('currency');
+        $order = $this->orderRepository->search($criteria, $context)->first();
+
+        if (! $order instanceof OrderEntity) {
+            throw PaymentException::asyncProcessInterrupted(
+                $orderTransactionId,
+                sprintf('Unable to load order %s for payment processing.', $orderId)
+            );
+        }
+
+        return $order;
+    }
 }

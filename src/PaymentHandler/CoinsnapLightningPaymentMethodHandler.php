@@ -7,10 +7,13 @@ use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
 
 class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    private ClientInterface $client;
-    private ConfigurationService  $configurationService;
-    private OrderTransactionStateHandler $transactionStateHandler;
-    private LoggerInterface $logger;
+    protected ClientInterface $client;
+
+    protected ConfigurationService $configurationService;
+
+    protected OrderTransactionStateHandler $transactionStateHandler;
+
+    protected LoggerInterface $logger;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
     {
