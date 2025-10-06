@@ -1,23 +1,9 @@
-<?php
-
-declare(strict_types=1);
-
-/**
- * Copyright (c) 2022 Coincharge
- * This file is open source and available under the MIT license.
- * See the LICENSE file for more info.
- *
- * Author: Coincharge<shopware@coincharge.io>
- */
-
-namespace Coincharge\Shopware\PaymentHandler;
-
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Psr\Log\LoggerInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\ClientInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
 
 class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
@@ -34,7 +20,7 @@ class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
         $this->logger = $logger;
         parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
-    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+    public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
             $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();

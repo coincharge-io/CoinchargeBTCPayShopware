@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/coinchargebtcpayshopware/administration/",
+  "entryPoints": {
+    "coincharge-b-t-c-pay-shopware": {
+      "css": [
+        "/bundles/coinchargebtcpayshopware/administration/assets/coincharge-b-t-c-pay-shopware-9eHaRv7f.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/coinchargebtcpayshopware/administration/assets/coincharge-b-t-c-pay-shopware-CTtczL-6.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

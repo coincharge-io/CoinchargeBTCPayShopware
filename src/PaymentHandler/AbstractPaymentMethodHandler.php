@@ -12,25 +12,29 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
+use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
+use Shopware\Core\Checkout\Payment\PaymentException;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Coincharge\Shopware\Client\ClientInterface;
-use Shopware\Core\Checkout\Payment\PaymentException;
 
-abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandlerInterface
+abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 {
     private ClientInterface $client;
-    private ConfigurationService  $configurationService;
+
+    private ConfigurationService $configurationService;
+
     private OrderTransactionStateHandler $transactionStateHandler;
+
     private LoggerInterface $logger;
+
     public string $baseSuccessUrl;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
@@ -40,14 +44,20 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
         $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
         $appUrl = $_SERVER['APP_URL'];
-        $url =  "$appUrl/checkout/finish?orderId=";
+        $url = "$appUrl/checkout/finish?orderId=";
         $this->baseSuccessUrl = $url;
+    }
+
+    public function supports(PaymentHandlerType $type, string $paymentMethodId, Context $context): bool
+    {
+        // This payment handler does not support recurring payments nor refunds
+        return false;
     }
 
     /**
      * @throws AsyncPaymentProcessException
      */
-    public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
+    public function pay(PaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
         $this->logger->info('test');
         try {
@@ -55,15 +65,15 @@ abstract class AbstractPaymentMethodHandler implements AsynchronousPaymentHandle
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
                 $transaction->getOrderTransaction()->getId(),
-                'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
+                'An error occurred during the communication with external payment gateway'.PHP_EOL.$e->getMessage()
             );
         }
+
         return new RedirectResponse($redirectUrl);
     }
 
-    //Webhook handles this part
-    public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
-    {
-    }
+    // Webhook handles this part
+    public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void {}
+
     abstract public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context);
 }

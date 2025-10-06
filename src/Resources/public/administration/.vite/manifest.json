@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/coincharge-b-t-c-pay-shopware-CTtczL-6.js",
+    "name": "coincharge-b-t-c-pay-shopware",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/coincharge-b-t-c-pay-shopware-9eHaRv7f.css"
+    ]
+  }
+}

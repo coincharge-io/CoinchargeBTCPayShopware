@@ -16,36 +16,41 @@ use Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler;
 
 class CoinsnapLightningPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Coinsnap-Lightning';
-  }
+    public function getName(): string
+    {
+        return 'Coinsnap-Lightning';
+    }
 
-  public function getPosition(): int
-  {
-    return -1;
-  }
+    public function getPosition(): int
+    {
+        return -1;
+    }
 
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Lightning - Coinsnap',
-        'name' => 'Coinsnap-Lightning',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Lightning - Coinsnap',
-        'name' => 'Coinsnap-Lightning',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Lightning - Coinsnap',
-        'name' => 'Coinsnap-Lightning',
-      ], //Fallback language
-    ];
-  }
+    public function getTranslations(): array
+    {
+        return [
+            'de-DE' => [
+                'description' => 'Zahle mit Lightning - Coinsnap',
+                'name' => 'Coinsnap-Lightning',
+            ],
+            'en-GB' => [
+                'description' => 'Pay with Lightning - Coinsnap',
+                'name' => 'Coinsnap-Lightning',
+            ],
+            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
+                'description' => 'Pay with Lightning - Coinsnap',
+                'name' => 'Coinsnap-Lightning',
+            ], // Fallback language
+        ];
+    }
 
-  public function getPaymentHandler(): string
-  {
-    return CoinsnapLightningPaymentMethodHandler::class;
-  }
+    public function getPaymentHandler(): string
+    {
+        return CoinsnapLightningPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_coinsnap_lightning_payment';
+    }
 }

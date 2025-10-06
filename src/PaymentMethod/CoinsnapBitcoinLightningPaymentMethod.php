@@ -29,23 +29,28 @@ class CoinsnapBitcoinLightningPaymentMethod
     public function getTranslations(): array
     {
         return [
-          'de-DE' => [
-            'description' => 'Zahle mit Bitcoin/Lightning - Coinsnap',
-            'name' => 'Coinsnap-Bitcoin-Lightning',
-          ],
-          'en-GB' => [
-            'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
-            'name' => 'Coinsnap-Bitcoin-Lightning',
-          ],
-          '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-            'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
-            'name' => 'Coinsnap-Bitcoin-Lightning',
-          ], //Fallback language
+            'de-DE' => [
+                'description' => 'Zahle mit Bitcoin/Lightning - Coinsnap',
+                'name' => 'Coinsnap-Bitcoin-Lightning',
+            ],
+            'en-GB' => [
+                'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
+                'name' => 'Coinsnap-Bitcoin-Lightning',
+            ],
+            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
+                'description' => 'Pay with Bitcoin/Lightning - Coinsnap',
+                'name' => 'Coinsnap-Bitcoin-Lightning',
+            ], // Fallback language
         ];
     }
 
     public function getPaymentHandler(): string
     {
         return CoinsnapBitcoinLightningPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_coinsnap_bitcoin_lightning_payment';
     }
 }

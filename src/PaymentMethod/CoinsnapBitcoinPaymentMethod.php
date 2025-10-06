@@ -16,36 +16,41 @@ use Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinPaymentMethodHandler;
 
 class CoinsnapBitcoinPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Coinsnap-Bitcoin';
-  }
+    public function getName(): string
+    {
+        return 'Coinsnap-Bitcoin';
+    }
 
-  public function getPosition(): int
-  {
-    return -2;
-  }
+    public function getPosition(): int
+    {
+        return -2;
+    }
 
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Bitcoin - Coinsnap',
-        'name' => 'Coinsnap-Bitcoin',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Bitcoin - Coinsnap',
-        'name' => 'Coinsnap-Bitcoin',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Bitcoin - Coinsnap',
-        'name' => 'Coinsnap-Bitcoin',
-      ], //Fallback language
-    ];
-  }
+    public function getTranslations(): array
+    {
+        return [
+            'de-DE' => [
+                'description' => 'Zahle mit Bitcoin - Coinsnap',
+                'name' => 'Coinsnap-Bitcoin',
+            ],
+            'en-GB' => [
+                'description' => 'Pay with Bitcoin - Coinsnap',
+                'name' => 'Coinsnap-Bitcoin',
+            ],
+            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
+                'description' => 'Pay with Bitcoin - Coinsnap',
+                'name' => 'Coinsnap-Bitcoin',
+            ], // Fallback language
+        ];
+    }
 
-  public function getPaymentHandler(): string
-  {
-    return CoinsnapBitcoinPaymentMethodHandler::class;
-  }
+    public function getPaymentHandler(): string
+    {
+        return CoinsnapBitcoinPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_coinsnap_bitcoin_payment';
+    }
 }

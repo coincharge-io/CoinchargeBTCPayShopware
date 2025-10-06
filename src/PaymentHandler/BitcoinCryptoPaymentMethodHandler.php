@@ -12,18 +12,21 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     private ClientInterface $client;
-    private ConfigurationService  $configurationService;
-    private OrderTransactionStateHandler $transactionStateHandler;
+
+    private ConfigurationService $configurationService;
+
+    private readonly OrderTransactionStateHandler $transactionStateHandler;
+
     private LoggerInterface $logger;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
@@ -34,37 +37,18 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
         $this->logger = $logger;
         parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
-    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+
+    public function pay(PaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
         try {
-            $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
-            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
-                return $accountUrl;
-            }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
-                [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
-                    'metadata' =>
-                    [
-                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId()
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true,
-                    ]
-                ]
-            );
-
-            return $response['checkoutLink'];
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            throw new \Exception($e->getMessage());
+            throw PaymentException::asyncProcessInterrupted(
+                $transaction->getOrderTransaction()->getId(),
+                'An error occurred during the communication with external payment gateway'.PHP_EOL.$e->getMessage()
+            );
         }
+
+        return new RedirectResponse($redirectUrl);
     }
 }

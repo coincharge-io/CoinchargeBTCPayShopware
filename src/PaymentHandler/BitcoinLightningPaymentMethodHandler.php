@@ -12,18 +12,21 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     private ClientInterface $client;
-    private ConfigurationService  $configurationService;
+
+    private ConfigurationService $configurationService;
+
     private OrderTransactionStateHandler $transactionStateHandler;
+
     private LoggerInterface $logger;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
@@ -34,31 +37,32 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
         $this->logger = $logger;
         parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
-    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+
+    public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
-            $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
+            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
             if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
                 $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+
                 return $accountUrl;
             }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
-                    'metadata' =>
-                    [
+                    'metadata' => [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),
                         'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId()
+                        'transactionId' => $transaction->getOrderTransaction()->getId(),
                     ],
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
-                    ]
+                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY'],
+                    ],
                 ]
             );
 
