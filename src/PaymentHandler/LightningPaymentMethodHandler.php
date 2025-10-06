@@ -31,7 +31,7 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                 $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $this->getCurrencyIso($order),
+                    'currency' => ($order->getCurrency() ? $order->getCurrency()->getIsoCode() : null),
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),

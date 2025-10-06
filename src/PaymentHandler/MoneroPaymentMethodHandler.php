@@ -24,14 +24,14 @@ class MoneroPaymentMethodHandler extends AbstractPaymentMethodHandler
             $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
             if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
                 $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
-                return $accountUrl;
-            }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
+        return $accountUrl;
+      }
+      $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
+      $response = $this->client->sendPostRequest(
+        $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $this->getCurrencyIso($order),
+                    'currency' => ($order->getCurrency() ? $order->getCurrency()->getIsoCode() : null),
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),

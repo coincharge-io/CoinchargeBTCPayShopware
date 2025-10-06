@@ -31,7 +31,7 @@ class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                 $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $this->getCurrencyIso($order),
+                    'currency' => ($order->getCurrency() ? $order->getCurrency()->getIsoCode() : null),
                     'referralCode' => 'DEV17612c35cd8c54d3fad381615',
                     'metadata' =>
                     [
