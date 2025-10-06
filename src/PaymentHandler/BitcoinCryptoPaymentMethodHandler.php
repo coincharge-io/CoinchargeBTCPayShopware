@@ -18,12 +18,12 @@ use Shopware\Core\Checkout\Order\OrderEntity;
 
 class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    protected function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context, OrderEntity $order): string
+    protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context, OrderEntity $order): string
     {
         try {
             $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
             if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
                 return $accountUrl;
             }
             $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
@@ -31,7 +31,7 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
                 $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
+                    'currency' => ($order->getCurrency() ? $order->getCurrency()->getIsoCode() : null),
                     'metadata' =>
                     [
                         'orderId' => $transaction->getOrderTransaction()->getOrderId(),
