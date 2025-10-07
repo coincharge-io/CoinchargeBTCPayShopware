@@ -107,7 +107,21 @@ class BTCPayWebhookService implements WebhookServiceInterface
       return new Response();
     }
     $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $body['invoiceId'];
-    $responseBody = $this->client->sendGetRequest($uri);
+
+    try {
+      $responseBody = $this->client->sendGetRequest($uri);
+    } catch (\Exception $e) {
+      if ($e->getCode() === 404) {
+        $this->logger->warning('Invoice not found while processing webhook', [
+          'invoiceId' => $body['invoiceId'],
+          'uri' => $uri,
+        ]);
+
+        return new Response();
+      }
+
+      throw $e;
+    }
     $criteria = new Criteria();
     $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
     $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();

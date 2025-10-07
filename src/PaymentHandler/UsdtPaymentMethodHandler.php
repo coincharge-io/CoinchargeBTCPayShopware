@@ -80,7 +80,7 @@ class UsdtPaymentMethodHandler extends AbstractPaymentMethodHandler
                 ],
                 $accountUrl,
                 $context,
-                ['USDt']
+                ['USDT-TRON']
             );
 
             return $redirectUrl;

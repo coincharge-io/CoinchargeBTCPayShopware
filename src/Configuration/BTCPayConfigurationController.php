@@ -90,14 +90,16 @@ class BTCPayConfigurationController extends ConfigurationController
             'BTC-LN' => 'Lightning',
             'LTC-CHAIN' => 'Litecoin',
             'XMR-CHAIN' => 'Monero',
-            'USDt' => 'USDT',
+            'USDT-TRON' => 'USDT',
+            'USDT' => 'USDT',
         ];
         $paymentHandlers = [
             'BTC-CHAIN' => BitcoinPaymentMethod::class,
             'BTC-LN' => LightningPaymentMethod::class,
             'LTC-CHAIN' => LitecoinPaymentMethod::class,
             'XMR-CHAIN' => MoneroPaymentMethod::class,
-            'USDt' => UsdtPaymentMethod::class,
+            'USDT-TRON' => UsdtPaymentMethod::class,
+            'USDT' => UsdtPaymentMethod::class,
         ];
         $this->disableBTCPaymentMethodsBeforeTest();
         $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/payment-methods';
@@ -170,9 +172,14 @@ class BTCPayConfigurationController extends ConfigurationController
             'XMR' => 'XMR-CHAIN',
             'XMR-MoneroLike' => 'XMR-CHAIN',
             'XMR_MoneroLike' => 'XMR-CHAIN',
-            'USDt' => 'USDt',
-            'USDt-StablecoinLike' => 'USDt',
-            'USDt_StablecoinLike' => 'USDt',
+            'USDt' => 'USDT-TRON',
+            'USDt-StablecoinLike' => 'USDT-TRON',
+            'USDt_StablecoinLike' => 'USDT-TRON',
+            'USDT-TRON' => 'USDT-TRON',
+            'USDT_TRON' => 'USDT-TRON',
+            'USDT' => 'USDT-TRON',
+            'USDT-StablecoinLike' => 'USDT-TRON',
+            'USDT_StablecoinLike' => 'USDT-TRON',
         ];
 
         return $mapping[$paymentMethodId] ?? $paymentMethodId;

@@ -41,5 +41,7 @@ class WebhookRouter
         } elseif ($request->headers->has('btcpay-sig')) {
             return 'btcpay_server';
         }
+
+        throw new \RuntimeException('Unable to determine webhook provider from request headers.');
     }
 }
