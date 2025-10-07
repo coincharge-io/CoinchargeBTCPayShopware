@@ -99,19 +99,40 @@ class CoinsnapWebhookService implements WebhookServiceInterface
     public function process(Request $request, Context $context): Response
     {
         $signature = $request->headers->get(self::REQUIRED_HEADER);
-        $body = $request->request->all();
+
+        if ($signature === null) {
+            $this->logger->error('Missing Coinsnap signature header');
+
+            return new Response('', Response::HTTP_FORBIDDEN);
+        }
+        $body = \json_decode($request->getContent(), true);
+
+        if (! \is_array($body)) {
+            $this->logger->warning('Coinsnap webhook received invalid JSON payload', ['content' => $request->getContent()]);
+
+            return new Response('', Response::HTTP_BAD_REQUEST);
+        }
 
         $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
 
-        if ($signature !== $expectedHeader) {
+        if (! hash_equals($expectedHeader, $signature)) {
             $this->logger->error('Invalid signature');
-            return new Response();
+            return new Response('', Response::HTTP_FORBIDDEN);
         }
         $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices/' . $body['invoiceId'];
         $responseBody = $this->client->sendGetRequest($uri);
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
+
+        if ($orderId === null) {
+            $this->logger->warning('Order not found for Coinsnap webhook', [
+                'orderNumber' => $responseBody['metadata']['orderNumber'] ?? null,
+                'invoiceId' => $body['invoiceId'],
+            ]);
+
+            return new Response();
+        }
 
 
         switch ($body['type']) {

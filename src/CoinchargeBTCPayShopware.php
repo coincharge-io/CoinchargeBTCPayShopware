@@ -12,9 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware;
 
-use Coincharge\Shopware\PaymentMethod\BitcoinCryptoPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
-use Coincharge\Shopware\PaymentMethod\UsdtPaymentMethod;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Content\Media\MediaEntity;
@@ -205,18 +203,8 @@ class CoinchargeBTCPayShopware extends Plugin
 
     public function update(UpdateContext $updateContext): void
     {
-        $currentVersion = $updateContext->getCurrentPluginVersion();
-        $targetVersion = $updateContext->getUpdatePluginVersion();
-
-        // Check if updating FROM 1.1.1 TO 1.1.2
-        if (version_compare($currentVersion, '1.1.1', '=') &&
-          version_compare($targetVersion, '1.1.2', '=')) {
-            $this->addPaymentMethod(new BitcoinCryptoPaymentMethod, $updateContext->getContext());
-        }
-
-        if (version_compare($currentVersion, '1.1.5', '<') &&
-            version_compare($targetVersion, '1.1.5', '>=')) {
-            $this->addPaymentMethod(new UsdtPaymentMethod, $updateContext->getContext());
+        foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
+            $this->ensurePaymentMethodExists($paymentMethod, $updateContext->getContext());
         }
 
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
@@ -341,6 +329,47 @@ class CoinchargeBTCPayShopware extends Plugin
         $paymentCriteria = (new Criteria)->addFilter(new EqualsFilter('handlerIdentifier', $paymentMethod->getPaymentHandler()));
 
         return $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+    }
+
+    private function ensurePaymentMethodExists(string $paymentMethodClass, Context $context): void
+    {
+        $paymentMethod = new $paymentMethodClass();
+
+        $paymentMethodId = $this->getPaymentMethodId($paymentMethod);
+
+        if ($paymentMethodId === null) {
+            $this->addPaymentMethod($paymentMethod, $context);
+
+            return;
+        }
+
+        $this->ensureTechnicalName($paymentMethodId, $paymentMethod->getTechnicalName(), $context);
+    }
+
+    private function ensureTechnicalName(string $paymentMethodId, string $technicalName, Context $context): void
+    {
+        if ($technicalName === '') {
+            return;
+        }
+
+        $paymentRepository = $this->container->get('payment_method.repository');
+
+        if (! method_exists($paymentRepository, 'getDefinition')) {
+            return;
+        }
+
+        $definition = $paymentRepository->getDefinition();
+
+        if (! method_exists($definition, 'hasField') || ! $definition->hasField('technicalName')) {
+            return;
+        }
+
+        $paymentRepository->update([
+            [
+                'id' => $paymentMethodId,
+                'technicalName' => $technicalName,
+            ],
+        ], $context);
     }
 
     private function getMediaEntity(string $fileName, Context $context): ?MediaEntity
