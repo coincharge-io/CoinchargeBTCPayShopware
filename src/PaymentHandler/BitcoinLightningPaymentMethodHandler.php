@@ -17,25 +17,27 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    protected ClientInterface $client;
-
-    protected ConfigurationService $configurationService;
-
-    protected OrderTransactionStateHandler $transactionStateHandler;
-
-    protected LoggerInterface $logger;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
-        $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
-        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
+    public function __construct(
+        ClientInterface $client,
+        ConfigurationService $configurationService,
+        OrderTransactionStateHandler $transactionStateHandler,
+        LoggerInterface $logger,
+        EntityRepository $orderRepository,
+        EntityRepository $orderTransactionRepository
+    ) {
+        parent::__construct(
+            $client,
+            $configurationService,
+            $transactionStateHandler,
+            $logger,
+            $orderRepository,
+            $orderTransactionRepository
+        );
     }
 
     public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
@@ -47,6 +49,7 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 
                 return $accountUrl;
             }
+            /*
             $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,
@@ -65,52 +68,27 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                     ],
                 ]
             );
-
             return $response['checkoutLink'];
+*/
+
+            $redirectUrl = $this->client->createInvoice(
+                $orderTransaction->getAmount()->getTotalPrice(),
+                $context->getCurrency()->getIsoCode(),
+                [
+                    'orderId' => $orderTransaction->getOrderId(),
+                    'orderNumber' => $order->getOrderNumber(),
+                    'transactionId' => $orderTransaction->getId(),
+                ],
+                $accountUrl,
+                $context->getContext(),
+                // Optional: restrict payment methods (only if desired)
+                ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
+            );
+
+            return $redirectUrl;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());
-        }
-    }
-
-    public function createInvoice(
-        float $amount,
-        string $currency,
-        array $metadata,
-        string $redirectUrl,
-        Context $context,
-        ?array $paymentMethods = null // optional parameter
-    ): string {
-        $storeId = $this->configurationService->getSetting('btcpayServerStoreId');
-        $uri = '/api/v1/stores/'.$storeId.'/invoices';
-
-        // Base payload
-        $payload = [
-            'amount' => $amount,
-            'currency' => $currency,
-            'metadata' => $metadata,
-            'checkout' => [
-                'redirectURL' => $redirectUrl,
-                'redirectAutomatically' => true,
-            ],
-        ];
-
-        // Conditionally add paymentMethods only if provided
-        if (! empty($paymentMethods)) {
-            $payload['checkout']['paymentMethods'] = $paymentMethods;
-        }
-
-        try {
-            $response = $this->sendPostRequest($uri, $payload);
-
-            return $response['checkoutLink'] ?? $redirectUrl;
-        } catch (\Throwable $e) {
-            $this->logger->error('BTCPay invoice creation failed', [
-                'exception' => $e,
-                'payload' => $payload,
-            ]);
-
-            throw $e;
         }
     }
 }

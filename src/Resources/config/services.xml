@@ -10,6 +10,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinLightningPaymentMethodHandler">
@@ -17,13 +19,16 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler">
             <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+            <argument type="service" id="Coincharge\Shopwar<argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>e\Util\Logger"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\BitcoinLightningPaymentMethodHandler">
@@ -31,6 +36,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\BitcoinCryptoPaymentMethodHandler">
@@ -38,6 +45,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler">
@@ -45,6 +54,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler">
@@ -52,6 +63,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\MoneroPaymentMethodHandler">
@@ -59,6 +72,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\PaymentHandler\LitecoinPaymentMethodHandler">
@@ -66,6 +81,8 @@
             <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
+      <argument type="service" id="order.repository"/>
+    <argument type="service" id="order_transaction.repository"/>
             <tag name="shopware.payment.method" />
         </service>
         <service id="Coincharge\Shopware\Client\BTCPayServerClient">

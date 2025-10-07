@@ -21,21 +21,22 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    protected ClientInterface $client;
-
-    protected ConfigurationService $configurationService;
-
-    protected OrderTransactionStateHandler $transactionStateHandler;
-
-    protected LoggerInterface $logger;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
-        $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
-        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
+    public function __construct(
+        ClientInterface $client,
+        ConfigurationService $configurationService,
+        OrderTransactionStateHandler $transactionStateHandler,
+        LoggerInterface $logger,
+        EntityRepository $orderRepository,
+        EntityRepository $orderTransactionRepository
+    ) {
+        parent::__construct(
+            $client,
+            $configurationService,
+            $transactionStateHandler,
+            $logger,
+            $orderRepository,
+            $orderTransactionRepository
+        );
     }
 
     public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)

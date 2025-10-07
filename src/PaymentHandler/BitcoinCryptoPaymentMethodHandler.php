@@ -17,25 +17,27 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    protected ClientInterface $client;
-
-    protected ConfigurationService $configurationService;
-
-    protected OrderTransactionStateHandler $transactionStateHandler;
-
-    protected LoggerInterface $logger;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
-        $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
-        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
+    public function __construct(
+        ClientInterface $client,
+        ConfigurationService $configurationService,
+        OrderTransactionStateHandler $transactionStateHandler,
+        LoggerInterface $logger,
+        EntityRepository $orderRepository,
+        EntityRepository $orderTransactionRepository
+    ) {
+        parent::__construct(
+            $client,
+            $configurationService,
+            $transactionStateHandler,
+            $logger,
+            $orderRepository,
+            $orderTransactionRepository
+        );
     }
 
     public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
@@ -47,7 +49,7 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
 
                 return $accountUrl;
             }
-            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
+            /*$uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
@@ -66,6 +68,21 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
             );
 
             return $response['checkoutLink'];
+             */
+
+            $redirectUrl = $this->client->createInvoice(
+                $orderTransaction->getAmount()->getTotalPrice(),
+                $context->getCurrency()->getIsoCode(),
+                [
+                    'orderId' => $orderTransaction->getOrderId(),
+                    'orderNumber' => $order->getOrderNumber(),
+                    'transactionId' => $orderTransaction->getId(),
+                ],
+                $accountUrl,
+                $context->getContext(),
+            );
+
+            return $redirectUrl;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());

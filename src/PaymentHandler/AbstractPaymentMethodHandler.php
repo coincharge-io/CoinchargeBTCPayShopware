@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) 2022 Coincharge
+ * Copyright (c) 2025 Coincharge
  * This file is open source and available under the MIT license.
  * See the LICENSE file for more info.
  *
@@ -40,6 +40,8 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 
     protected EntityRepository $orderRepository;
 
+    protected EntityRepository $orderTransactionRepository;
+
     protected string $baseSuccessUrl;
 
     public function __construct(
@@ -47,13 +49,15 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
         ConfigurationService $configurationService,
         OrderTransactionStateHandler $transactionStateHandler,
         LoggerInterface $logger,
-        EntityRepository $orderRepository
+        EntityRepository $orderRepository,
+        EntityRepository $orderTransactionRepository
     ) {
         $this->client = $client;
         $this->configurationService = $configurationService;
         $this->transactionStateHandler = $transactionStateHandler;
         $this->logger = $logger;
         $this->orderRepository = $orderRepository;
+        $this->orderTransactionRepository = $orderTransactionRepository; // ✅ missing line added
 
         $appUrl = $_SERVER['APP_URL'] ?? '';
         $this->baseSuccessUrl = rtrim($appUrl, '/').'/checkout/finish?orderId=';
@@ -68,9 +72,7 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
     public function pay(Request $request, PaymentTransactionStruct $transaction, Context $context, ?Struct $validateStruct): ?RedirectResponse
     {
         try {
-            $orderTransaction = $transaction->getOrderTransaction();
-            $orderId = $orderTransaction->getOrderId();
-            $order = $this->loadOrder($orderId, $context, $orderTransaction->getId());
+            $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
 
             $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $context, $order);
         } catch (\Exception $e) {
@@ -87,23 +89,30 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 
     abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string;
 
-    private function loadOrder(string $orderId, Context $context, string $orderTransactionId): OrderEntity
+    private function loadOrderByTransactionId(string $orderTransactionId, Context $context): OrderEntity
     {
-        if ($orderId === null) {
+        // Load the OrderTransaction entity and include its related Order
+        $criteria = new Criteria([$orderTransactionId]);
+        $criteria->addAssociation('order.currency');
+        $criteria->addAssociation('order.lineItems');
+        $criteria->addAssociation('order.transactions');
+        $criteria->addAssociation('order.addresses');
+
+        $orderTransaction = $this->orderTransactionRepository->search($criteria, $context)->first();
+
+        if (! $orderTransaction) {
             throw PaymentException::asyncProcessInterrupted(
                 $orderTransactionId,
-                'The order transaction does not contain an order identifier.'
+                sprintf('Order transaction %s could not be found.', $orderTransactionId)
             );
         }
 
-        $criteria = new Criteria([$orderId]);
-        $criteria->addAssociation('currency');
-        $order = $this->orderRepository->search($criteria, $context)->first();
+        $order = $orderTransaction->getOrder();
 
         if (! $order instanceof OrderEntity) {
             throw PaymentException::asyncProcessInterrupted(
                 $orderTransactionId,
-                sprintf('Unable to load order %s for payment processing.', $orderId)
+                sprintf('No order found for transaction %s.', $orderTransactionId)
             );
         }
 

@@ -1,51 +1,68 @@
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Copyright (c) 2025 Coincharge
+ * This file is open source and available under the MIT license.
+ * See the LICENSE file for more info.
+ *
+ * Author: Coincharge<shopware@coincharge.io>
+ */
+
+namespace Coincharge\Shopware\PaymentHandler;
+
 use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    protected ClientInterface $client;
-
-    protected ConfigurationService $configurationService;
-
-    protected OrderTransactionStateHandler $transactionStateHandler;
-
-    protected LoggerInterface $logger;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
-        $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
-        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
+    public function __construct(
+        ClientInterface $client,
+        ConfigurationService $configurationService,
+        OrderTransactionStateHandler $transactionStateHandler,
+        LoggerInterface $logger,
+        EntityRepository $orderRepository,
+        EntityRepository $orderTransactionRepository
+    ) {
+        parent::__construct(
+            $client,
+            $configurationService,
+            $transactionStateHandler,
+            $logger,
+            $orderRepository,
+            $orderTransactionRepository
+        );
     }
+
     public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
-            $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
+            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
             if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
                 $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+
                 return $accountUrl;
             }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices';
+            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('coinsnapStoreId').'/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
                     'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
                     'currency' => $context->getCurrency()->getIsoCode(),
                     'referralCode' => 'DEV17612c35cd8c54d3fad381615',
-                    'metadata' =>
-                    [
+                    'metadata' => [
                         'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId()
+                        'transactionId' => $transaction->getOrderTransaction()->getId(),
                     ],
                     'orderId' => $transaction->getOrderTransaction()->getOrderId(),
                     'redirectUrl' => $accountUrl,
-                    'enabledPaymentMethods' => ['Lightning']
+                    'enabledPaymentMethods' => ['Lightning'],
                 ]
             );
 
