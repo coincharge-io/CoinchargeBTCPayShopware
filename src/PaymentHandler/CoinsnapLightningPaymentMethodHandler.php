@@ -16,8 +16,8 @@ use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Checkout\Payment\PaymentException;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
@@ -44,16 +44,20 @@ class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
     protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string
     {
         try {
-            $order = $transaction->getOrder();
+            $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            $orderTransaction = $order->getTransactions()?->get($transaction->getOrderTransactionId());
 
-            if (! $order instanceof OrderEntity) {
-                $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            if ($orderTransaction === null) {
+                throw PaymentException::asyncProcessInterrupted(
+                    $transaction->getOrderTransactionId(),
+                    sprintf('Transaction %s missing on order %s.', $transaction->getOrderTransactionId(), $order->getOrderNumber() ?? $order->getId())
+                );
             }
 
-            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
+            $accountUrl = $this->baseSuccessUrl.$orderTransaction->getOrderId();
 
-            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0.0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
+            if ($orderTransaction->getAmount()->getTotalPrice() == 0.0) {
+                $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
 
                 return $accountUrl;
             }
@@ -64,24 +68,20 @@ class CoinsnapLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                 throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
             }
 
-            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('coinsnapStoreId').'/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
-                [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $currency->getIsoCode(),
-                    'referralCode' => 'DEV17612c35cd8c54d3fad381615',
-                    'metadata' => [
-                        'orderNumber' => $order->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId(),
-                    ],
-                    'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                    'redirectUrl' => $accountUrl,
-                    'enabledPaymentMethods' => ['Lightning'],
-                ]
+            $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
+
+            $redirectUrl = $this->client->createInvoice(
+                $orderTransaction->getAmount()->getTotalPrice(),
+                $currency->getIsoCode(),
+                $orderTransaction->getOrderId(),
+                $orderNumber,
+                $orderTransaction->getId(),
+                $accountUrl,
+                $context,
+                ['Lightning']
             );
 
-            return $response['checkoutLink'];
+            return $redirectUrl;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());

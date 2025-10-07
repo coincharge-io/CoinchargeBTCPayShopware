@@ -16,8 +16,8 @@ use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Checkout\Payment\PaymentException;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
@@ -44,16 +44,20 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
     protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string
     {
         try {
-            $order = $transaction->getOrder();
+            $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            $orderTransaction = $order->getTransactions()?->get($transaction->getOrderTransactionId());
 
-            if (! $order instanceof OrderEntity) {
-                $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            if ($orderTransaction === null) {
+                throw PaymentException::asyncProcessInterrupted(
+                    $transaction->getOrderTransactionId(),
+                    sprintf('Transaction %s missing on order %s.', $transaction->getOrderTransactionId(), $order->getOrderNumber() ?? $order->getId())
+                );
             }
 
-            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
+            $accountUrl = $this->baseSuccessUrl.$orderTransaction->getOrderId();
 
-            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0.0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
+            if ($orderTransaction->getAmount()->getTotalPrice() == 0.0) {
+                $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
 
                 return $accountUrl;
             }
@@ -64,26 +68,22 @@ class LightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                 throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
             }
 
-            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
+            $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
+
+            $redirectUrl = $this->client->createInvoice(
+                $orderTransaction->getAmount()->getTotalPrice(),
+                $currency->getIsoCode(),
                 [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $currency->getIsoCode(),
-                    'metadata' => [
-                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $order->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId(),
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC-LN', 'BTC-LNURL'],
-                    ],
-                ]
+                    'orderId' => $orderTransaction->getOrderId(),
+                    'orderNumber' => $orderNumber,
+                    'transactionId' => $orderTransaction->getId(),
+                ],
+                $accountUrl,
+                $context,
+                ['BTC-LN', 'BTC-LNURL']
             );
 
-            return $response['checkoutLink'];
+            return $redirectUrl;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());

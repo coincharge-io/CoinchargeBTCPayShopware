@@ -88,12 +88,14 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
             );
 
             return $response['checkoutLink'];*/
+            $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
+
             $redirectUrl = $this->client->createInvoice(
                 $orderTransaction->getAmount()->getTotalPrice(),
                 $currency->getIsoCode(),
                 [
                     'orderId' => $orderTransaction->getOrderId(),
-                    'orderNumber' => $order->getOrderNumber(),
+                    'orderNumber' => $orderNumber,
                     'transactionId' => $orderTransaction->getId(),
                 ],
                 $accountUrl,
