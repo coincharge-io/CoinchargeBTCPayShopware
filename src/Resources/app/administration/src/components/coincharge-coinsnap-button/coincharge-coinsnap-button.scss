@@ -3,3 +3,22 @@
   background-color: #51b13e;
   border-color: #51b13e;
 }
+
+.coincharge-coinsnap-status-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.coincharge-coinsnap-status-card__webhook {
+  margin-left: auto;
+}
+
+.coincharge-coinsnap-credentials-hint {
+  margin-bottom: 12px;
+}
+
+.coincharge-coinsnap-action-row {
+  align-items: center;
+}

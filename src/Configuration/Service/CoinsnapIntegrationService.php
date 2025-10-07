@@ -45,7 +45,7 @@ class CoinsnapIntegrationService
     }
 
     /**
-     * @return array{success: bool, message?: string}
+     * @return array{success: bool, message?: string, lastVerifiedAt?: string, webhookStatus?: string}
      */
     public function verify(Request $request, Context $context): array
     {
@@ -53,14 +53,23 @@ class CoinsnapIntegrationService
             return ['success' => false, 'message' => 'Check server url and API key.'];
         }
 
-        if (! $this->webhookService->register($request, null)) {
-            return ['success' => false, 'message' => "There is a temporary problem with Coinsnap Server. A webhook can't be created at the moment. Please try later."];
+        $webhookResult = $this->registerWebhook($request);
+        if ($webhookResult['success'] === false) {
+            return $webhookResult;
         }
 
-        $this->activatePaymentMethods($context);
-        $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
+        $paymentStatus = $this->activatePaymentMethods($context);
+        $checkedAt = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(DATE_ATOM);
 
-        return ['success' => true];
+        $this->configurationService->setSetting('coinsnapIntegrationStatus', true);
+        $this->configurationService->setSetting('coinsnapLastVerifiedAt', $checkedAt);
+
+        return [
+            'success' => true,
+            'lastVerifiedAt' => $checkedAt,
+            'webhookStatus' => $webhookResult['webhookStatus'] ?? 'registered',
+            'paymentStatus' => $paymentStatus,
+        ];
     }
 
     private function hasValidCredentials(): bool
@@ -71,6 +80,7 @@ class CoinsnapIntegrationService
 
             if (! \is_array($response)) {
                 $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
+                $this->configurationService->setSetting('coinsnapPaymentStatus', []);
 
                 return false;
             }
@@ -78,16 +88,71 @@ class CoinsnapIntegrationService
             return true;
         } catch (\Throwable $throwable) {
             $this->configurationService->setSetting('coinsnapIntegrationStatus', false);
+            $this->configurationService->setSetting('coinsnapPaymentStatus', []);
             $this->logger->error('Coinsnap credential verification failed', ['exception' => $throwable]);
 
             return false;
         }
     }
 
-    private function activatePaymentMethods(Context $context): void
+    /**
+     * @return array<string, bool>
+     */
+    private function activatePaymentMethods(Context $context): array
     {
+        $status = [
+            'Lightning' => true,
+            'Bitcoin' => true,
+            'BitcoinLightning' => true,
+        ];
+
         $this->paymentMethodManager->setActive(CoinsnapLightningPaymentMethod::class, true, $context);
         $this->paymentMethodManager->setActive(CoinsnapBitcoinPaymentMethod::class, true, $context);
         $this->paymentMethodManager->setActive(CoinsnapBitcoinLightningPaymentMethod::class, true, $context);
+        $this->configurationService->setSetting('coinsnapPaymentStatus', $status);
+
+        return $status;
+    }
+
+    /**
+     * @return array{success: bool, message?: string, webhookStatus: string, registeredAt?: string}
+     */
+    public function reRegisterWebhook(Request $request): array
+    {
+        return $this->registerWebhook($request);
+    }
+
+    /**
+     * @return array{success: bool, message?: string, webhookStatus: string, registeredAt?: string}
+     */
+    private function registerWebhook(Request $request): array
+    {
+        $registered = false;
+
+        try {
+            $registered = $this->webhookService->register($request, null);
+        } catch (\Throwable $throwable) {
+            $this->logger->error('Coinsnap webhook registration failed', ['exception' => $throwable]);
+        }
+
+        $status = $registered ? 'registered' : 'error';
+        $this->configurationService->setSetting('coinsnapWebhookStatus', $status);
+
+        if ($registered) {
+            $timestamp = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(DATE_ATOM);
+            $this->configurationService->setSetting('coinsnapLastWebhookRegistration', $timestamp);
+
+            return [
+                'success' => true,
+                'webhookStatus' => $status,
+                'registeredAt' => $timestamp,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => "There is a temporary problem with Coinsnap Server. A webhook can't be created at the moment. Please try later.",
+            'webhookStatus' => $status,
+        ];
     }
 }

@@ -58,7 +58,7 @@ class BTCPayIntegrationService
     }
 
     /**
-     * @return array{success: bool, message?: string}
+     * @return array{success: bool, message?: string, lastVerifiedAt?: string, webhookStatus?: string, paymentStatus?: array<string, bool>}
      */
     public function verify(Request $request, Context $context): array
     {
@@ -66,15 +66,25 @@ class BTCPayIntegrationService
             return ['success' => false, 'message' => 'Check server url and API key.'];
         }
 
-        if (! $this->webhookService->register($request, null)) {
-            return ['success' => false, 'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later."];
+        $webhookResult = $this->registerWebhook($request);
+        if ($webhookResult['success'] === false) {
+            return $webhookResult;
         }
 
-        $this->synchronisePaymentMethods($context);
+        $status = $this->synchronisePaymentMethods($context);
+
+        $checkedAt = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(DATE_ATOM);
 
         $this->configurationService->setSetting('integrationStatus', true);
+        $this->configurationService->setSetting('btcpayLastVerifiedAt', $checkedAt);
+        $this->configurationService->setSetting('btcpayPaymentStatus', $status);
 
-        return ['success' => true];
+        return [
+            'success' => true,
+            'lastVerifiedAt' => $checkedAt,
+            'webhookStatus' => $webhookResult['webhookStatus'] ?? 'registered',
+            'paymentStatus' => $status,
+        ];
     }
 
     private function hasValidCredentials(): bool
@@ -93,12 +103,16 @@ class BTCPayIntegrationService
         } catch (\Throwable $throwable) {
             $this->configurationService->setSetting('integrationStatus', false);
             $this->logger->error('BTCPay credential verification failed', ['exception' => $throwable]);
+            $this->configurationService->setSetting('btcpayPaymentStatus', []);
 
             return false;
         }
     }
 
-    private function synchronisePaymentMethods(Context $context): void
+    /**
+     * @return array<string, bool>
+     */
+    private function synchronisePaymentMethods(Context $context): array
     {
         $this->disablePaymentFlags();
 
@@ -106,8 +120,9 @@ class BTCPayIntegrationService
             $status = $this->fetchRemotePaymentStatus();
         } catch (\Throwable $throwable) {
             $this->logger->error('Unable to fetch BTCPay payment methods', ['exception' => $throwable]);
+            $this->configurationService->setSetting('btcpayPaymentStatus', []);
 
-            return;
+            return [];
         }
 
         foreach ($status as $remoteCode => $enabled) {
@@ -121,6 +136,8 @@ class BTCPayIntegrationService
         }
 
         $this->paymentMethodManager->setActive(BitcoinCryptoPaymentMethod::class, true, $context);
+
+        return $status;
     }
 
     /**
@@ -204,5 +221,47 @@ class BTCPayIntegrationService
         $this->configurationService->setSetting('btcpayStorePaymentMethodLitecoin', false);
         $this->configurationService->setSetting('btcpayStorePaymentMethodMonero', false);
         $this->configurationService->setSetting('btcpayStorePaymentMethodUSDT', false);
+    }
+
+    /**
+     * @return array{success: bool, message?: string, webhookStatus?: string, registeredAt?: string}
+     */
+    public function reRegisterWebhook(Request $request): array
+    {
+        return $this->registerWebhook($request);
+    }
+
+    /**
+     * @return array{success: bool, message?: string, webhookStatus: string, registeredAt?: string}
+     */
+    private function registerWebhook(Request $request): array
+    {
+        $registered = false;
+
+        try {
+            $registered = $this->webhookService->register($request, null);
+        } catch (\Throwable $throwable) {
+            $this->logger->error('BTCPay webhook registration failed', ['exception' => $throwable]);
+        }
+
+        $status = $registered ? 'registered' : 'error';
+        $this->configurationService->setSetting('btcpayWebhookStatus', $status);
+
+        if ($registered) {
+            $timestamp = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(DATE_ATOM);
+            $this->configurationService->setSetting('btcpayLastWebhookRegistration', $timestamp);
+
+            return [
+                'success' => true,
+                'webhookStatus' => $status,
+                'registeredAt' => $timestamp,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => "There is a temporary problem with BTCPay Server. A webhook can't be created at the moment. Please try later.",
+            'webhookStatus' => $status,
+        ];
     }
 }

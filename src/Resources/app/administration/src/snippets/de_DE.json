@@ -10,11 +10,51 @@
     "error": "Ein Fehler ist aufgetreten. Prüfen Sie, ob die Anmeldedaten gültig sind und versuchen Sie es erneut.",
     "missing_credentials": "Sie müssen zunächst einen Berechtigungsnachweis erstellen."
   },
+  "coincharge-btcpay-status": {
+    "connected": "BTCPay verbunden",
+    "disconnected": "BTCPay nicht verbunden",
+    "lastChecked": "Zuletzt geprüft: {date}",
+    "webhookRegistered": "Webhook registriert",
+    "webhookError": "Webhook nicht registriert",
+    "webhookUnknown": "Webhook-Status unbekannt",
+    "lastWebhook": "Webhook aktualisiert: {date}",
+    "webhookReRegisterButton": "Webhook erneut registrieren",
+    "webhookReRegisterSuccess": "Webhook wurde erfolgreich neu registriert.",
+    "webhookReRegisterError": "Webhook konnte nicht registriert werden.",
+    "credentialWarning": "Bitte füllen Sie alle erforderlichen BTCPay-Zugangsdaten aus, bevor Sie die Verbindung testen.",
+    "paymentTitle": "Zahlungsarten",
+    "payment": {
+      "BTC-CHAIN": "Bitcoin (On-Chain)",
+      "BTC-LN": "Bitcoin Lightning",
+      "LTC-CHAIN": "Litecoin",
+      "XMR-CHAIN": "Monero",
+      "USDT-TRON": "USDT-TRON"
+    }
+  },
   "coincharge-coinsnap-test-connection": {
     "save": "Anmeldeinformationen speichern",
     "button": "Verbindung testen",
     "success": "Das Plugin ist mit dem Server verbunden",
     "error": "Ein Fehler ist aufgetreten. Prüfen Sie, ob die Anmeldedaten gültig sind und versuchen Sie es erneut.",
     "missing_credentials": "Sie müssen zuerst den API-Schlüssel speichern und die ID speichern."
+  },
+  "coincharge-coinsnap-status": {
+    "connected": "Coinsnap verbunden",
+    "disconnected": "Coinsnap nicht verbunden",
+    "lastChecked": "Zuletzt geprüft: {date}",
+    "webhookRegistered": "Webhook registriert",
+    "webhookError": "Webhook nicht registriert",
+    "webhookUnknown": "Webhook-Status unbekannt",
+    "lastWebhook": "Webhook aktualisiert: {date}",
+    "webhookReRegisterButton": "Webhook erneut registrieren",
+    "webhookReRegisterSuccess": "Webhook wurde erfolgreich neu registriert.",
+    "webhookReRegisterError": "Webhook konnte nicht registriert werden.",
+    "credentialWarning": "Bitte geben Sie Coinsnap Store-ID und API-Schlüssel ein, bevor Sie die Verbindung testen.",
+    "paymentTitle": "Zahlungsarten",
+    "payment": {
+      "Lightning": "Lightning",
+      "Bitcoin": "Bitcoin",
+      "BitcoinLightning": "Bitcoin + Lightning"
+    }
   }
 }

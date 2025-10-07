@@ -43,6 +43,16 @@ class BTCPayConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
+    #[Route(path: '/api/_action/coincharge/verify/webhook', name: 'api.action.coincharge.verify.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
+    public function registerWebhook(Request $request): JsonResponse
+    {
+        $result = $this->integrationService->reRegisterWebhook($request);
+
+        $statusCode = $result['success'] ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST;
+
+        return new JsonResponse($result, $statusCode);
+    }
+
     #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
     public function updateCredentials(Request $request): RedirectResponse
     {

@@ -146,7 +146,7 @@ class CoinchargeBTCPayShopware extends Plugin
             );
         }
         foreach (PaymentMethods::PAYMENT_METHODS as $paymentMethod) {
-            $this->addPaymentMethod(new $paymentMethod, $context->getContext());
+            $this->ensurePaymentMethodExists($paymentMethod, $context->getContext());
         }
         // $this->addPaymentMethod($context->getContext());
     }

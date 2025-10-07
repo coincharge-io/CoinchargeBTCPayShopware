@@ -10,11 +10,51 @@
     "error": "Something went wrong. Check if credentials are valid and try again.",
     "missing_credentials": "You need to generate credentials first."
   },
+  "coincharge-btcpay-status": {
+    "connected": "BTCPay connected",
+    "disconnected": "BTCPay disconnected",
+    "lastChecked": "Last checked: {date}",
+    "webhookRegistered": "Webhook registered",
+    "webhookError": "Webhook not registered",
+    "webhookUnknown": "Webhook status unknown",
+    "lastWebhook": "Webhook updated: {date}",
+    "webhookReRegisterButton": "Re-register webhook",
+    "webhookReRegisterSuccess": "Webhook re-registered successfully.",
+    "webhookReRegisterError": "Webhook could not be registered.",
+    "credentialWarning": "Please fill in all required BTCPay credentials before testing the connection.",
+    "paymentTitle": "Payment methods",
+    "payment": {
+      "BTC-CHAIN": "Bitcoin (On-chain)",
+      "BTC-LN": "Bitcoin Lightning",
+      "LTC-CHAIN": "Litecoin",
+      "XMR-CHAIN": "Monero",
+      "USDT-TRON": "USDT-TRON"
+    }
+  },
   "coincharge-coinsnap-test-connection": {
     "save": "Save credentials",
     "button": "Test connection",
     "success": "The plugin is connected to the server",
     "error": "Something went wrong. Check if credentials are valid and try again.",
     "missing_credentials": "You need to save API key and store ID first."
+  },
+  "coincharge-coinsnap-status": {
+    "connected": "Coinsnap connected",
+    "disconnected": "Coinsnap disconnected",
+    "lastChecked": "Last checked: {date}",
+    "webhookRegistered": "Webhook registered",
+    "webhookError": "Webhook not registered",
+    "webhookUnknown": "Webhook status unknown",
+    "lastWebhook": "Webhook updated: {date}",
+    "webhookReRegisterButton": "Re-register webhook",
+    "webhookReRegisterSuccess": "Webhook re-registered successfully.",
+    "webhookReRegisterError": "Webhook could not be registered.",
+    "credentialWarning": "Please fill in the Coinsnap Store ID and API key before testing the connection.",
+    "paymentTitle": "Payment methods",
+    "payment": {
+      "Lightning": "Lightning",
+      "Bitcoin": "Bitcoin",
+      "BitcoinLightning": "Bitcoin + Lightning"
+    }
   }
 }

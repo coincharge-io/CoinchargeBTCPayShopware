@@ -3,11 +3,11 @@
   "entryPoints": {
     "coincharge-b-t-c-pay-shopware": {
       "css": [
-        "/bundles/coinchargebtcpayshopware/administration/assets/coincharge-b-t-c-pay-shopware-9eHaRv7f.css"
+        "/bundles/coinchargebtcpayshopware/administration/assets/coincharge-b-t-c-pay-shopware-Bv3TwT7I.css"
       ],
       "dynamic": [],
       "js": [
-        "/bundles/coinchargebtcpayshopware/administration/assets/coincharge-b-t-c-pay-shopware-D5GAXMZs.js"
+        "/bundles/coinchargebtcpayshopware/administration/assets/coincharge-b-t-c-pay-shopware-BlcJrSvT.js"
       ],
       "legacy": false,
       "preload": []

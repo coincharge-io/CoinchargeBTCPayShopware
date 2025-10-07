@@ -3,3 +3,23 @@
   background-color: #51b13e;
   border-color: #51b13e;
 }
+
+
+.coincharge-btcpay-status-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.coincharge-btcpay-status-card__webhook {
+  margin-left: auto;
+}
+
+.coincharge-btcpay-credentials-hint {
+  margin-bottom: 12px;
+}
+
+.coincharge-btcpay-action-row {
+  align-items: center;
+}
