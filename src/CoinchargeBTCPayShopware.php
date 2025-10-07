@@ -14,6 +14,7 @@ namespace Coincharge\Shopware;
 
 use Coincharge\Shopware\PaymentMethod\BitcoinCryptoPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
+use Coincharge\Shopware\PaymentMethod\UsdtPaymentMethod;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Content\Media\MediaEntity;
@@ -213,6 +214,11 @@ class CoinchargeBTCPayShopware extends Plugin
             $this->addPaymentMethod(new BitcoinCryptoPaymentMethod, $updateContext->getContext());
         }
 
+        if (version_compare($currentVersion, '1.1.5', '<') &&
+            version_compare($targetVersion, '1.1.5', '>=')) {
+            $this->addPaymentMethod(new UsdtPaymentMethod, $updateContext->getContext());
+        }
+
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
         $criteria = new Criteria;
@@ -298,6 +304,8 @@ class CoinchargeBTCPayShopware extends Plugin
          */
         $paymentRepository = $this->container->get('payment_method.repository');
         $paymentRepository->create([$examplePaymentData], $context);
+
+        $this->setPaymentMethodIsActive($paymentMethod, true, $context);
     }
 
     private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
