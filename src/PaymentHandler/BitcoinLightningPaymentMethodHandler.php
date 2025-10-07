@@ -16,9 +16,10 @@ use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
@@ -40,48 +41,40 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
         );
     }
 
-    public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
+    protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string
     {
         try {
-            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
-            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+            $order = $transaction->getOrder();
+
+            if (! $order instanceof OrderEntity) {
+                $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            }
+
+            $orderTransaction = $transaction->getOrderTransaction();
+            $accountUrl = $this->baseSuccessUrl.$orderTransaction->getOrderId();
+
+            if ($orderTransaction->getAmount()->getTotalPrice() == 0.0) {
+                $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
 
                 return $accountUrl;
             }
-            /*
-            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
-                [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
-                    'metadata' => [
-                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId(),
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY'],
-                    ],
-                ]
-            );
-            return $response['checkoutLink'];
-*/
+
+            $currency = $order->getCurrency();
+
+            if ($currency === null) {
+                throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
+            }
 
             $redirectUrl = $this->client->createInvoice(
                 $orderTransaction->getAmount()->getTotalPrice(),
-                $context->getCurrency()->getIsoCode(),
+                $currency->getIsoCode(),
                 [
                     'orderId' => $orderTransaction->getOrderId(),
                     'orderNumber' => $order->getOrderNumber(),
                     'transactionId' => $orderTransaction->getId(),
                 ],
                 $accountUrl,
-                $context->getContext(),
-                // Optional: restrict payment methods (only if desired)
+                $context,
                 ['BTC-CHAIN', 'BTC-LN', 'BTC-LNURL']
             );
 

@@ -72,9 +72,7 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
     public function pay(Request $request, PaymentTransactionStruct $transaction, Context $context, ?Struct $validateStruct): ?RedirectResponse
     {
         try {
-            $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
-
-            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $context, $order);
+            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $context);
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
                 $transaction->getOrderTransactionId(),
@@ -89,7 +87,7 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 
     abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string;
 
-    private function loadOrderByTransactionId(string $orderTransactionId, Context $context): OrderEntity
+    protected function loadOrderByTransactionId(string $orderTransactionId, Context $context): OrderEntity
     {
         // Load the OrderTransaction entity and include its related Order
         $criteria = new Criteria([$orderTransactionId]);

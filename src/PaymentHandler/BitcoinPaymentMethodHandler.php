@@ -17,8 +17,9 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Checkout\Payment\PaymentException;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
@@ -40,25 +41,43 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
         );
     }
 
-    public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
+    protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string
     {
         try {
-            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
-            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+            $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            $orderTransaction = $order->getTransactions()?->get($transaction->getOrderTransactionId());
+
+            if ($orderTransaction === null) {
+                throw PaymentException::asyncProcessInterrupted(
+                    $transaction->getOrderTransactionId(),
+                    sprintf('Transaction %s missing on order %s.', $transaction->getOrderTransactionId(), $order->getOrderNumber() ?? $order->getId())
+                );
+            }
+
+            $accountUrl = $this->baseSuccessUrl.$orderTransaction->getOrderId();
+
+            if ($orderTransaction->getAmount()->getTotalPrice() == 0.0) {
+                $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
 
                 return $accountUrl;
             }
-            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
+
+            $currency = $order->getCurrency();
+
+            if ($currency === null) {
+                throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
+            }
+
+            /*$uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
             $response = $this->client->sendPostRequest(
                 $uri,
                 [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
+                    'amount' => $orderTransaction->getAmount()->getTotalPrice(),
+                    'currency' => $currency->getIsoCode(),
                     'metadata' => [
-                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId(),
+                        'orderId' => $orderTransaction->getOrderId(),
+                        'orderNumber' => $order->getOrderNumber(),
+                        'transactionId' => $orderTransaction->getId(),
                     ],
                     'checkout' => [
                         'redirectURL' => $accountUrl,
@@ -68,7 +87,21 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                 ]
             );
 
-            return $response['checkoutLink'];
+            return $response['checkoutLink'];*/
+            $redirectUrl = $this->client->createInvoice(
+                $orderTransaction->getAmount()->getTotalPrice(),
+                $currency->getIsoCode(),
+                [
+                    'orderId' => $orderTransaction->getOrderId(),
+                    'orderNumber' => $order->getOrderNumber(),
+                    'transactionId' => $orderTransaction->getId(),
+                ],
+                $accountUrl,
+                $context,
+                ['BTC-CHAIN']
+            );
+
+            return $redirectUrl;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());
