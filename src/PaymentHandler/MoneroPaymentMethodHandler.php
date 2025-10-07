@@ -63,7 +63,7 @@ class MoneroPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['XMR'],
+                        'paymentMethods' => ['XMR-CHAIN'],
                     ],
                 ]
             );

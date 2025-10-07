@@ -63,7 +63,7 @@ class LitecoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['LTC'],
+                        'paymentMethods' => ['LTC-CHAIN'],
                     ],
                 ]
             );

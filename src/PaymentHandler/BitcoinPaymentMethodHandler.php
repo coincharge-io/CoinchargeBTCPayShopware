@@ -17,6 +17,7 @@ use Coincharge\Shopware\Configuration\ConfigurationService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
@@ -62,7 +63,7 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                     'checkout' => [
                         'redirectURL' => $accountUrl,
                         'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC'],
+                        'paymentMethods' => ['BTC-CHAIN'],
                     ],
                 ]
             );

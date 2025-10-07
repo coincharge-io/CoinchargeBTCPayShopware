@@ -82,7 +82,7 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
                 $accountUrl,
                 $context->getContext(),
                 // Optional: restrict payment methods (only if desired)
-                ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
+                ['BTC-CHAIN', 'BTC-LN', 'BTC-LNURL']
             );
 
             return $redirectUrl;

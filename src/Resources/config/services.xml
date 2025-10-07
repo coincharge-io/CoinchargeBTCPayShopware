@@ -1,163 +1,181 @@
 <container xmlns="http://symfony.com/schema/dic/services"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <services>
-        <service id="Coincharge\Shopware\Configuration\ConfigurationService">
-            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinLightningPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopwar<argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>e\Util\Logger"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\BitcoinLightningPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\BitcoinCryptoPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\MoneroPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\PaymentHandler\LitecoinPaymentMethodHandler">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-      <argument type="service" id="order.repository"/>
-    <argument type="service" id="order_transaction.repository"/>
-            <tag name="shopware.payment.method" />
-        </service>
-        <service id="Coincharge\Shopware\Client\BTCPayServerClient">
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-        </service>
-        <service id="Coincharge\Shopware\Client\CoinsnapClient">
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-        </service>
+  <services>
+    <service id="Coincharge\Shopware\Configuration\ConfigurationService">
+      <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\CoinsnapBitcoinLightningPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient" />
+      <argument
+        type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument
+        type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument
+        type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service"
+        id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\BitcoinLightningPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\BitcoinCryptoPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\BitcoinPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\LightningPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\MoneroPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\PaymentHandler\LitecoinPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
+    <service id="Coincharge\Shopware\Client\BTCPayServerClient">
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+    </service>
+    <service id="Coincharge\Shopware\Client\CoinsnapClient">
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+    </service>
 
-        <service id="Coincharge\Shopware\Util\Log\LoggerFactory">
-            <argument type="string">%kernel.logs_dir%/btcpay_shopware.log</argument>
-            <argument>%shopware.logger.file_rotation_count%</argument>
-        </service>
+    <service id="Coincharge\Shopware\Util\Log\LoggerFactory">
+      <argument type="string">%kernel.logs_dir%/btcpay_shopware.log</argument>
+      <argument>%shopware.logger.file_rotation_count%</argument>
+    </service>
 
-        <service id="Coincharge\Shopware\Util\Logger" class="Monolog\Logger">
-            <factory service="Coincharge\Shopware\Util\Log\LoggerFactory" method="createLogger"/>
-        </service>
+    <service id="Coincharge\Shopware\Util\Logger" class="Monolog\Logger">
+      <factory service="Coincharge\Shopware\Util\Log\LoggerFactory" method="createLogger" />
+    </service>
 
-        <service id="Coincharge\Shopware\Order\OrderService">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-        </service>
-        <service id="Coincharge\Shopware\Webhook\BTCPayWebhookService">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Order\OrderService"/>
-            <argument type="service" id="order.repository"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-        </service>
-        <service id="Coincharge\Shopware\Webhook\Factory\WebhookFactory" public="true">
-            <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Order\OrderService"/>
-            <argument type="service" id="order.repository"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-        </service>
-        <service id="Coincharge\Shopware\Webhook\WebhookRouter" public="true">
-            <argument type="service" id="Coincharge\Shopware\Webhook\Factory\WebhookFactory"/>
-        </service>
-        <service id="Coincharge\Shopware\Webhook\WebhookController" public="true">
-            <argument type="service" id="Coincharge\Shopware\Webhook\WebhookRouter"/>
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-        </service>
-        <service id="Coincharge\Shopware\Configuration\BTCPayConfigurationController" public="true">
-            <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Coincharge\Shopware\Webhook\BTCPayWebhookService"/>
-            <argument type="service" id="payment_method.repository"/>
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-        </service>
-        <service id="Coincharge\Shopware\Configuration\CoinsnapConfigurationController" public="true">
-            <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Coincharge\Shopware\Webhook\CoinsnapWebhookService"/>
-            <argument type="service" id="payment_method.repository"/>
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-        </service>
-        <service id="Coincharge\Shopware\Webhook\CoinsnapWebhookService">
-            <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient"/>
-            <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService"/>
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="Coincharge\Shopware\Order\OrderService"/>
-            <argument type="service" id="order.repository"/>
-            <argument type="service" id="Coincharge\Shopware\Util\Logger"/>
-        </service>
-    </services>
+    <service id="Coincharge\Shopware\Order\OrderService">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+    </service>
+    <service id="Coincharge\Shopware\Webhook\BTCPayWebhookService">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Order\OrderService" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+    </service>
+    <service id="Coincharge\Shopware\Webhook\Factory\WebhookFactory" public="true">
+      <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient" />
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Order\OrderService" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+    </service>
+    <service id="Coincharge\Shopware\Webhook\WebhookRouter" public="true">
+      <argument type="service" id="Coincharge\Shopware\Webhook\Factory\WebhookFactory" />
+    </service>
+    <service id="Coincharge\Shopware\Webhook\WebhookController" public="true">
+      <argument type="service" id="Coincharge\Shopware\Webhook\WebhookRouter" />
+      <call method="setContainer">
+        <argument type="service" id="service_container" />
+      </call>
+    </service>
+    <service id="Coincharge\Shopware\Configuration\BTCPayConfigurationController" public="true">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service" id="Coincharge\Shopware\Webhook\BTCPayWebhookService" />
+      <argument type="service" id="payment_method.repository" />
+      <call method="setContainer">
+        <argument type="service" id="service_container" />
+      </call>
+    </service>
+    <service id="Coincharge\Shopware\Configuration\CoinsnapConfigurationController" public="true">
+      <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service" id="Coincharge\Shopware\Webhook\CoinsnapWebhookService" />
+      <argument type="service" id="payment_method.repository" />
+      <call method="setContainer">
+        <argument type="service" id="service_container" />
+      </call>
+    </service>
+    <service id="Coincharge\Shopware\Webhook\CoinsnapWebhookService">
+      <argument type="service" id="Coincharge\Shopware\Client\CoinsnapClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Order\OrderService" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+    </service>
+  </services>
 </container>
