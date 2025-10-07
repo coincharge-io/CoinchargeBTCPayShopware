@@ -38,17 +38,37 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
         parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
     }
 
-    public function pay(PaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
+    public function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, SalesChannelContext $context)
     {
         try {
-            $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $salesChannelContext);
-        } catch (\Exception $e) {
-            throw PaymentException::asyncProcessInterrupted(
-                $transaction->getOrderTransaction()->getId(),
-                'An error occurred during the communication with external payment gateway'.PHP_EOL.$e->getMessage()
-            );
-        }
+            $accountUrl = $this->baseSuccessUrl.$transaction->getOrderTransaction()->getOrderId();
+            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
+                $this->transactionStateHandler->paid($transaction->getOrderTransactionId(), $context->getContext());
 
-        return new RedirectResponse($redirectUrl);
+                return $accountUrl;
+            }
+            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
+            $response = $this->client->sendPostRequest(
+                $uri,
+                [
+                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
+                    'currency' => $context->getCurrency()->getIsoCode(),
+                    'metadata' => [
+                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
+                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
+                        'transactionId' => $transaction->getOrderTransaction()->getId(),
+                    ],
+                    'checkout' => [
+                        'redirectURL' => $accountUrl,
+                        'redirectAutomatically' => true,
+                    ],
+                ]
+            );
+
+            return $response['checkoutLink'];
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            throw new \Exception($e->getMessage());
+        }
     }
 }

@@ -110,3 +110,4 @@ tests/phpunit-full-coverage.xml
 .devenv*
 devenv.local.nix
 
+.php-cs-fixer.cache

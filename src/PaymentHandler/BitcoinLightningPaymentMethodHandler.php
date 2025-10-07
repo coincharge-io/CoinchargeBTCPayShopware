@@ -72,4 +72,45 @@ class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
             throw new \Exception($e->getMessage());
         }
     }
+
+    public function createInvoice(
+        float $amount,
+        string $currency,
+        array $metadata,
+        string $redirectUrl,
+        Context $context,
+        ?array $paymentMethods = null // optional parameter
+    ): string {
+        $storeId = $this->configurationService->getSetting('btcpayServerStoreId');
+        $uri = '/api/v1/stores/'.$storeId.'/invoices';
+
+        // Base payload
+        $payload = [
+            'amount' => $amount,
+            'currency' => $currency,
+            'metadata' => $metadata,
+            'checkout' => [
+                'redirectURL' => $redirectUrl,
+                'redirectAutomatically' => true,
+            ],
+        ];
+
+        // Conditionally add paymentMethods only if provided
+        if (! empty($paymentMethods)) {
+            $payload['checkout']['paymentMethods'] = $paymentMethods;
+        }
+
+        try {
+            $response = $this->sendPostRequest($uri, $payload);
+
+            return $response['checkoutLink'] ?? $redirectUrl;
+        } catch (\Throwable $e) {
+            $this->logger->error('BTCPay invoice creation failed', [
+                'exception' => $e,
+                'payload' => $payload,
+            ]);
+
+            throw $e;
+        }
+    }
 }

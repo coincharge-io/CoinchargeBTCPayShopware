@@ -75,7 +75,7 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
             $redirectUrl = $this->sendReturnUrlToCheckout($transaction, $context, $order);
         } catch (\Exception $e) {
             throw PaymentException::asyncProcessInterrupted(
-                $transaction->getOrderTransaction()->getId(),
+                $transaction->getOrderTransactionId(),
                 'An error occurred during the communication with external payment gateway'.PHP_EOL.$e->getMessage()
             );
         }
@@ -85,9 +85,9 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
 
     public function finalize(Request $request, PaymentTransactionStruct $transaction, Context $context): void {}
 
-    abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context, OrderEntity $order): string;
+    abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string;
 
-    private function loadOrder(?string $orderId, Context $context, string $orderTransactionId): OrderEntity
+    private function loadOrder(string $orderId, Context $context, string $orderTransactionId): OrderEntity
     {
         if ($orderId === null) {
             throw PaymentException::asyncProcessInterrupted(
