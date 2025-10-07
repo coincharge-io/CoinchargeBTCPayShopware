@@ -46,19 +46,20 @@ Component.register("coincharge-btcpay-buttons", {
 				window.location.origin +
 				clearedPathname +
 				"api/_action/coincharge/credentials";
-			systemConfig.saveValues({
-				"CoinchargeBTCPayShopware.config.btcpayServerUrl":
-					this.config["CoinchargeBTCPayShopware.config.btcpayServerUrl"],
-				"CoinchargeBTCPayShopware.config.btcpayApiKey": "",
-				"CoinchargeBTCPayShopware.config.btcpayServerStoreId": "",
-				"CoinchargeBTCPayShopware.config.btcpayWebhookId": "",
-				"CoinchargeBTCPayShopware.config.btcpayWebhookSecret": "",
-				"CoinchargeBTCPayShopware.config.integrationStatus": false,
-				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodBTC": false,
-				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLightning": false,
-				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodMonero": false,
-				"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLitecoin": false,
-			});
+		systemConfig.saveValues({
+			"CoinchargeBTCPayShopware.config.btcpayServerUrl":
+				this.config["CoinchargeBTCPayShopware.config.btcpayServerUrl"],
+			"CoinchargeBTCPayShopware.config.btcpayApiKey": "",
+			"CoinchargeBTCPayShopware.config.btcpayServerStoreId": "",
+			"CoinchargeBTCPayShopware.config.btcpayWebhookId": "",
+			"CoinchargeBTCPayShopware.config.btcpayWebhookSecret": "",
+			"CoinchargeBTCPayShopware.config.integrationStatus": false,
+			"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodBTC": false,
+			"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLightning": false,
+			"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodMonero": false,
+			"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodLitecoin": false,
+			"CoinchargeBTCPayShopware.config.btcpayStorePaymentMethodUSDT": false,
+		});
 			return window.open(
 				filteredUrl +
 				"/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=" +

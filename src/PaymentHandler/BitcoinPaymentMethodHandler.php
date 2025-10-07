@@ -68,26 +68,6 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                 throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
             }
 
-            /*$uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
-                [
-                    'amount' => $orderTransaction->getAmount()->getTotalPrice(),
-                    'currency' => $currency->getIsoCode(),
-                    'metadata' => [
-                        'orderId' => $orderTransaction->getOrderId(),
-                        'orderNumber' => $order->getOrderNumber(),
-                        'transactionId' => $orderTransaction->getId(),
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC-CHAIN'],
-                    ],
-                ]
-            );
-
-            return $response['checkoutLink'];*/
             $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
 
             $redirectUrl = $this->client->createInvoice(

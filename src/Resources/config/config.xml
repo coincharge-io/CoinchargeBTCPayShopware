@@ -86,6 +86,14 @@
       <helpText lang="de-DE">Zeigt an, ob Sie diese Zahlungsmethode in Ihrem Geschäft verwenden
         können oder nicht</helpText>
     </input-field>
+    <input-field type="bool">
+      <name>btcpayStorePaymentMethodUSDT</name>
+      <label>USDT</label>
+      <disabled>true</disabled>
+      <helpText>Shows whether or not you can use this payment method in your store</helpText>
+      <helpText lang="de-DE">Zeigt an, ob Sie diese Zahlungsmethode in Ihrem Geschäft verwenden
+        können oder nicht</helpText>
+    </input-field>
   </card>
   <card>
     <title>Credentials</title>

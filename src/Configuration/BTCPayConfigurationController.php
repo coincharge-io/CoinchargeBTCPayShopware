@@ -18,6 +18,7 @@ use Coincharge\Shopware\PaymentMethod\BitcoinPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\LightningPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\LitecoinPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\MoneroPaymentMethod;
+use Coincharge\Shopware\PaymentMethod\UsdtPaymentMethod;
 use Coincharge\Shopware\Webhook\WebhookServiceInterface;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -84,8 +85,20 @@ class BTCPayConfigurationController extends ConfigurationController
 
     private function checkEnabledPaymentMethodsBTCPayStore(Context $context)
     {
-        $paymentMethods = ['BTC-CHAIN' => 'BTC', 'BTC-LN' => 'Lightning', 'LTC-CHAIN' => 'Litecoin', 'XMR-CHAIN' => 'Monero'];
-        $paymentHandlers = ['BTC-CHAIN' => BitcoinPaymentMethod::class, 'BTC-LN' => LightningPaymentMethod::class, 'LTC-CHAIN' => LitecoinPaymentMethod::class, 'XMR-CHAIN' => MoneroPaymentMethod::class];
+        $paymentMethods = [
+            'BTC-CHAIN' => 'BTC',
+            'BTC-LN' => 'Lightning',
+            'LTC-CHAIN' => 'Litecoin',
+            'XMR-CHAIN' => 'Monero',
+            'USDt' => 'USDT',
+        ];
+        $paymentHandlers = [
+            'BTC-CHAIN' => BitcoinPaymentMethod::class,
+            'BTC-LN' => LightningPaymentMethod::class,
+            'LTC-CHAIN' => LitecoinPaymentMethod::class,
+            'XMR-CHAIN' => MoneroPaymentMethod::class,
+            'USDt' => UsdtPaymentMethod::class,
+        ];
         $this->disableBTCPaymentMethodsBeforeTest();
         $uri = '/api/v1/stores/'.$this->configurationService->getSetting('btcpayServerStoreId').'/payment-methods';
         $response = $this->client->sendGetRequest($uri);
@@ -125,6 +138,7 @@ class BTCPayConfigurationController extends ConfigurationController
         $this->configurationService->setSetting('btcpayStorePaymentMethodLightning', false);
         $this->configurationService->setSetting('btcpayStorePaymentMethodLitecoin', false);
         $this->configurationService->setSetting('btcpayStorePaymentMethodMonero', false);
+        $this->configurationService->setSetting('btcpayStorePaymentMethodUSDT', false);
     }
 
     private function enableIntegratedPaymentPage(Context $context)
@@ -156,6 +170,9 @@ class BTCPayConfigurationController extends ConfigurationController
             'XMR' => 'XMR-CHAIN',
             'XMR-MoneroLike' => 'XMR-CHAIN',
             'XMR_MoneroLike' => 'XMR-CHAIN',
+            'USDt' => 'USDt',
+            'USDt-StablecoinLike' => 'USDt',
+            'USDt_StablecoinLike' => 'USDt',
         ];
 
         return $mapping[$paymentMethodId] ?? $paymentMethodId;

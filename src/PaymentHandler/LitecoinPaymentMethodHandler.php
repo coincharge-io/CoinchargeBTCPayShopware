@@ -68,12 +68,14 @@ class LitecoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                 throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
             }
 
+            $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
+
             $redirectUrl = $this->client->createInvoice(
                 $orderTransaction->getAmount()->getTotalPrice(),
                 $currency->getIsoCode(),
                 [
                     'orderId' => $orderTransaction->getOrderId(),
-                    'orderNumber' => $order->getOrderNumber(),
+                    'orderNumber' => $orderNumber,
                     'transactionId' => $orderTransaction->getId(),
                 ],
                 $accountUrl,

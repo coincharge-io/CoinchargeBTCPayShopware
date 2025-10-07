@@ -100,6 +100,16 @@
       <argument type="service" id="order_transaction.repository" />
       <tag name="shopware.payment.method" />
     </service>
+    <service id="Coincharge\Shopware\PaymentHandler\UsdtPaymentMethodHandler">
+      <argument type="service" id="Coincharge\Shopware\Client\BTCPayServerClient" />
+      <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
+      <argument type="service"
+        id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler" />
+      <argument type="service" id="Coincharge\Shopware\Util\Logger" />
+      <argument type="service" id="order.repository" />
+      <argument type="service" id="order_transaction.repository" />
+      <tag name="shopware.payment.method" />
+    </service>
     <service id="Coincharge\Shopware\Client\BTCPayServerClient">
       <argument type="service" id="Coincharge\Shopware\Configuration\ConfigurationService" />
       <argument type="service" id="Coincharge\Shopware\Util\Logger" />
