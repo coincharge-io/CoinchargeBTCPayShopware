@@ -98,6 +98,15 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
     public function process(Request $request, Context $context): Response
     {
+        $content = $request->getContent();
+        $body = \json_decode($content, true);
+
+        if (\is_array($body) && ($body['purpose'] ?? null) === 'webhook_url_validation') {
+            $this->logger->info('Coinsnap webhook reachability probe acknowledged');
+
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
+
         $signature = $request->headers->get(self::REQUIRED_HEADER);
 
         if ($signature === null) {
@@ -105,15 +114,14 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
             return new Response('', Response::HTTP_FORBIDDEN);
         }
-        $body = \json_decode($request->getContent(), true);
 
         if (! \is_array($body)) {
-            $this->logger->warning('Coinsnap webhook received invalid JSON payload', ['content' => $request->getContent()]);
+            $this->logger->warning('Coinsnap webhook received invalid JSON payload', ['content' => $content]);
 
             return new Response('', Response::HTTP_BAD_REQUEST);
         }
 
-        $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
+        $expectedHeader = 'sha256=' . hash_hmac('sha256', $content, $this->configurationService->getSetting('coinsnapWebhookSecret'));
 
         if (! hash_equals($expectedHeader, $signature)) {
             $this->logger->error('Invalid signature');
