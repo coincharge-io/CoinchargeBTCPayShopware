@@ -77,7 +77,10 @@ Component.register("coincharge-coinsnap-button", {
 			this.isLoading = true;
 			this.coinchargeCoinsnapApiService
 				.verifyApiKey()
-				.then((response) => this.handleVerificationResponse(response))
+				.then((response) => {
+					this.handleVerificationResponse(response);
+					return this.loadConfiguration();
+				})
 				.catch(() => {
 					this.createNotificationError({
 						title: "Coinsnap",
@@ -92,7 +95,10 @@ Component.register("coincharge-coinsnap-button", {
 			this.isWebhookLoading = true;
 			this.coinchargeCoinsnapApiService
 				.registerWebhook()
-				.then((response) => this.handleWebhookResponse(response))
+				.then((response) => {
+					this.handleWebhookResponse(response);
+					return this.loadConfiguration();
+				})
 				.catch(() => {
 					this.createNotificationError({
 						title: "Coinsnap",
@@ -143,9 +149,10 @@ Component.register("coincharge-coinsnap-button", {
 			}
 		},
 		loadConfiguration() {
-			this.systemConfigService
+			return this.systemConfigService
 				.getValues("CoinchargeBTCPayShopware.config")
 				.then((values) => {
+					this.syncSystemConfigValues(values);
 					this.credentials.storeId = values["CoinchargeBTCPayShopware.config.coinsnapStoreId"] || "";
 					this.credentials.apiKey = values["CoinchargeBTCPayShopware.config.coinsnapApiKey"] || "";
 					this.status.connected = Boolean(values["CoinchargeBTCPayShopware.config.coinsnapIntegrationStatus"]);
@@ -178,6 +185,67 @@ Component.register("coincharge-coinsnap-button", {
 		getFieldValue(fieldId) {
 			const field = document.getElementById(fieldId);
 			return field ? field.value.trim() : "";
+		},
+		syncSystemConfigValues(values) {
+			this.$nextTick(() => {
+				const state = Shopware?.State;
+				const systemConfigStore = state?.get?.("swSystemConfig");
+				const salesChannelId = systemConfigStore?.currentSalesChannelId ?? null;
+
+				Object.entries(values).forEach(([key, value]) => {
+					if (!key.startsWith("CoinchargeBTCPayShopware.config.")) {
+						return;
+					}
+
+					const updated =
+						this.commitSystemConfigValue(key, value, salesChannelId) ||
+						this.updateDomFieldValue(key, value);
+
+					if (!updated) {
+						this.updateDomFieldValue(key, value); // Fallback to DOM update if mutation missing
+					}
+				});
+			});
+		},
+		commitSystemConfigValue(key, value, salesChannelId) {
+			const state = Shopware?.State;
+			if (!state?._mutations) {
+				return false;
+			}
+
+			const payload = { key, value, salesChannelId };
+			const mutations = [
+				"swSystemConfig/setActualConfigData",
+				"swSystemConfig/setActualConfigValue",
+				"swSystemConfig/setActualValue",
+				"swSystemConfig/setActualConfigItem",
+			];
+
+			for (const mutation of mutations) {
+				if (state._mutations[mutation]) {
+					state.commit(mutation, payload);
+					return true;
+				}
+			}
+
+			return false;
+		},
+		updateDomFieldValue(key, value) {
+			const element = document.getElementById(key);
+			if (!element) {
+				return false;
+			}
+
+			if (element.type === "checkbox") {
+				element.checked = Boolean(value);
+			} else {
+				element.value = value ?? "";
+			}
+
+			element.dispatchEvent(new Event("input", { bubbles: true }));
+			element.dispatchEvent(new Event("change", { bubbles: true }));
+
+			return true;
 		},
 	},
 });
