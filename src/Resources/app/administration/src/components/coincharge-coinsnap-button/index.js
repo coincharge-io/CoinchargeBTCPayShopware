@@ -75,8 +75,8 @@ Component.register("coincharge-coinsnap-button", {
 			}
 
 			this.isLoading = true;
-			this.coinchargeCoinsnapApiService
-				.verifyApiKey()
+			this.persistCredentials(false)
+				.then(() => this.coinchargeCoinsnapApiService.verifyApiKey())
 				.then((response) => {
 					this.handleVerificationResponse(response);
 					return this.loadConfiguration();
@@ -110,12 +110,16 @@ Component.register("coincharge-coinsnap-button", {
 				});
 		},
 		saveCredentials() {
-			const payload = {
-				"CoinchargeBTCPayShopware.config.coinsnapStoreId": this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapStoreId"),
-				"CoinchargeBTCPayShopware.config.coinsnapApiKey": this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapApiKey"),
-			};
-			this.systemConfigService.saveValues(payload).then(() => {
-				this.loadConfiguration();
+			if (!this.credentialsExist()) {
+				this.helper.showMissingCredentials = true;
+				return;
+			}
+
+			this.persistCredentials(true).catch(() => {
+				this.createNotificationError({
+					title: "Coinsnap",
+					message: this.$tc("coincharge-coinsnap-test-connection.error"),
+				});
 			});
 		},
 		handleVerificationResponse(response) {
@@ -174,17 +178,52 @@ Component.register("coincharge-coinsnap-button", {
 				if (!element) {
 					return;
 				}
-				element.addEventListener("input", () => {
+				element.addEventListener("input", (event) => {
+					this.updateCredentialFromField(field, event.target?.value ?? "");
 					this.helper.showMissingCredentials = !this.credentialsExist();
 				});
 			});
 		},
 		credentialsExist() {
-			return Boolean(this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapStoreId") && this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapApiKey"));
+			const storeId = this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapStoreId") || this.credentials.storeId;
+			const apiKey = this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapApiKey") || this.credentials.apiKey;
+
+			return Boolean(storeId && apiKey);
 		},
 		getFieldValue(fieldId) {
 			const field = document.getElementById(fieldId);
 			return field ? field.value.trim() : "";
+		},
+		updateCredentialFromField(fieldId, rawValue) {
+			const key = fieldId === "CoinchargeBTCPayShopware.config.coinsnapStoreId" ? "storeId" : "apiKey";
+			this.credentials[key] = (rawValue ?? "").trim();
+		},
+		getCredentialPayload() {
+			const storeId = this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapStoreId") || this.credentials.storeId;
+			const apiKey = this.getFieldValue("CoinchargeBTCPayShopware.config.coinsnapApiKey") || this.credentials.apiKey;
+
+			return {
+				"CoinchargeBTCPayShopware.config.coinsnapStoreId": storeId,
+				"CoinchargeBTCPayShopware.config.coinsnapApiKey": apiKey,
+			};
+		},
+		persistCredentials(reloadConfiguration) {
+			const payload = this.getCredentialPayload();
+
+			if (!payload["CoinchargeBTCPayShopware.config.coinsnapStoreId"] || !payload["CoinchargeBTCPayShopware.config.coinsnapApiKey"]) {
+				return Promise.reject(new Error("Missing credentials"));
+			}
+
+			return this.systemConfigService.saveValues(payload).then(() => {
+				this.credentials.storeId = payload["CoinchargeBTCPayShopware.config.coinsnapStoreId"];
+				this.credentials.apiKey = payload["CoinchargeBTCPayShopware.config.coinsnapApiKey"];
+
+				if (reloadConfiguration) {
+					return this.loadConfiguration();
+				}
+
+				return null;
+			});
 		},
 		syncSystemConfigValues(values) {
 			this.$nextTick(() => {
