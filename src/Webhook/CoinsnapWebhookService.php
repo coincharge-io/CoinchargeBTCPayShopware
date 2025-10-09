@@ -13,24 +13,30 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Webhook;
 
 use Coincharge\Shopware\Client\ClientInterface;
-use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Shopware\Core\Framework\Context;
 use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CoinsnapWebhookService implements WebhookServiceInterface
 {
     public const REQUIRED_HEADER = 'x-coinsnap-sig';
+
     private ClientInterface $client;
+
     private ConfigurationService $configurationService;
+
     private OrderTransactionStateHandler $transactionStateHandler;
+
     private $orderService;
+
     private EntityRepository $orderRepository;
+
     private LoggerInterface $logger;
 
     public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, $orderService, EntityRepository $orderRepository, LoggerInterface $logger)
@@ -48,20 +54,22 @@ class CoinsnapWebhookService implements WebhookServiceInterface
         try {
             if ($this->isEnabled()) {
                 $this->logger->info('Webhook exists');
+
                 return true;
             }
 
-            $webhookUrl =  $request->server->get('APP_URL') . '/api/_action/coincharge/webhook-endpoint';
+            $webhookUrl = $request->server->get('APP_URL').'/api/_action/coincharge/webhook-endpoint';
 
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks';
+            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('coinsnapStoreId').'/webhooks';
             $body = $this->client->sendPostRequest(
                 $uri,
                 [
-                    'url' => $webhookUrl
+                    'url' => $webhookUrl,
                 ]
             );
             if (empty($body)) {
                 $this->logger->error("Webhook couldn't be created");
+
                 return false;
             }
 
@@ -73,6 +81,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
             return false;
         }
     }
+
     public function isEnabled(): bool
     {
         try {
@@ -80,16 +89,19 @@ class CoinsnapWebhookService implements WebhookServiceInterface
             if (empty($this->configurationService->getSetting('coinsnapWebhookId'))) {
                 return false;
             }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/webhooks/' . $this->configurationService->getSetting('coinsnapWebhookId');
+            $uri = '/api/v1/stores/'.$this->configurationService->getSetting('coinsnapStoreId').'/webhooks/'.$this->configurationService->getSetting('coinsnapWebhookId');
             $response = $this->client->sendGetRequest($uri);
             if (empty($response)) {
-                $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " doesn't exist.");
+                $this->logger->error('Webhook with ID:'.$this->configurationService->getSetting('coinsnapWebhookId')." doesn't exist.");
+
                 return false;
             }
             if ($response['enabled'] == false) {
-                $this->logger->error("Webhook with ID:" . $this->configurationService->getSetting('coinsnapWebhookId') . " isn't enabled.");
+                $this->logger->error('Webhook with ID:'.$this->configurationService->getSetting('coinsnapWebhookId')." isn't enabled.");
+
                 return false;
             }
+
             return true;
         } catch (\Exception $e) {
             return false;
@@ -98,21 +110,50 @@ class CoinsnapWebhookService implements WebhookServiceInterface
 
     public function process(Request $request, Context $context): Response
     {
-        $signature = $request->headers->get(self::REQUIRED_HEADER);
-        $body = $request->request->all();
+        $content = $request->getContent();
+        $body = \json_decode($content, true);
 
-        $expectedHeader = 'sha256=' . hash_hmac('sha256', $request->getContent(), $this->configurationService->getSetting('coinsnapWebhookSecret'));
+        if (\is_array($body) && ($body['purpose'] ?? null) === 'webhook_url_validation') {
+            $this->logger->info('Coinsnap webhook reachability probe acknowledged');
 
-        if ($signature !== $expectedHeader) {
-            $this->logger->error('Invalid signature');
-            return new Response();
+            return new Response('', Response::HTTP_NO_CONTENT);
         }
-        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('coinsnapStoreId') . '/invoices/' . $body['invoiceId'];
+
+        $signature = $request->headers->get(self::REQUIRED_HEADER);
+
+        if ($signature === null) {
+            $this->logger->error('Missing Coinsnap signature header');
+
+            return new Response('', Response::HTTP_FORBIDDEN);
+        }
+
+        if (! \is_array($body)) {
+            $this->logger->warning('Coinsnap webhook received invalid JSON payload', ['content' => $content]);
+
+            return new Response('', Response::HTTP_BAD_REQUEST);
+        }
+
+        $expectedHeader = 'sha256='.hash_hmac('sha256', $content, $this->configurationService->getSetting('coinsnapWebhookSecret'));
+
+        if (! hash_equals($expectedHeader, $signature)) {
+            $this->logger->error('Invalid Coinsnap signature');
+
+            return new Response('', Response::HTTP_FORBIDDEN);
+        }
+        $uri = '/api/v1/stores/'.$this->configurationService->getSetting('coinsnapStoreId').'/invoices/'.$body['invoiceId'];
         $responseBody = $this->client->sendGetRequest($uri);
-        $criteria = new Criteria();
+        $criteria = new Criteria;
         $criteria->addFilter(new EqualsFilter('orderNumber', $responseBody['metadata']['orderNumber']));
         $orderId = $this->orderRepository->searchIds($criteria, $context)->firstId();
 
+        if ($orderId === null) {
+            $this->logger->warning('Order not found for Coinsnap webhook', [
+                'orderNumber' => $responseBody['metadata']['orderNumber'] ?? null,
+                'invoiceId' => $body['invoiceId'],
+            ]);
+
+            return new Response;
+        }
 
         switch ($body['type']) {
             case 'Processing': // The invoice is paid in full.
@@ -132,7 +173,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                 $this->logger->info('Invoice settled, waiting for payment to settle.');
                 break;
             case 'Expired':
-                //TODO: Check if invoice was partially paid
+                // TODO: Check if invoice was partially paid
                 $status = $body['underpaid'] ? 'partially_paid' : 'expired';
                 $this->orderRepository->upsert(
                     [
@@ -146,7 +187,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                     ],
                     $context
                 );
-                //TODO: Check if paid partially
+                // TODO: Check if paid partially
                 if ($body['underpaid']) {
                     $this->transactionStateHandler->payPartially($responseBody['metadata']['transactionId'], $context);
                 }
@@ -169,6 +210,7 @@ class CoinsnapWebhookService implements WebhookServiceInterface
                 $this->logger->info('Invoice payment settled.');
                 break;
         }
-        return new Response();
+
+        return new Response;
     }
 }

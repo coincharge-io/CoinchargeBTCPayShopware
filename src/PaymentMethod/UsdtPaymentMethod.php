@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) 2022 Coincharge
+ * Copyright (c) 2025 Coincharge
  * This file is open source and available under the MIT license.
  * See the LICENSE file for more info.
  *
@@ -12,45 +12,45 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentMethod;
 
-use Coincharge\Shopware\PaymentHandler\CoinsnapLightningPaymentMethodHandler;
+use Coincharge\Shopware\PaymentHandler\UsdtPaymentMethodHandler;
 
-class CoinsnapLightningPaymentMethod
+class UsdtPaymentMethod
 {
     public function getName(): string
     {
-        return 'Coinsnap-Lightning';
+        return 'USDT';
     }
 
     public function getPosition(): int
     {
-        return -1;
+        return 6;
     }
 
     public function getTranslations(): array
     {
         return [
             'de-DE' => [
-                'description' => 'Zahle mit Lightning - Coinsnap',
-                'name' => 'Coinsnap-Lightning',
+                'description' => 'Zahle mit USDT',
+                'name' => 'USDT',
             ],
             'en-GB' => [
-                'description' => 'Pay with Lightning - Coinsnap',
-                'name' => 'Coinsnap-Lightning',
+                'description' => 'Pay with USDT',
+                'name' => 'USDT',
             ],
             '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-                'description' => 'Pay with Lightning - Coinsnap',
-                'name' => 'Coinsnap-Lightning',
+                'description' => 'Pay with USDT',
+                'name' => 'USDT',
             ], // Fallback language
         ];
     }
 
     public function getPaymentHandler(): string
     {
-        return CoinsnapLightningPaymentMethodHandler::class;
+        return UsdtPaymentMethodHandler::class;
     }
 
     public function getTechnicalName(): string
     {
-        return 'coincharge_coinsnap_lightning_payment';
+        return 'coincharge_btcpay_usdt_payment';
     }
 }

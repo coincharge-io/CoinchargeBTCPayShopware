@@ -25,4 +25,12 @@ export default class CoinchargeCoinsnapApiService extends ApiService {
         throw error.message;
       });
   }
+
+  registerWebhook() {
+    const apiRoute = `/_action/${this.getApiBasePath()}/coinsnap/webhook`;
+
+    return this.httpClient
+      .post(apiRoute, {}, { headers: this.getBasicHeaders() })
+      .then((response) => ApiService.handleResponse(response));
+  }
 }

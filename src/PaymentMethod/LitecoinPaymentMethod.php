@@ -16,36 +16,41 @@ use Coincharge\Shopware\PaymentHandler\LitecoinPaymentMethodHandler;
 
 class LitecoinPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Litecoin';
-  }
+    public function getName(): string
+    {
+        return 'Litecoin';
+    }
 
-  public function getPosition(): int
-  {
-    return 5;
-  }
+    public function getPosition(): int
+    {
+        return 5;
+    }
 
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Litecoin',
-        'name' => 'Litecoin',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Litecoin',
-        'name' => 'Litecoin',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Litecoin',
-        'name' => 'Litecoin',
-      ], //Fallback language
-    ];
-  }
+    public function getTranslations(): array
+    {
+        return [
+            'de-DE' => [
+                'description' => 'Zahle mit Litecoin',
+                'name' => 'Litecoin',
+            ],
+            'en-GB' => [
+                'description' => 'Pay with Litecoin',
+                'name' => 'Litecoin',
+            ],
+            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
+                'description' => 'Pay with Litecoin',
+                'name' => 'Litecoin',
+            ], // Fallback language
+        ];
+    }
 
-  public function getPaymentHandler(): string
-  {
-    return LitecoinPaymentMethodHandler::class;
-  }
+    public function getPaymentHandler(): string
+    {
+        return LitecoinPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_btcpay_litecoin_payment';
+    }
 }

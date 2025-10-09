@@ -41,5 +41,16 @@ class WebhookRouter
         } elseif ($request->headers->has('btcpay-sig')) {
             return 'btcpay_server';
         }
+
+        $content = $request->getContent();
+        if ($content !== '') {
+            $body = \json_decode($content, true);
+
+            if (\is_array($body) && ($body['purpose'] ?? null) === 'webhook_url_validation' && ($body['app'] ?? null) === 'Coinsnap') {
+                return 'coinsnap';
+            }
+        }
+
+        throw new \RuntimeException('Unable to determine webhook provider from request headers.');
     }
 }

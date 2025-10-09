@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Copyright (c) 2022 Coincharge
+ * Copyright (c) 2025 Coincharge
  * This file is open source and available under the MIT license.
  * See the LICENSE file for more info.
  *
@@ -21,7 +21,7 @@ use Shopware\Core\Checkout\Payment\PaymentException;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
-class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
+class UsdtPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
     public function __construct(
         ClientInterface $client,
@@ -80,6 +80,7 @@ class BitcoinCryptoPaymentMethodHandler extends AbstractPaymentMethodHandler
                 ],
                 $accountUrl,
                 $context,
+                ['USDT-TRON']
             );
 
             return $redirectUrl;

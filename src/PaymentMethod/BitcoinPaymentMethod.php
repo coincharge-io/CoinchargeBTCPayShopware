@@ -40,13 +40,17 @@ class BitcoinPaymentMethod
             '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
                 'description' => 'Pay with Bitcoin',
                 'name' => 'Bitcoin',
-            ], //Fallback language
+            ], // Fallback language
         ];
     }
-
 
     public function getPaymentHandler(): string
     {
         return BitcoinPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_btcpay_bitcoin_payment';
     }
 }

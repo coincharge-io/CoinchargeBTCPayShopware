@@ -40,13 +40,17 @@ class BitcoinLightningPaymentMethod
             '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
                 'description' => 'Pay with Bitcoin/Lightning',
                 'name' => 'Bitcoin-Lightning',
-            ], //Fallback language
+            ], // Fallback language
         ];
     }
-
 
     public function getPaymentHandler(): string
     {
         return BitcoinLightningPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_btcpay_bitcoin_lightning_payment';
     }
 }

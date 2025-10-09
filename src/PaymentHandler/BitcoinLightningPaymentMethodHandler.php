@@ -12,57 +12,78 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\PaymentHandler;
 
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Psr\Log\LoggerInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\ConfigurationService;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Checkout\Payment\PaymentException;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 class BitcoinLightningPaymentMethodHandler extends AbstractPaymentMethodHandler
 {
-    private ClientInterface $client;
-    private ConfigurationService  $configurationService;
-    private OrderTransactionStateHandler $transactionStateHandler;
-    private LoggerInterface $logger;
-
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService, OrderTransactionStateHandler $transactionStateHandler, LoggerInterface $logger)
-    {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
-        $this->transactionStateHandler = $transactionStateHandler;
-        $this->logger = $logger;
-        parent::__construct($client, $configurationService, $transactionStateHandler, $logger);
+    public function __construct(
+        ClientInterface $client,
+        ConfigurationService $configurationService,
+        OrderTransactionStateHandler $transactionStateHandler,
+        LoggerInterface $logger,
+        EntityRepository $orderRepository,
+        EntityRepository $orderTransactionRepository
+    ) {
+        parent::__construct(
+            $client,
+            $configurationService,
+            $transactionStateHandler,
+            $logger,
+            $orderRepository,
+            $orderTransactionRepository
+        );
     }
-    public function sendReturnUrlToCheckout(AsyncPaymentTransactionStruct $transaction, SalesChannelContext $context)
+
+    protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string
     {
         try {
-            $accountUrl = $this->baseSuccessUrl . $transaction->getOrderTransaction()->getOrderId();
-            if ($transaction->getOrderTransaction()->getAmount()->getTotalPrice() == 0) {
-                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context->getContext());
+            $order = $this->loadOrderByTransactionId($transaction->getOrderTransactionId(), $context);
+            $orderTransaction = $order->getTransactions()?->get($transaction->getOrderTransactionId());
+
+            if ($orderTransaction === null) {
+                throw PaymentException::asyncProcessInterrupted(
+                    $transaction->getOrderTransactionId(),
+                    sprintf('Transaction %s missing on order %s.', $transaction->getOrderTransactionId(), $order->getOrderNumber() ?? $order->getId())
+                );
+            }
+
+            $accountUrl = $this->baseSuccessUrl.$orderTransaction->getOrderId();
+
+            if ($orderTransaction->getAmount()->getTotalPrice() == 0.0) {
+                $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
+
                 return $accountUrl;
             }
-            $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices';
-            $response = $this->client->sendPostRequest(
-                $uri,
+
+            $currency = $order->getCurrency();
+
+            if ($currency === null) {
+                throw new \RuntimeException(sprintf('Currency information missing for order %s', (string) $order->getId()));
+            }
+
+            $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
+
+            $redirectUrl = $this->client->createInvoice(
+                $orderTransaction->getAmount()->getTotalPrice(),
+                $currency->getIsoCode(),
                 [
-                    'amount' => $transaction->getOrderTransaction()->getAmount()->getTotalPrice(),
-                    'currency' => $context->getCurrency()->getIsoCode(),
-                    'metadata' =>
-                    [
-                        'orderId' => $transaction->getOrderTransaction()->getOrderId(),
-                        'orderNumber' => $transaction->getOrder()->getOrderNumber(),
-                        'transactionId' => $transaction->getOrderTransaction()->getId()
-                    ],
-                    'checkout' => [
-                        'redirectURL' => $accountUrl,
-                        'redirectAutomatically' => true,
-                        'paymentMethods' => ['BTC', 'BTC-LightningNetwork', 'BTC-LNURLPAY']
-                    ]
-                ]
+                    'orderId' => $orderTransaction->getOrderId(),
+                    'orderNumber' => $orderNumber,
+                    'transactionId' => $orderTransaction->getId(),
+                ],
+                $accountUrl,
+                $context,
+                ['BTC-CHAIN', 'BTC-LN', 'BTC-LNURL']
             );
 
-            return $response['checkoutLink'];
+            return $redirectUrl;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());

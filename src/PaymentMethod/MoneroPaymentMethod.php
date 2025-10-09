@@ -16,36 +16,41 @@ use Coincharge\Shopware\PaymentHandler\MoneroPaymentMethodHandler;
 
 class MoneroPaymentMethod
 {
-  public function getName(): string
-  {
-    return 'Monero';
-  }
+    public function getName(): string
+    {
+        return 'Monero';
+    }
 
-  public function getPosition(): int
-  {
-    return -1;
-  }
+    public function getPosition(): int
+    {
+        return -1;
+    }
 
-  public function getTranslations(): array
-  {
-    return [
-      'de-DE' => [
-        'description' => 'Zahle mit Monero',
-        'name' => 'Monero',
-      ],
-      'en-GB' => [
-        'description' => 'Pay with Monero',
-        'name' => 'Monero',
-      ],
-      '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
-        'description' => 'Pay with Monero',
-        'name' => 'Monero',
-      ], //Fallback language
-    ];
-  }
+    public function getTranslations(): array
+    {
+        return [
+            'de-DE' => [
+                'description' => 'Zahle mit Monero',
+                'name' => 'Monero',
+            ],
+            'en-GB' => [
+                'description' => 'Pay with Monero',
+                'name' => 'Monero',
+            ],
+            '2fbb5fe2e29a4d70aa5854ce7ce3e20b' => [
+                'description' => 'Pay with Monero',
+                'name' => 'Monero',
+            ], // Fallback language
+        ];
+    }
 
-  public function getPaymentHandler(): string
-  {
-    return MoneroPaymentMethodHandler::class;
-  }
+    public function getPaymentHandler(): string
+    {
+        return MoneroPaymentMethodHandler::class;
+    }
+
+    public function getTechnicalName(): string
+    {
+        return 'coincharge_btcpay_monero_payment';
+    }
 }

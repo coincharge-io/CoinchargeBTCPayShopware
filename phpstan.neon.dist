@@ -1,0 +1,10 @@
+includes:
+    - vendor/shopware/core/phpstan.neon
+parameters:
+    level: 6
+    paths:
+        - src
+    tmpDir: var/phpstan
+    bootstrapFiles:
+        - vendor/autoload.php
+

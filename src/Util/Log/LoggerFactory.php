@@ -26,7 +26,7 @@ class LoggerFactory {
 
     public function createLogger(): Logger {
         $logger = new Logger('btcpay_logger');
-        $handler = new RotatingFileHandler($this->logPath, $this->rotationCount);
+        $handler = new RotatingFileHandler($this->logPath, $this->rotationCount, Logger::INFO);
         $logger->pushHandler($handler);
 
         return $logger;
