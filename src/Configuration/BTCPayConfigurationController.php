@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(defaults: ['_routeScope' => ['api']])]
 class BTCPayConfigurationController extends ConfigurationController
@@ -43,7 +43,7 @@ class BTCPayConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
-    #[Route(path: '/api/_action/coincharge/verify/webhook', name: 'api.action.coincharge.verify.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
+    #[Route(path: '/api/_action/coincharge/verify/webhook', name: 'api.action.coincharge.verify.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false])]
     public function registerWebhook(Request $request): JsonResponse
     {
         $result = $this->integrationService->reRegisterWebhook($request);
@@ -53,7 +53,7 @@ class BTCPayConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
-    #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
+    #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false])]
     public function updateCredentials(Request $request): RedirectResponse
     {
         $body = $request->request->all();

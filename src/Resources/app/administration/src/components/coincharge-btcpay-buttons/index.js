@@ -10,6 +10,8 @@ const { Component, Mixin, ApiService } = Shopware;
 import template from "./coincharge-btcpay-buttons.html.twig";
 import "./coincharge-btcpay-buttons.scss";
 
+const CONFIG_DOMAIN = "CoinchargeBTCPayShopware.config";
+
 Component.register("coincharge-btcpay-buttons", {
 	template,
 	inject: [["coinchargeBtcpayApiService"]],
@@ -35,7 +37,6 @@ Component.register("coincharge-btcpay-buttons", {
 	},
 	mounted() {
 		this.loadConfiguration();
-		this.registerFieldListeners();
 	},
 	computed: {
 		isTestDisabled() {
@@ -46,8 +47,8 @@ Component.register("coincharge-btcpay-buttons", {
 		},
 		connectionLabel() {
 			return this.status.connected
-				? this.$tc("coincharge-btcpay-status.connected")
-				: this.$tc("coincharge-btcpay-status.disconnected");
+				? this.$t("coincharge-btcpay-status.connected")
+				: this.$t("coincharge-btcpay-status.disconnected");
 		},
 		webhookVariant() {
 			if (this.status.webhookStatus === "registered") {
@@ -60,67 +61,109 @@ Component.register("coincharge-btcpay-buttons", {
 		},
 		webhookLabel() {
 			if (this.status.webhookStatus === "registered") {
-				return this.$tc("coincharge-btcpay-status.webhookRegistered");
+				return this.$t("coincharge-btcpay-status.webhookRegistered");
 			}
 			if (this.status.webhookStatus === "error") {
-				return this.$tc("coincharge-btcpay-status.webhookError");
+				return this.$t("coincharge-btcpay-status.webhookError");
 			}
-			return this.$tc("coincharge-btcpay-status.webhookUnknown");
+			return this.$t("coincharge-btcpay-status.webhookUnknown");
 		},
 	},
 	methods: {
+		// All credential fields are native system-config inputs; the user edits
+		// them and persists with Shopware's own Save button. We therefore read
+		// the SAVED config through the system config API rather than the admin
+		// form's DOM, which since Shopware 6.7 no longer exposes the config key
+		// as an element id.
 		generateAPIKey() {
-			const serverUrl = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayServerUrl");
-			if (!serverUrl) {
-				this.helper.showMissingCredentials = true;
-				return;
-			}
+			this.systemConfigService
+				.getValues(CONFIG_DOMAIN)
+				.then((values) => {
+					const serverUrl = (values[`${CONFIG_DOMAIN}.btcpayServerUrl`] || "").replace(/\/$/, "");
 
-			const filteredUrl = serverUrl.replace(/\/$/, "");
-			this.systemConfigService.saveValues({
-				"CoinchargeBTCPayShopware.config.btcpayServerUrl": filteredUrl,
-				"CoinchargeBTCPayShopware.config.btcpayApiKey": "",
-				"CoinchargeBTCPayShopware.config.btcpayServerStoreId": "",
-				"CoinchargeBTCPayShopware.config.btcpayWebhookId": "",
-				"CoinchargeBTCPayShopware.config.btcpayWebhookSecret": "",
-				"CoinchargeBTCPayShopware.config.integrationStatus": false,
-			}).then(() => {
-				this.credentials.serverUrl = filteredUrl;
-				this.credentials.apiKey = "";
-				this.credentials.storeId = "";
-				this.helper.showMissingCredentials = !this.credentialsExist();
-			});
+					if (!serverUrl) {
+						this.helper.showMissingCredentials = true;
+						return null;
+					}
 
-			const clearedPath = window.location.pathname.replace("/admin", "/");
-			const redirectUrl = `${window.location.origin}${clearedPath}api/_action/coincharge/credentials`;
+					this.helper.showMissingCredentials = false;
 
-			window.open(
-				`${filteredUrl}/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=${encodeURIComponent(redirectUrl)}`,
-				"_blank",
-				"noopener"
-			);
-		},
-		testConnection() {
-			if (this.isTestDisabled) {
-				this.helper.showMissingCredentials = true;
-				return;
-			}
+					// Persist the normalized URL and reset any previously derived
+					// credentials before sending the merchant to BTCPay to authorize.
+					return this.systemConfigService
+						.saveValues({
+							[`${CONFIG_DOMAIN}.btcpayServerUrl`]: serverUrl,
+							[`${CONFIG_DOMAIN}.btcpayApiKey`]: "",
+							[`${CONFIG_DOMAIN}.btcpayServerStoreId`]: "",
+							[`${CONFIG_DOMAIN}.btcpayWebhookId`]: "",
+							[`${CONFIG_DOMAIN}.btcpayWebhookSecret`]: "",
+							[`${CONFIG_DOMAIN}.integrationStatus`]: false,
+						})
+						.then(() => {
+							this.credentials.serverUrl = serverUrl;
+							this.credentials.apiKey = "";
+							this.credentials.storeId = "";
 
-			this.isLoading = true;
-			this.persistCredentials(false)
-				.then(() => this.coinchargeBtcpayApiService.verifyApiKey())
-				.then((response) => {
-					this.handleVerificationResponse(response);
-					return this.loadConfiguration();
+							const clearedPath = window.location.pathname.replace("/admin", "/");
+							const redirectUrl = `${window.location.origin}${clearedPath}api/_action/coincharge/credentials`;
+
+							window.open(
+								`${serverUrl}/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=${encodeURIComponent(redirectUrl)}`,
+								"_blank",
+								"noopener"
+							);
+						});
 				})
 				.catch(() => {
 					this.createNotificationError({
 						title: "BTCPay Server",
-						message: this.$tc("coincharge-btcpay-test-connection.error"),
+						message: this.$t("coincharge-btcpay-test-connection.error"),
 					});
+				});
+		},
+		testConnection() {
+			this.isLoading = true;
+			this.systemConfigService
+				.getValues(CONFIG_DOMAIN)
+				.then((values) => {
+					const serverUrl = values[`${CONFIG_DOMAIN}.btcpayServerUrl`];
+					const apiKey = values[`${CONFIG_DOMAIN}.btcpayApiKey`];
+					const storeId = values[`${CONFIG_DOMAIN}.btcpayServerStoreId`];
+
+					this.credentials.serverUrl = serverUrl || "";
+					this.credentials.apiKey = apiKey || "";
+					this.credentials.storeId = storeId || "";
+
+					if (!serverUrl || !apiKey || !storeId) {
+						this.isLoading = false;
+						this.helper.showMissingCredentials = true;
+						return null;
+					}
+
+					this.helper.showMissingCredentials = false;
+
+					return this.coinchargeBtcpayApiService
+						.verifyApiKey()
+						.then((response) => {
+							this.handleVerificationResponse(response);
+							return this.loadConfiguration();
+						})
+						.catch(() => {
+							this.createNotificationError({
+								title: "BTCPay Server",
+								message: this.$t("coincharge-btcpay-test-connection.error"),
+							});
+						})
+						.finally(() => {
+							this.isLoading = false;
+						});
 				})
-				.finally(() => {
+				.catch(() => {
 					this.isLoading = false;
+					this.createNotificationError({
+						title: "BTCPay Server",
+						message: this.$t("coincharge-btcpay-test-connection.error"),
+					});
 				});
 		},
 		reRegisterWebhook() {
@@ -134,7 +177,7 @@ Component.register("coincharge-btcpay-buttons", {
 				.catch(() => {
 					this.createNotificationError({
 						title: "BTCPay Server",
-						message: this.$tc("coincharge-btcpay-status.webhookReRegisterError"),
+						message: this.$t("coincharge-btcpay-status.webhookReRegisterError"),
 					});
 				})
 				.finally(() => {
@@ -147,14 +190,14 @@ Component.register("coincharge-btcpay-buttons", {
 			if (!response.success) {
 				this.createNotificationWarning({
 					title: "BTCPay Server",
-					message: response.message || this.$tc("coincharge-btcpay-test-connection.error"),
+					message: response.message || this.$t("coincharge-btcpay-test-connection.error"),
 				});
 				return;
 			}
 
 			this.createNotificationSuccess({
 				title: "BTCPay Server",
-				message: this.$tc("coincharge-btcpay-test-connection.success"),
+				message: this.$t("coincharge-btcpay-test-connection.success"),
 			});
 		},
 		handleWebhookResponse(response) {
@@ -162,162 +205,37 @@ Component.register("coincharge-btcpay-buttons", {
 			if (response.success) {
 				this.createNotificationSuccess({
 					title: "BTCPay Server",
-					message: this.$tc("coincharge-btcpay-status.webhookReRegisterSuccess"),
+					message: this.$t("coincharge-btcpay-status.webhookReRegisterSuccess"),
 				});
 			} else {
 				this.createNotificationWarning({
 					title: "BTCPay Server",
-					message: response.message || this.$tc("coincharge-btcpay-status.webhookReRegisterError"),
+					message: response.message || this.$t("coincharge-btcpay-status.webhookReRegisterError"),
 				});
 			}
 		},
 		loadConfiguration() {
 			return this.systemConfigService
-				.getValues("CoinchargeBTCPayShopware.config")
+				.getValues(CONFIG_DOMAIN)
 				.then((values) => {
-					this.syncSystemConfigValues(values);
-					this.credentials.serverUrl = values["CoinchargeBTCPayShopware.config.btcpayServerUrl"] || "";
-					this.credentials.apiKey = values["CoinchargeBTCPayShopware.config.btcpayApiKey"] || "";
-					this.credentials.storeId = values["CoinchargeBTCPayShopware.config.btcpayServerStoreId"] || "";
-					this.status.connected = Boolean(values["CoinchargeBTCPayShopware.config.integrationStatus"]);
-					this.status.webhookStatus = values["CoinchargeBTCPayShopware.config.btcpayWebhookStatus"] || null;
+					this.credentials.serverUrl = values[`${CONFIG_DOMAIN}.btcpayServerUrl`] || "";
+					this.credentials.apiKey = values[`${CONFIG_DOMAIN}.btcpayApiKey`] || "";
+					this.credentials.storeId = values[`${CONFIG_DOMAIN}.btcpayServerStoreId`] || "";
+					this.status.connected = Boolean(values[`${CONFIG_DOMAIN}.integrationStatus`]);
+					this.status.webhookStatus = values[`${CONFIG_DOMAIN}.btcpayWebhookStatus`] || null;
 					this.helper.showMissingCredentials = !this.credentialsExist();
 				});
 		},
 		updateStatusFromResponse(response) {
-			if (typeof response.success === 'boolean') {
+			if (typeof response.success === "boolean") {
 				this.status.connected = response.success;
 			}
 			if (response.webhookStatus) {
 				this.status.webhookStatus = response.webhookStatus;
 			}
 		},
-		registerFieldListeners() {
-			["CoinchargeBTCPayShopware.config.btcpayServerUrl", "CoinchargeBTCPayShopware.config.btcpayApiKey", "CoinchargeBTCPayShopware.config.btcpayServerStoreId"].forEach((field) => {
-				const element = document.getElementById(field);
-				if (!element) {
-					return;
-				}
-				element.addEventListener("input", (event) => {
-					this.updateCredentialFromField(field, event.target?.value ?? "");
-					this.helper.showMissingCredentials = !this.credentialsExist();
-				});
-			});
-		},
 		credentialsExist() {
-			const serverUrl = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayServerUrl") || this.credentials.serverUrl;
-			const apiKey = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayApiKey") || this.credentials.apiKey;
-			const storeId = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayServerStoreId") || this.credentials.storeId;
-
-			return Boolean(serverUrl && apiKey && storeId);
-		},
-		getFieldValue(fieldId) {
-			const field = document.getElementById(fieldId);
-			return field ? field.value.trim() : "";
-		},
-		updateCredentialFromField(fieldId, rawValue) {
-			const value = (rawValue ?? "").trim();
-
-			if (fieldId === "CoinchargeBTCPayShopware.config.btcpayServerUrl") {
-				this.credentials.serverUrl = value;
-			} else if (fieldId === "CoinchargeBTCPayShopware.config.btcpayApiKey") {
-				this.credentials.apiKey = value;
-			} else if (fieldId === "CoinchargeBTCPayShopware.config.btcpayServerStoreId") {
-				this.credentials.storeId = value;
-			}
-		},
-		getCredentialPayload() {
-			const rawServerUrl = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayServerUrl") || this.credentials.serverUrl;
-			const serverUrl = rawServerUrl ? rawServerUrl.replace(/\/$/, "") : "";
-
-			const apiKey = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayApiKey") || this.credentials.apiKey;
-			const storeId = this.getFieldValue("CoinchargeBTCPayShopware.config.btcpayServerStoreId") || this.credentials.storeId;
-
-			return {
-				"CoinchargeBTCPayShopware.config.btcpayServerUrl": serverUrl,
-				"CoinchargeBTCPayShopware.config.btcpayApiKey": apiKey,
-				"CoinchargeBTCPayShopware.config.btcpayServerStoreId": storeId,
-			};
-		},
-		persistCredentials(reloadConfiguration) {
-			const payload = this.getCredentialPayload();
-
-			if (!payload["CoinchargeBTCPayShopware.config.btcpayServerUrl"] || !payload["CoinchargeBTCPayShopware.config.btcpayApiKey"] || !payload["CoinchargeBTCPayShopware.config.btcpayServerStoreId"]) {
-				return Promise.reject(new Error("Missing credentials"));
-			}
-
-			return this.systemConfigService.saveValues(payload).then(() => {
-				this.credentials.serverUrl = payload["CoinchargeBTCPayShopware.config.btcpayServerUrl"];
-				this.credentials.apiKey = payload["CoinchargeBTCPayShopware.config.btcpayApiKey"];
-				this.credentials.storeId = payload["CoinchargeBTCPayShopware.config.btcpayServerStoreId"];
-
-				if (reloadConfiguration) {
-					return this.loadConfiguration();
-				}
-
-				return null;
-			});
-		},
-		syncSystemConfigValues(values) {
-			this.$nextTick(() => {
-				const state = Shopware?.State;
-				const systemConfigStore = state?.get?.("swSystemConfig");
-				const salesChannelId = systemConfigStore?.currentSalesChannelId ?? null;
-
-				Object.entries(values).forEach(([key, value]) => {
-					if (!key.startsWith("CoinchargeBTCPayShopware.config.")) {
-						return;
-					}
-
-					const updated =
-						this.commitSystemConfigValue(key, value, salesChannelId) ||
-						this.updateDomFieldValue(key, value);
-
-					if (!updated) {
-						this.updateDomFieldValue(key, value);
-					}
-				});
-			});
-		},
-		commitSystemConfigValue(key, value, salesChannelId) {
-			const state = Shopware?.State;
-			if (!state?._mutations) {
-				return false;
-			}
-
-			const payload = { key, value, salesChannelId };
-			const mutations = [
-				"swSystemConfig/setActualConfigData",
-				"swSystemConfig/setActualConfigValue",
-				"swSystemConfig/setActualValue",
-				"swSystemConfig/setActualConfigItem",
-			];
-
-			for (const mutation of mutations) {
-				if (state._mutations[mutation]) {
-					state.commit(mutation, payload);
-					return true;
-				}
-			}
-
-			return false;
-		},
-		updateDomFieldValue(key, value) {
-			const element = document.getElementById(key);
-			if (!element) {
-				return false;
-			}
-
-			if (element.type === "checkbox") {
-				element.checked = Boolean(value);
-			} else {
-				element.value = value ?? "";
-			}
-
-			element.dispatchEvent(new Event("input", { bubbles: true }));
-			element.dispatchEvent(new Event("change", { bubbles: true }));
-
-			return true;
+			return Boolean(this.credentials.serverUrl && this.credentials.apiKey && this.credentials.storeId);
 		},
 	},
 });

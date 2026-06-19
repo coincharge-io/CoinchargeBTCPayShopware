@@ -2,19 +2,16 @@
 	<sw-label :variant="connectionVariant" size="small">{{ connectionLabel }}</sw-label>
 	<sw-label :variant="webhookVariant" size="small">{{ webhookLabel }}</sw-label>
 	<sw-button size="small" variant="tertiary" class="coincharge-coinsnap-status-card__webhook" :disabled="isWebhookLoading" :isLoading="isWebhookLoading" @click="reRegisterWebhook">
-		{{ $tc('coincharge-coinsnap-status.webhookReRegisterButton') }}
+		{{ $t('coincharge-coinsnap-status.webhookReRegisterButton') }}
 	</sw-button>
 </div>
 
 <sw-alert variant="warning" v-if="helper.showMissingCredentials" class="coincharge-coinsnap-credentials-hint">
-	{{ $tc('coincharge-coinsnap-status.credentialWarning') }}
+	{{ $t('coincharge-coinsnap-status.credentialWarning') }}
 </sw-alert>
 
-<sw-container columns="repeat(3, auto)" gap="0px 10px" class="coincharge-coinsnap-action-row">
-	<sw-button class="sw-button-coincharge" @click="saveCredentials">
-		{{ $tc('coincharge-coinsnap-test-connection.save') }}
-	</sw-button>
+<sw-container columns="repeat(2, auto)" gap="0px 10px" class="coincharge-coinsnap-action-row">
 	<sw-button-process class="sw-button-coincharge" :process-success="isLoading" :disabled="isDisabled" :isLoading="isLoading" @click="testConnection">
-		{{ $tc('coincharge-coinsnap-test-connection.button') }}
+		{{ $t('coincharge-coinsnap-test-connection.button') }}
 	</sw-button-process>
 </sw-container>

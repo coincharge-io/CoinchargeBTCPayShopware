@@ -15,7 +15,7 @@ namespace Coincharge\Shopware\Configuration;
 use Coincharge\Shopware\Configuration\Service\CoinsnapIntegrationService;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -39,7 +39,7 @@ class CoinsnapConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
-    #[Route(path: '/api/_action/coincharge/coinsnap/webhook', name: 'api.action.coincharge.coinsnap.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false, 'csrf_protected' => false])]
+    #[Route(path: '/api/_action/coincharge/coinsnap/webhook', name: 'api.action.coincharge.coinsnap.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false])]
     public function registerWebhook(Request $request): JsonResponse
     {
         $result = $this->integrationService->reRegisterWebhook($request);

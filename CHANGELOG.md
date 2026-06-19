@@ -1,3 +1,12 @@
+# 1.1.6
+
+- Fix compatibility with Shopware 6.7 / Symfony 7: switch route attributes to the `Symfony\Component\Routing\Attribute\Route` namespace
+- Make media registration idempotent so re-install and upgrade no longer fail with "file already exists"
+- Replace the removed `EntityRepositoryInterface` with `EntityRepository`
+- Drop the dead `csrf_protected` route default (removed since Shopware 6.5)
+- Migrate administration `$tc()` to `$t()` for Vue 3 i18n
+- Read admin settings from saved system config via the API instead of the form DOM / Vuex store, which Shopware 6.7 no longer exposes; fixes the "Generate API key" flow and credential detection on 6.7
+
 # 1.1.5
 
 - Add USDT support for BTCPay Server

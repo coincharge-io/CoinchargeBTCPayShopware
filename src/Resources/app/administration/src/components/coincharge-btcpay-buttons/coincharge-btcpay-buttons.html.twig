@@ -2,19 +2,19 @@
 	<sw-label :variant="connectionVariant" size="small">{{ connectionLabel }}</sw-label>
 	<sw-label :variant="webhookVariant" size="small">{{ webhookLabel }}</sw-label>
 	<sw-button size="small" variant="tertiary" class="coincharge-btcpay-status-card__webhook" :disabled="isWebhookLoading" :isLoading="isWebhookLoading" @click="reRegisterWebhook">
-		{{ $tc('coincharge-btcpay-status.webhookReRegisterButton') }}
+		{{ $t('coincharge-btcpay-status.webhookReRegisterButton') }}
 	</sw-button>
 </div>
 
 <sw-alert variant="warning" v-if="helper.showMissingCredentials" class="coincharge-btcpay-credentials-hint">
-	{{ $tc('coincharge-btcpay-status.credentialWarning') }}
+	{{ $t('coincharge-btcpay-status.credentialWarning') }}
 </sw-alert>
 
 <sw-container columns="repeat(3, auto)" gap="0px 10px" class="coincharge-btcpay-action-row">
-	<sw-button v-tooltip.top="{ message:$tc('coincharge-btcpay-generate-credentials.info')}" class="sw-button-coincharge" @click="generateAPIKey">
-		{{ $tc('coincharge-btcpay-generate-credentials.button') }}
+	<sw-button v-tooltip.top="{ message:$t('coincharge-btcpay-generate-credentials.info')}" class="sw-button-coincharge" @click="generateAPIKey">
+		{{ $t('coincharge-btcpay-generate-credentials.button') }}
 	</sw-button>
 	<sw-button-process class="sw-button-coincharge" :process-success="isLoading" :isLoading="isLoading" :disabled="isTestDisabled" @click="testConnection">
-		{{ $tc('coincharge-btcpay-test-connection.button') }}
+		{{ $t('coincharge-btcpay-test-connection.button') }}
 	</sw-button-process>
 </sw-container>

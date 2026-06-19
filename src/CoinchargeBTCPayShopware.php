@@ -17,7 +17,7 @@ use Shopware\Core\Content\Media\File\FileSaver;
 use Shopware\Core\Content\Media\File\MediaFile;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
@@ -288,7 +288,7 @@ class CoinchargeBTCPayShopware extends Plugin
         ];
 
         /**
-         * @var EntityRepositoryInterface $paymentRepository
+         * @var EntityRepository $paymentRepository
          */
         $paymentRepository = $this->container->get('payment_method.repository');
         $paymentRepository->create([$examplePaymentData], $context);
@@ -299,7 +299,7 @@ class CoinchargeBTCPayShopware extends Plugin
     private function setPaymentMethodIsActive($paymentMethod, bool $active, Context $context): void
     {
         /**
-         * @var EntityRepositoryInterface $paymentRepository
+         * @var EntityRepository $paymentRepository
          */
         $paymentRepository = $this->container->get('payment_method.repository');
 
@@ -321,7 +321,7 @@ class CoinchargeBTCPayShopware extends Plugin
     private function getPaymentMethodId($paymentMethod): ?string
     {
         /**
-         * @var EntityRepositoryInterface $paymentRepository
+         * @var EntityRepository $paymentRepository
          */
         $paymentRepository = $this->container->get('payment_method.repository');
 
@@ -387,14 +387,17 @@ class CoinchargeBTCPayShopware extends Plugin
         if ($filePath === false) {
             throw new \RuntimeException(sprintf('Missing media asset for payment method logo "%s"', $logoName));
         }
-        $fileName = hash_file('md5', $filePath);
-        $media = $this->getMediaEntity($fileName, $context);
-        $mediaRepository = $this->container->get('media.repository');
+        $savedFileName = \sprintf('btcpay_shopware_%s', strtolower($logoName));
+
+        // Look up by the name the file is actually stored under, so re-installs
+        // and upgrades don't try to persist a media file that already exists.
+        $media = $this->getMediaEntity($savedFileName, $context);
 
         if ($media) {
             return $media->getId();
         }
 
+        $mediaRepository = $this->container->get('media.repository');
         $mediaFile = new MediaFile(
             $filePath,
             mime_content_type($filePath),
@@ -411,7 +414,6 @@ class CoinchargeBTCPayShopware extends Plugin
             $context
         );
         $fileSaver = $this->container->get(FileSaver::class);
-        $savedFileName = \sprintf('btcpay_shopware_%s', strtolower($logoName));
         $fileSaver->persistFileToMedia(
             $mediaFile,
             $savedFileName,
