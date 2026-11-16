@@ -39,6 +39,13 @@ class AbstractClient
         return $this->request(Request::METHOD_POST, $uri, $options);
     }
 
+    // Path without store, invoice or webhook IDs, and without the query.
+    private static function pathForLog(string $uri): string
+    {
+        $path = (string) parse_url($uri, PHP_URL_PATH);
+        return (string) preg_replace('#/(stores|invoices|webhooks|payment-methods)/[^/]+#', '/$1/{id}', $path);
+    }
+
     // Logs method, path and status only: bodies and options can carry secrets or customer data.
     private function request(string $method, string $uri, array $options = []): array
     {
@@ -48,7 +55,7 @@ class AbstractClient
             $status = $e->hasResponse() ? $e->getResponse()->getStatusCode() : 0;
             $this->logger->error('API request failed: {method} {uri} status {status}', [
                 'method' => $method,
-                'uri' => $uri,
+                'uri' => self::pathForLog($uri),
                 'status' => $status,
             ]);
 
@@ -56,7 +63,7 @@ class AbstractClient
         } catch (GuzzleException $e) {
             $this->logger->error('API request failed: {method} {uri} could not connect', [
                 'method' => $method,
-                'uri' => $uri,
+                'uri' => self::pathForLog($uri),
             ]);
 
             throw new ApiRequestException('API server unreachable', 0);
