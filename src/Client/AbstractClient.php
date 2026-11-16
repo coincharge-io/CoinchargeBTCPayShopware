@@ -76,7 +76,7 @@ class AbstractClient
 
         $decodedBody = \json_decode($body, true);
         if (!is_array($decodedBody)) {
-            $this->logger->error('API returned invalid JSON: {method} {uri}', ['method' => $method, 'uri' => $uri]);
+            $this->logger->error('API returned invalid JSON: {method} {uri}', ['method' => $method, 'uri' => self::pathForLog($uri)]);
 
             throw new ApiRequestException('API returned invalid JSON', 502);
         }
