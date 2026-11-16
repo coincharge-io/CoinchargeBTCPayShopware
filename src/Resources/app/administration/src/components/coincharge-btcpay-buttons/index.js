@@ -90,8 +90,11 @@ Component.register("coincharge-btcpay-buttons", {
 
 					// Persist the normalized URL and reset any previously derived
 					// credentials before sending the merchant to BTCPay to authorize.
+					// The one-time state proves the key BTCPay posts back was requested here.
+					const authState = Array.from(window.crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join("");
 					return this.systemConfigService
 						.saveValues({
+							[`${CONFIG_DOMAIN}.btcpayAuthState`]: authState,
 							[`${CONFIG_DOMAIN}.btcpayServerUrl`]: serverUrl,
 							[`${CONFIG_DOMAIN}.btcpayApiKey`]: "",
 							[`${CONFIG_DOMAIN}.btcpayServerStoreId`]: "",
@@ -105,10 +108,10 @@ Component.register("coincharge-btcpay-buttons", {
 							this.credentials.storeId = "";
 
 							const clearedPath = window.location.pathname.replace("/admin", "/");
-							const redirectUrl = `${window.location.origin}${clearedPath}api/_action/coincharge/credentials`;
+							const redirectUrl = `${window.location.origin}${clearedPath}api/_action/coincharge/credentials?state=${authState}`;
 
 							window.open(
-								`${serverUrl}/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&selectiveStores=true&redirect=${encodeURIComponent(redirectUrl)}`,
+								`${serverUrl}/api-keys/authorize/?applicationName=BTCPayShopwarePlugin&permissions=btcpay.store.cancreateinvoice&permissions=btcpay.store.canviewinvoices&permissions=btcpay.store.webhooks.canmodifywebhooks&permissions=btcpay.store.canviewstoresettings&strict=true&selectiveStores=true&redirect=${encodeURIComponent(redirectUrl)}`,
 								"_blank",
 								"noopener"
 							);

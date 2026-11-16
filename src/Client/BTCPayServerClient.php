@@ -72,7 +72,7 @@ class BTCPayServerClient extends AbstractClient implements ClientInterface
         string $redirectUrl,
         Context $context,
         ?array $paymentMethods = null // optional parameter
-    ): string {
+    ): array {
         $storeId = $this->configurationService->getSetting('btcpayServerStoreId');
         $uri = '/api/v1/stores/'.$storeId.'/invoices';
 
@@ -92,17 +92,7 @@ class BTCPayServerClient extends AbstractClient implements ClientInterface
             $payload['checkout']['paymentMethods'] = $paymentMethods;
         }
 
-        try {
-            $response = $this->sendPostRequest($uri, $payload);
-
-            return $response['checkoutLink'] ?? $redirectUrl;
-        } catch (\Throwable $e) {
-            $this->logger->error('BTCPay invoice creation failed', [
-                'exception' => $e,
-                'payload' => $payload,
-            ]);
-
-            throw $e;
-        }
+        // Failures are logged by the client without the payload.
+        return $this->sendPostRequest($uri, $payload);
     }
 }

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware;
 
+use Doctrine\DBAL\Connection;
 use Coincharge\Shopware\PaymentMethod\PaymentMethods;
 use Shopware\Core\Content\Media\File\FileSaver;
 use Shopware\Core\Content\Media\File\MediaFile;
@@ -184,6 +185,8 @@ class CoinchargeBTCPayShopware extends Plugin
             if ($customFieldIds) {
                 $customFieldSetRepository->delete($customFieldIds, $context->getContext());
             }
+
+            $this->container->get(Connection::class)->executeStatement('DROP TABLE IF EXISTS `coincharge_processed_invoice`');
         }
     }
 

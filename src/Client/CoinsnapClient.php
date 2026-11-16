@@ -65,11 +65,7 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
         return $this->configurationService->getSetting('coinsnapApiKey');
     }
 
-    /**
-     * Creates an invoice on Coinsnap and returns the checkout link.
-     *
-     * @param  array|null  $enabledPaymentMethods  Optional — if provided, included in request
-     */
+    // Creates an invoice on Coinsnap and returns it as the API answered.
     public function createInvoice(
         float $amount,
         string $currency,
@@ -79,7 +75,7 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
         string $redirectUrl,
         Context $context,
         ?array $enabledPaymentMethods = null
-    ): string {
+    ): array {
         $uri = '/api/v1/stores/'.$this->configurationService->getSetting('coinsnapStoreId').'/invoices';
 
         $payload = [
@@ -99,16 +95,7 @@ class CoinsnapClient extends AbstractClient implements ClientInterface
             $payload['enabledPaymentMethods'] = $enabledPaymentMethods;
         }
 
-        try {
-            $response = $this->sendPostRequest($uri, $payload);
-
-            return $response['checkoutLink'] ?? $redirectUrl;
-        } catch (\Throwable $e) {
-            $this->logger->error('Coinsnap invoice creation failed', [
-                'exception' => $e,
-                'payload' => $payload,
-            ]);
-            throw $e;
-        }
+        // Failures are logged by the client without the payload.
+        return $this->sendPostRequest($uri, $payload);
     }
 }

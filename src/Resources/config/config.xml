@@ -7,7 +7,7 @@
       <name>coinsnapStoreId</name>
       <label>Coinsnap Store Id</label>
     </input-field>
-    <input-field>
+    <input-field type="password">
       <name>coinsnapApiKey</name>
       <label>Coinsnap API Key</label>
     </input-field>
@@ -15,11 +15,6 @@
       <name>coinsnapWebhookId</name>
       <label>Webhook id</label>
       <disabled>true</disabled>
-    </input-field>
-    <input-field>
-      <name>coinsnapWebhookSecret</name>
-      <disabled>true</disabled>
-      <label>Webhook secret</label>
     </input-field>
     <input-field type="checkbox">
       <name>coinsnapIntegrationStatus</name>
@@ -98,7 +93,7 @@
   <card>
     <title>Credentials</title>
     <title lang="de-DE">Berechtigungsnachweise</title>
-    <input-field>
+    <input-field type="password">
       <name>btcpayApiKey</name>
       <label>BTCPay API Key</label>
     </input-field>
@@ -110,11 +105,6 @@
       <name>btcpayWebhookId</name>
       <label>Webhook id</label>
       <disabled>true</disabled>
-    </input-field>
-    <input-field>
-      <name>btcpayWebhookSecret</name>
-      <disabled>true</disabled>
-      <label>Webhook secret</label>
     </input-field>
   </card>
 

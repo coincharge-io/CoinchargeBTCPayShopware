@@ -14,7 +14,9 @@ namespace Coincharge\Shopware\PaymentHandler;
 
 use Coincharge\Shopware\Client\ClientInterface;
 use Coincharge\Shopware\Configuration\ConfigurationService;
+use Coincharge\Shopware\Order\OrderService;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
@@ -86,6 +88,25 @@ abstract class AbstractPaymentMethodHandler extends AbstractPaymentHandler
     public function finalize(Request $request, PaymentTransactionStruct $transaction, Context $context): void {}
 
     abstract protected function sendReturnUrlToCheckout(PaymentTransactionStruct $transaction, Context $context): string;
+
+    // Returns the checkout link, after recording the invoice so only its webhooks can pay this transaction.
+    protected function checkoutLinkFrom(array $invoice, OrderTransactionEntity $orderTransaction, Context $context): string
+    {
+        if (empty($invoice['checkoutLink']) || empty($invoice['id']) || ! is_string($invoice['id'])) {
+            throw new \RuntimeException('The payment gateway did not return a checkout link.');
+        }
+
+        $known = $orderTransaction->getCustomFields()[OrderService::INVOICE_IDS_FIELD] ?? [];
+        $known = is_array($known) ? $known : [];
+        $known[] = $invoice['id'];
+
+        $this->orderTransactionRepository->update([[
+            'id' => $orderTransaction->getId(),
+            'customFields' => [OrderService::INVOICE_IDS_FIELD => array_values(array_unique($known))],
+        ]], $context);
+
+        return $invoice['checkoutLink'];
+    }
 
     protected function loadOrderByTransactionId(string $orderTransactionId, Context $context): OrderEntity
     {

@@ -70,7 +70,7 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
 
             $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
 
-            $redirectUrl = $this->client->createInvoice(
+            $invoice = $this->client->createInvoice(
                 $orderTransaction->getAmount()->getTotalPrice(),
                 $currency->getIsoCode(),
                 [
@@ -83,7 +83,7 @@ class BitcoinPaymentMethodHandler extends AbstractPaymentMethodHandler
                 ['BTC-CHAIN']
             );
 
-            return $redirectUrl;
+            return $this->checkoutLinkFrom($invoice, $orderTransaction, $context);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());

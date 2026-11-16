@@ -12,7 +12,9 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Configuration\Service;
 
+use Coincharge\Shopware\Client\ApiRequestException;
 use Coincharge\Shopware\Client\ClientInterface;
+use Coincharge\Shopware\Configuration\BTCPayKeyPolicy;
 use Coincharge\Shopware\Configuration\ConfigurationService;
 use Coincharge\Shopware\PaymentMethod\BitcoinLightningPaymentMethod;
 use Coincharge\Shopware\PaymentMethod\BitcoinCryptoPaymentMethod;
@@ -221,6 +223,40 @@ class BTCPayIntegrationService
         $this->configurationService->setSetting('btcpayStorePaymentMethodLitecoin', false);
         $this->configurationService->setSetting('btcpayStorePaymentMethodMonero', false);
         $this->configurationService->setSetting('btcpayStorePaymentMethodUSDT', false);
+    }
+
+    // Saves the key BTCPay posts back only for this admin's one-time state and a key limited to one store.
+    public function acceptCredentials(mixed $state, mixed $apiKey): bool
+    {
+        $expectedState = (string) $this->configurationService->getSetting('btcpayAuthState');
+        $this->configurationService->setSetting('btcpayAuthState', null);
+
+        if ($expectedState === '' || ! is_string($state) || ! hash_equals($expectedState, $state)) {
+            $this->logger->warning('SECURITY btcpay connect rejected reason=invalid state');
+
+            return false;
+        }
+        if (! is_string($apiKey) || ! preg_match('/^[A-Za-z0-9]+$/', $apiKey)) {
+            return false;
+        }
+
+        // Permissions and store come from BTCPay itself, never from the POST.
+        try {
+            $key = $this->client->sendGetRequest('/api/v1/api-keys/current', ['Authorization' => 'token '.$apiKey]);
+        } catch (ApiRequestException $e) {
+            return false;
+        }
+        $storeId = BTCPayKeyPolicy::storeIdFor(is_array($key['permissions'] ?? null) ? $key['permissions'] : []);
+        if ($storeId === null) {
+            $this->logger->warning('SECURITY btcpay connect rejected reason=key not limited to one store');
+
+            return false;
+        }
+
+        $this->configurationService->setSetting('btcpayApiKey', $apiKey);
+        $this->configurationService->setSetting('btcpayServerStoreId', $storeId);
+
+        return true;
     }
 
     /**

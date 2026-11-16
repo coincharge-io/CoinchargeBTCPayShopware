@@ -16,6 +16,7 @@ use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\GuzzleException;
 
 class AbstractClient
 {
@@ -38,65 +39,41 @@ class AbstractClient
         return $this->request(Request::METHOD_POST, $uri, $options);
     }
 
-  private function request(string $method, string $uri, array $options = []): array
-  {
-    try {
-      $response = $this->client->request($method, $uri, $options);
-      $body = $response->getBody()->getContents();
+    // Logs method, path and status only: bodies and options can carry secrets or customer data.
+    private function request(string $method, string $uri, array $options = []): array
+    {
+        try {
+            $response = $this->client->request($method, $uri, $options);
+        } catch (RequestException $e) {
+            $status = $e->hasResponse() ? $e->getResponse()->getStatusCode() : 0;
+            $this->logger->error('API request failed: {method} {uri} status {status}', [
+                'method' => $method,
+                'uri' => $uri,
+                'status' => $status,
+            ]);
 
-      $this->logger->debug(
-        '{method} {uri} with following response: {response}',
-        [
-          'method' => \mb_strtoupper($method),
-          'uri' => $uri,
-          'response' => $body,
-        ]
-      );
+            throw new ApiRequestException('API request failed with status ' . $status, $status);
+        } catch (GuzzleException $e) {
+            $this->logger->error('API request failed: {method} {uri} could not connect', [
+                'method' => $method,
+                'uri' => $uri,
+            ]);
 
-      return \json_decode($body, true) ?? [];
-
-    } catch (RequestException $e) {
-      if ($e->hasResponse()) {
-        $response = $e->getResponse();
-        $statusCode = $response->getStatusCode();
-        $reasonPhrase = $response->getReasonPhrase();
-        $responseBody = $response->getBody()->getContents();
-
-        // Log more detailed error information
-        $this->logger->error('Guzzle request failed: {status} {reason}', [
-          'status' => $statusCode,
-          'reason' => $reasonPhrase,
-          'uri' => $uri,
-          'method' => $method,
-          'request_options' => $options,
-          'response_body' => $responseBody,
-        ]);
-
-        // For 422 errors, try to extract validation errors
-        if ($statusCode === 422) {
-          $errorData = \json_decode($responseBody, true);
-          $errorMessage = 'Validation failed: ';
-
-          if (is_array($errorData)) {
-            $errorMessage .= json_encode($errorData);
-          } else {
-            $errorMessage .= $responseBody;
-          }
-
-          throw new \Exception($errorMessage, $statusCode);
+            throw new ApiRequestException('API server unreachable', 0);
         }
 
-        throw new \Exception($reasonPhrase, $statusCode);
-      }
+        $body = $response->getBody()->getContents();
+        if ($body === '') {
+            return [];
+        }
 
-      $this->logger->error('Guzzle request failed: Unknown error', [
-        'uri' => $uri,
-        'method' => $method,
-        'request_options' => $options,
-        'error' => $e->getMessage(),
-      ]);
+        $decodedBody = \json_decode($body, true);
+        if (!is_array($decodedBody)) {
+            $this->logger->error('API returned invalid JSON: {method} {uri}', ['method' => $method, 'uri' => $uri]);
 
-      throw new \Exception('Unknown error: ' . $e->getMessage());
+            throw new ApiRequestException('API returned invalid JSON', 502);
+        }
+
+        return $decodedBody;
     }
-  }
 }

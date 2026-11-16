@@ -39,7 +39,7 @@ class CoinsnapConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
-    #[Route(path: '/api/_action/coincharge/coinsnap/webhook', name: 'api.action.coincharge.coinsnap.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false])]
+    #[Route(path: '/api/_action/coincharge/coinsnap/webhook', name: 'api.action.coincharge.coinsnap.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true])]
     public function registerWebhook(Request $request): JsonResponse
     {
         $result = $this->integrationService->reRegisterWebhook($request);

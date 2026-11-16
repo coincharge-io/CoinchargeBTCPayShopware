@@ -12,28 +12,61 @@ declare(strict_types=1);
 
 namespace Coincharge\Shopware\Order;
 
-use Coincharge\Shopware\Client\ClientInterface;
-use Coincharge\Shopware\Configuration\ConfigurationService;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\Uuid\Uuid;
 
 class OrderService
 {
-    private ClientInterface $client;
-    private ConfigurationService $configurationService;
+    public const INVOICE_IDS_FIELD = 'coinchargeInvoiceIds';
 
-    public function __construct(ClientInterface $client, ConfigurationService $configurationService)
+    private EntityRepository $orderRepository;
+    private EntityRepository $orderTransactionRepository;
+
+    public function __construct(EntityRepository $orderRepository, EntityRepository $orderTransactionRepository)
     {
-        $this->client = $client;
-        $this->configurationService = $configurationService;
+        $this->orderRepository = $orderRepository;
+        $this->orderTransactionRepository = $orderTransactionRepository;
     }
 
-    public function invoiceIsFullyPaid(string $invoiceId): bool
+    // The transaction with its order, currency and current state, or null.
+    public function getTransaction(string $transactionId, Context $context): ?OrderTransactionEntity
     {
-
-        $uri = '/api/v1/stores/' . $this->configurationService->getSetting('btcpayServerStoreId') . '/invoices/' . $invoiceId;
-        $response = $this->client->sendGetRequest($uri);
-        if ($response['status'] !== 'Settled') {
-            return false;
+        if (!Uuid::isValid($transactionId)) {
+            return null;
         }
-        return true;
+
+        $criteria = new Criteria([$transactionId]);
+        $criteria->addAssociation('order.currency');
+        $criteria->addAssociation('stateMachineState');
+        $transaction = $this->orderTransactionRepository->search($criteria, $context)->first();
+
+        return $transaction instanceof OrderTransactionEntity ? $transaction : null;
+    }
+
+    // Records every invoice created for a transaction; a customer can start a payment twice.
+    public function rememberInvoiceId(OrderTransactionEntity $transaction, string $invoiceId, Context $context): void
+    {
+        $known = $transaction->getCustomFields()[self::INVOICE_IDS_FIELD] ?? [];
+        $known = is_array($known) ? $known : [];
+        $known[] = $invoiceId;
+
+        $this->orderTransactionRepository->update([[
+            'id' => $transaction->getId(),
+            'customFields' => [self::INVOICE_IDS_FIELD => array_values(array_unique($known))],
+        ]], $context);
+    }
+
+    public function setOrderStatus(string $orderId, string $invoiceId, string $status, Context $context): void
+    {
+        $this->orderRepository->upsert([[
+            'id' => $orderId,
+            'customFields' => [
+                'coinsnapInvoiceId' => $invoiceId,
+                'coinsnapOrderStatus' => $status,
+            ],
+        ]], $context);
     }
 }

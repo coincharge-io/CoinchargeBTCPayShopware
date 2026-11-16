@@ -25,12 +25,9 @@ class BTCPayConfigurationController extends ConfigurationController
 {
     private BTCPayIntegrationService $integrationService;
 
-    private ConfigurationService $configurationService;
-
-    public function __construct(BTCPayIntegrationService $integrationService, ConfigurationService $configurationService)
+    public function __construct(BTCPayIntegrationService $integrationService)
     {
         $this->integrationService = $integrationService;
-        $this->configurationService = $configurationService;
     }
 
     #[Route(path: '/api/_action/coincharge/verify', name: 'api.action.coincharge.verify.webhook', methods: ['GET'])]
@@ -43,7 +40,7 @@ class BTCPayConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
-    #[Route(path: '/api/_action/coincharge/verify/webhook', name: 'api.action.coincharge.verify.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false])]
+    #[Route(path: '/api/_action/coincharge/verify/webhook', name: 'api.action.coincharge.verify.webhook.register', methods: ['POST'], defaults: ['XmlHttpRequest' => true])]
     public function registerWebhook(Request $request): JsonResponse
     {
         $result = $this->integrationService->reRegisterWebhook($request);
@@ -53,14 +50,13 @@ class BTCPayConfigurationController extends ConfigurationController
         return new JsonResponse($result, $statusCode);
     }
 
+    // BTCPay posts the key back through a browser navigation without the admin token, so this route
+    // stays public and is guarded by the one-time state the admin created before leaving.
     #[Route(path: '/api/_action/coincharge/credentials', name: 'api.action.coincharge.update.credentials', methods: ['POST'], defaults: ['XmlHttpRequest' => true, 'auth_required' => false])]
     public function updateCredentials(Request $request): RedirectResponse
     {
-        $body = $request->request->all();
-        $this->configurationService->setSetting('btcpayApiKey', $body['apiKey']);
-        $this->configurationService->setSetting('btcpayServerStoreId', explode(':', $body['permissions'][0])[1]);
-        $redirectUrl = $request->server->get('APP_URL').'/admin#/sw/extension/config/CoinchargeBTCPayShopware';
+        $this->integrationService->acceptCredentials($request->query->get('state'), $request->request->get('apiKey'));
 
-        return new RedirectResponse($redirectUrl);
+        return new RedirectResponse($request->server->get('APP_URL').'/admin#/sw/extension/config/CoinchargeBTCPayShopware');
     }
 }

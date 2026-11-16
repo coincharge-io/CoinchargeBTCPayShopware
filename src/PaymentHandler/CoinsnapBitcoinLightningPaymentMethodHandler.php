@@ -70,7 +70,7 @@ class CoinsnapBitcoinLightningPaymentMethodHandler extends AbstractPaymentMethod
 
             $orderNumber = $order->getOrderNumber() ?? (string) $order->getId();
 
-            $redirectUrl = $this->client->createInvoice(
+            $invoice = $this->client->createInvoice(
                 $orderTransaction->getAmount()->getTotalPrice(),
                 $currency->getIsoCode(),
                 $orderTransaction->getOrderId(),
@@ -80,7 +80,7 @@ class CoinsnapBitcoinLightningPaymentMethodHandler extends AbstractPaymentMethod
                 $context,
             );
 
-            return $redirectUrl;
+            return $this->checkoutLinkFrom($invoice, $orderTransaction, $context);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw new \Exception($e->getMessage());

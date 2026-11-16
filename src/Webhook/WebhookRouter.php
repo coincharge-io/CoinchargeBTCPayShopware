@@ -14,43 +14,56 @@ declare(strict_types=1);
 namespace Coincharge\Shopware\Webhook;
 
 use Coincharge\Shopware\Webhook\Factory\WebhookFactory;
+use Coincharge\Shopware\Webhook\BTCPayWebhookService;
+use Coincharge\Shopware\Webhook\CoinsnapWebhookService;
+use Coincharge\Shopware\Configuration\ConfigurationService;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class WebhookRouter
 {
-    private $webhookFactory;
+    private WebhookFactory $webhookFactory;
+    private ConfigurationService $configurationService;
 
-    public function __construct(WebhookFactory $webhookFactory)
+    public function __construct(WebhookFactory $webhookFactory, ConfigurationService $configurationService)
     {
         $this->webhookFactory = $webhookFactory;
+        $this->configurationService = $configurationService;
     }
-    public function route(Request $request, Context $context)
+    public function route(Request $request, Context $context): Response
     {
         $provider = $this->getProviderFromRequest($request);
-        if (isset($provider)) {
+        if ($provider !== null) {
             $webhook = $this->webhookFactory->create($provider);
             return $webhook->process($request, $context);
         }
-        throw new \RuntimeException('No webhook defined for the payment provider.');
+
+        // Unidentified, ambiguous, or not-connected provider. Respond with a
+        // generic 401 rather than throwing (which would surface as a 500 on
+        // this unauthenticated route), and never reveal which check failed.
+        return new Response(
+            json_encode(['error' => 'Unauthorized']),
+            Response::HTTP_UNAUTHORIZED,
+            ['Content-Type' => 'application/json']
+        );
     }
-    public function getProviderFromRequest(Request $request): string
+    public function getProviderFromRequest(Request $request): ?string
     {
-        if ($request->headers->has('X-Coinsnap-Sig')) {
-            return 'coinsnap';
-        } elseif ($request->headers->has('btcpay-sig')) {
-            return 'btcpay_server';
+        // Exactly one known signature header must be present, and that provider
+        // must be connected (its webhook secret is set). Reject ambiguous,
+        // unidentified, or not-connected requests instead of defaulting.
+        $hasBtcpay = $request->headers->has(BTCPayWebhookService::REQUIRED_HEADER);
+        $hasCoinsnap = $request->headers->has(CoinsnapWebhookService::REQUIRED_HEADER);
+
+        if ($hasBtcpay === $hasCoinsnap) {
+            return null;
         }
 
-        $content = $request->getContent();
-        if ($content !== '') {
-            $body = \json_decode($content, true);
-
-            if (\is_array($body) && ($body['purpose'] ?? null) === 'webhook_url_validation' && ($body['app'] ?? null) === 'Coinsnap') {
-                return 'coinsnap';
-            }
+        if ($hasBtcpay) {
+            return empty($this->configurationService->getSetting('btcpayWebhookSecret')) ? null : 'btcpay';
         }
 
-        throw new \RuntimeException('Unable to determine webhook provider from request headers.');
+        return empty($this->configurationService->getSetting('coinsnapWebhookSecret')) ? null : 'coinsnap';
     }
 }
